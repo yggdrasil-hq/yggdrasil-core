@@ -6,7 +6,8 @@ into the `backend/` submodule, or you're deciding which repo owns a concern.
 bridge — keep it short and link, don't duplicate.
 
 - **Submodule path:** `backend/`
-- **Status:** not added yet
+- **GitHub repo:** `yggdrasil-hq/yggdrasil-api`
+- **Status:** added
 - **Stack (planned):** REST + WebSocket API, PostgreSQL primary DB, object
   storage for logs/reports/recordings.
 

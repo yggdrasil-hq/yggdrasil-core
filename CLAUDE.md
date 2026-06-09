@@ -29,16 +29,17 @@ requests and streaming progress back in real time. See
 
 ## Repo map (submodules)
 
-| Path             | Repo                | What lives there                                  | Status        |
-|------------------|---------------------|---------------------------------------------------|---------------|
-| `frontend/`      | Yggdrasil Frontend  | React/Next.js web app                             | not added yet |
-| `backend/`       | Yggdrasil Backend   | REST + WebSocket API, PostgreSQL                  | not added yet |
-| `orchestrator/`  | Yggdrasil Forge     | Stateless job executor / Docker orchestration     | not added yet |
-| `landing/`       | Landing site        | Marketing / public website                        | not added yet |
-| `docs-site/`     | Docusaurus          | End-user product documentation (NOT agent docs)   | not added yet |
+| Path             | GitHub repo              | What lives there                                  | Status |
+|------------------|--------------------------|---------------------------------------------------|--------|
+| `frontend/`      | `yggdrasil-hq/yggdrasil-web` | React/Next.js web app                         | added  |
+| `backend/`       | `yggdrasil-hq/yggdrasil-api` | REST + WebSocket API, PostgreSQL              | added  |
+| `orchestrator/`  | `yggdrasil-hq/yggdrasil-orchestrator` | Stateless job executor / Docker orchestration | added  |
+| `landing/`       | `yggdrasil-hq/yggdrasil-landing` | Marketing / public website                 | added  |
+| `docs-site/`     | `yggdrasil-hq/yggdrasil-docs` | End-user product documentation (NOT agent docs) | added  |
 
-> Submodules are not initialized yet. When they are, see
-> `docs/conventions/repo-structure.md` for the add/clone/update workflow.
+> Meta repo: `yggdrasil-hq/yggdrasil-core`. Clone with submodules:
+> `git clone --recurse-submodules git@github.com:yggdrasil-hq/yggdrasil-core.git`
+> See `docs/conventions/repo-structure.md` for the add/clone/update workflow.
 
 ## Routing table — open only what matches your task
 

@@ -4,7 +4,8 @@
 **Authoritative source:** `landing/CLAUDE.md` (the submodule). Bridge page.
 
 - **Submodule path:** `landing/`
-- **Status:** not added yet
+- **GitHub repo:** `yggdrasil-hq/yggdrasil-landing`
+- **Status:** added
 - **Purpose:** public-facing marketing/landing site. Separate from both the app
   (Frontend) and the user docs (Docusaurus).
 

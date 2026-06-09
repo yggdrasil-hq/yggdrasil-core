@@ -12,7 +12,7 @@ a submodule, or need to know where a given doc should live.
   own `docs/` tree, structured like this repo's.
 
 ```
-yggdrasil/                 (meta repo)
+yggdrasil-core/            (meta repo — GitHub: yggdrasil-hq/yggdrasil-core)
 ├── CLAUDE.md              canonical router for the suite
 ├── AGENTS.md              pointer → CLAUDE.md
 ├── docs/                  suite-wide agent/developer docs
@@ -24,6 +24,17 @@ yggdrasil/                 (meta repo)
 ├── landing/       → submodule
 └── docs-site/     → submodule (Docusaurus user docs)
 ```
+
+## GitHub repos (`yggdrasil-hq`)
+
+| Submodule path | GitHub repo |
+|----------------|-------------|
+| _(meta repo)_ | `yggdrasil-core` |
+| `frontend/` | `yggdrasil-web` |
+| `backend/` | `yggdrasil-api` |
+| `orchestrator/` | `yggdrasil-orchestrator` |
+| `landing/` | `yggdrasil-landing` |
+| `docs-site/` | `yggdrasil-docs` |
 
 ## Where does a doc belong? (parent vs. child)
 
@@ -50,7 +61,7 @@ yggdrasil/                 (meta repo)
 # add a new component repo as a submodule
 git submodule add <git-url> <path>      # e.g. frontend
 # clone the meta repo with everything
-git clone --recurse-submodules <meta-url>
+git clone --recurse-submodules git@github.com:yggdrasil-hq/yggdrasil-core.git
 # after a normal clone, pull submodule contents
 git submodule update --init --recursive
 # pull latest for all submodules

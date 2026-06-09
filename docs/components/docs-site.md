@@ -5,7 +5,8 @@ site.
 **Authoritative source:** `docs-site/CLAUDE.md` (the submodule). Bridge page.
 
 - **Submodule path:** `docs-site/`
-- **Status:** not added yet
+- **GitHub repo:** `yggdrasil-hq/yggdrasil-docs`
+- **Status:** added
 - **Stack:** Docusaurus.
 
 ## Important distinction

@@ -6,7 +6,8 @@ before diving into the `orchestrator/` submodule.
 keep short, link, don't duplicate.
 
 - **Submodule path:** `orchestrator/`
-- **Status:** not added yet
+- **GitHub repo:** `yggdrasil-hq/yggdrasil-orchestrator`
+- **Status:** added
 - **Key property:** **stateless between runs.** Receives a job spec, executes,
   reports back. Owns no durable state.
 

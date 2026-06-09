@@ -1,0 +1,15 @@
+[submodule "frontend"]
+	path = frontend
+	url = git@github.com:yggdrasil-hq/yggdrasil-web.git
+[submodule "backend"]
+	path = backend
+	url = git@github.com:yggdrasil-hq/yggdrasil-api.git
+[submodule "orchestrator"]
+	path = orchestrator
+	url = git@github.com:yggdrasil-hq/yggdrasil-orchestrator.git
+[submodule "landing"]
+	path = landing
+	url = git@github.com:yggdrasil-hq/yggdrasil-landing.git
+[submodule "docs-site"]
+	path = docs-site
+	url = git@github.com:yggdrasil-hq/yggdrasil-docs.git

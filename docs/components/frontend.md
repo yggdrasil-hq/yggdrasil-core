@@ -7,7 +7,8 @@ concern.
 a bridge — keep it short and link, don't duplicate.
 
 - **Submodule path:** `frontend/`
-- **Status:** not added yet
+- **GitHub repo:** `yggdrasil-hq/yggdrasil-web`
+- **Status:** added
 - **Stack (planned):** React / Next.js, desktop-first responsive.
 
 ## Responsibility
