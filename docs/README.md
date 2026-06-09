@@ -1,7 +1,7 @@
 # Yggdrasil docs — index
 
 These are **agent + developer** docs for the meta repo. End-user product docs
-live in the `docs-site/` (Docusaurus) submodule, not here.
+live in the `docusaurus/` (Docusaurus) submodule, not here.
 
 Start from the root [`../CLAUDE.md`](../CLAUDE.md) router. This index is the full
 map; the router only lists the common entry points.
@@ -25,7 +25,7 @@ doc is relevant before reading the body — that's how we keep context small.
 | [`components/backend.md`](components/backend.md) | Working on or referencing the API/DB. |
 | [`components/orchestrator.md`](components/orchestrator.md) | Working on or referencing the Forge. |
 | [`components/landing.md`](components/landing.md) | Working on the marketing site. |
-| [`components/docs-site.md`](components/docs-site.md) | Working on the Docusaurus user docs. |
+| [`components/docusaurus.md`](components/docusaurus.md) | Working on the Docusaurus user docs. |
 
 ## concepts/ — cross-cutting domain logic
 

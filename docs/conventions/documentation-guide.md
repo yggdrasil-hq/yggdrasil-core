@@ -33,7 +33,7 @@ rule below serves that goal.
 8. **Parent vs. child placement.** Suite-wide → meta repo; component-specific →
    that submodule. See `repo-structure.md`.
 9. **Audience.** These docs are for **agents + developers**. End-user how-tos go
-   in the Docusaurus `docs-site/`, not here.
+   in the Docusaurus `docusaurus/`, not here.
 
 ## Standard folder taxonomy (reuse in every repo)
 

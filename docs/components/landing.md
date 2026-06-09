@@ -12,7 +12,7 @@
 ## Scope notes
 
 - No authenticated app functionality — that's the Frontend.
-- Product/how-to documentation lives in `docs-site/`, not here.
+- Product/how-to documentation lives in `docusaurus/`, not here.
 
 ## Deep docs (in the submodule, once added)
 

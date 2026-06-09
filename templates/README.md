@@ -5,7 +5,7 @@ Reusable scaffolds for the Yggdrasil suite.
 ## `child-repo/`
 
 The standard agent-docs scaffold for a new submodule (frontend, backend,
-orchestrator, landing, docs-site, and any future component).
+orchestrator, landing, docusaurus, and any future component).
 
 **When you add a new submodule:**
 

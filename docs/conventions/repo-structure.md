@@ -22,7 +22,7 @@ yggdrasil-core/            (meta repo — GitHub: yggdrasil-hq/yggdrasil-core)
 ├── backend/       → submodule
 ├── orchestrator/  → submodule
 ├── landing/       → submodule
-└── docs-site/     → submodule (Docusaurus user docs)
+└── docusaurus/    → submodule (Docusaurus user docs)
 ```
 
 ## GitHub repos (`yggdrasil-hq`)
@@ -34,7 +34,7 @@ yggdrasil-core/            (meta repo — GitHub: yggdrasil-hq/yggdrasil-core)
 | `backend/` | `yggdrasil-api` |
 | `orchestrator/` | `yggdrasil-orchestrator` |
 | `landing/` | `yggdrasil-landing` |
-| `docs-site/` | `yggdrasil-docs` |
+| `docusaurus/` | `yggdrasil-docusaurus` |
 
 ## Where does a doc belong? (parent vs. child)
 

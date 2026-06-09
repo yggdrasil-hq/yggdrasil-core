@@ -35,7 +35,7 @@ requests and streaming progress back in real time. See
 | `backend/`       | `yggdrasil-hq/yggdrasil-api` | REST + WebSocket API, PostgreSQL              | added  |
 | `orchestrator/`  | `yggdrasil-hq/yggdrasil-orchestrator` | Stateless job executor / Docker orchestration | added  |
 | `landing/`       | `yggdrasil-hq/yggdrasil-landing` | Marketing / public website                 | added  |
-| `docs-site/`     | `yggdrasil-hq/yggdrasil-docs` | End-user product documentation (NOT agent docs) | added  |
+| `docusaurus/`    | `yggdrasil-hq/yggdrasil-docusaurus` | End-user product documentation (NOT agent docs) | added  |
 
 > Meta repo: `yggdrasil-hq/yggdrasil-core`. Clone with submodules:
 > `git clone --recurse-submodules git@github.com:yggdrasil-hq/yggdrasil-core.git`
@@ -52,7 +52,7 @@ requests and streaming progress back in real time. See
 | The Backend (API/DB)                                    | `docs/components/backend.md` → `backend/CLAUDE.md`   |
 | The Forge / orchestrator                                | `docs/components/orchestrator.md` → `orchestrator/CLAUDE.md` |
 | The landing / marketing site                            | `docs/components/landing.md` → `landing/CLAUDE.md`   |
-| The end-user docs site (Docusaurus)                     | `docs/components/docs-site.md` → `docs-site/CLAUDE.md` |
+| The end-user docs site (Docusaurus)                     | `docs/components/docusaurus.md` → `docusaurus/CLAUDE.md` |
 | The Pi agent (how the agent itself runs)                | `docs/concepts/pi-agent.md`            |
 | Feature states / lifecycle                              | `docs/concepts/feature-lifecycle.md`   |
 | How Backend dispatches jobs to the Forge                | `docs/concepts/job-dispatch.md`        |
@@ -72,7 +72,7 @@ A fuller index lives in `docs/README.md`.
 - **One concern per doc.** Don't dump everything into this file. Route to a doc.
 - **Parent vs. child.** Suite-wide concepts live here; repo-specific detail
   lives in that repo's `docs/`. Don't duplicate — link.
-- **User docs ≠ agent docs.** `docs-site/` (Docusaurus) is for end users. The
+- **User docs ≠ agent docs.** `docusaurus/` (Docusaurus) is for end users. The
   `docs/` folders described here are for agents and developers.
 - **Status:** the project is in planning. Docs marked `TODO` / `DRAFT` are not
   yet authoritative — flag assumptions rather than inventing details.
