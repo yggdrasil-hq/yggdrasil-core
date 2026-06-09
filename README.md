@@ -1,7 +1,9 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="branding/png/horizontal-lockup.png">
-  <img alt="Yggdrasil" src="branding/png/horizontal-knockout.png" width="360">
-</picture>
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="branding/svg/horizontal-lockup.svg">
+    <img alt="Yggdrasil" src="branding/svg/horizontal-knockout.svg" width="480">
+  </picture>
+</div>
 
 **AI-orchestrated software development for small teams and individuals.** Describe what to build — agents handle the rest.
 
