@@ -10,6 +10,6 @@
 [submodule "landing"]
 	path = landing
 	url = git@github.com:yggdrasil-hq/yggdrasil-landing.git
-[submodule "docs-site"]
-	path = docs-site
-	url = git@github.com:yggdrasil-hq/yggdrasil-docs.git
+[submodule "docusaurus"]
+	path = docusaurus
+	url = git@github.com:yggdrasil-hq/yggdrasil-docusaurus.git
