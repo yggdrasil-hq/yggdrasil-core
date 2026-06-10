@@ -14,16 +14,16 @@ doc is relevant before reading the body — that's how we keep context small.
 | Doc | Read this when |
 |-----|----------------|
 | [`overview/product.md`](overview/product.md) | You need the product vision, the three components, and what Yggdrasil is *not*. |
-| [`overview/architecture.md`](overview/architecture.md) | You need to know how Frontend, Backend, and Forge interact. |
-| [`overview/glossary.md`](overview/glossary.md) | You hit a domain term (Forge, job, run, feature, Pi) you're unsure about. |
+| [`overview/architecture.md`](overview/architecture.md) | You need to know how Web, API, and Orchestrator interact. |
+| [`overview/glossary.md`](overview/glossary.md) | You hit a domain term (Orchestrator, job, run, feature, Pi) you're unsure about. |
 
 ## components/ — per sub-repo summaries (link out to each submodule)
 
 | Doc | Read this when |
 |-----|----------------|
-| [`components/frontend.md`](components/frontend.md) | Working on or referencing the web app. |
-| [`components/backend.md`](components/backend.md) | Working on or referencing the API/DB. |
-| [`components/orchestrator.md`](components/orchestrator.md) | Working on or referencing the Forge. |
+| [`components/web.md`](components/web.md) | Working on or referencing the web app. |
+| [`components/api.md`](components/api.md) | Working on or referencing the API/DB. |
+| [`components/orchestrator.md`](components/orchestrator.md) | Working on or referencing the Orchestrator. |
 | [`components/landing.md`](components/landing.md) | Working on the marketing site. |
 | [`components/docusaurus.md`](components/docusaurus.md) | Working on the Docusaurus user docs. |
 
@@ -33,7 +33,7 @@ doc is relevant before reading the body — that's how we keep context small.
 |-----|----------------|
 | [`concepts/pi-agent.md`](concepts/pi-agent.md) | You need to understand the Pi coding agent. |
 | [`concepts/feature-lifecycle.md`](concepts/feature-lifecycle.md) | You touch feature states / the state machine. |
-| [`concepts/job-dispatch.md`](concepts/job-dispatch.md) | You touch how the Backend hands work to the Forge. |
+| [`concepts/job-dispatch.md`](concepts/job-dispatch.md) | You touch how the API hands work to the Orchestrator. |
 | [`concepts/project-settings.md`](concepts/project-settings.md) | You touch project- or feature-level configuration. |
 
 ## roadmap/ — what & when
@@ -50,3 +50,4 @@ doc is relevant before reading the body — that's how we keep context small.
 | [`conventions/repo-structure.md`](conventions/repo-structure.md) | Dealing with the parent/submodule layout or git submodule workflow. |
 | [`conventions/branching-and-git.md`](conventions/branching-and-git.md) | Creating branches, commits, or PRs. |
 | [`conventions/documentation-guide.md`](conventions/documentation-guide.md) | **Writing or updating any doc.** Read before editing docs. |
+| [`conventions/theming.md`](conventions/theming.md) | Theming any web surface (tokens, Tailwind, ShadCN, Docusaurus). |

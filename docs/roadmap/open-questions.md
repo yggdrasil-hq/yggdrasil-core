@@ -6,12 +6,12 @@ these — surface them.**
 
 | # | Question | Affects |
 |---|----------|---------|
-| 1 | **Self-hosted vs. managed Forge compute** — will users bring their own servers? | Forge, job-dispatch transport, billing |
-| 2 | **GitHub App implementation** details and webhook security. | Backend, auth |
-| 3 | **Multi-repo project handling** — which repo does the agent target for a given feature? | Backend, project-settings, job-dispatch |
-| 4 | **Secure injection of project-level env vars** into containers. | Forge, project-settings, security |
-| 5 | **Branch conflicts** when two features are developed in parallel. | Forge, feature-lifecycle |
-| 6 | **Container resource limits** and cost visibility for users. | Forge, billing/UX |
+| 1 | **Self-hosted vs. managed Orchestrator compute** — will users bring their own servers? | Orchestrator, job-dispatch transport, billing |
+| 2 | **GitHub App implementation** details and webhook security. | API, auth |
+| 3 | **Multi-repo project handling** — which repo does the agent target for a given feature? | API, project-settings, job-dispatch |
+| 4 | **Secure injection of project-level env vars** into containers. | Orchestrator, project-settings, security |
+| 5 | **Branch conflicts** when two features are developed in parallel. | Orchestrator, feature-lifecycle |
+| 6 | **Container resource limits** and cost visibility for users. | Orchestrator, billing/UX |
 
 ## How to use this list
 

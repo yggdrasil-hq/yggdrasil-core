@@ -18,8 +18,8 @@ yggdrasil-core/            (meta repo — GitHub: yggdrasil-hq/yggdrasil-core)
 ├── docs/                  suite-wide agent/developer docs
 │   ├── overview/  components/  concepts/  roadmap/  conventions/
 ├── templates/child-repo/  scaffold to drop into each new submodule
-├── frontend/      → submodule (frontend/CLAUDE.md, frontend/docs/…)
-├── backend/       → submodule
+├── web/           → submodule (web/CLAUDE.md, web/docs/…)
+├── api/           → submodule
 ├── orchestrator/  → submodule
 ├── landing/       → submodule
 └── docusaurus/    → submodule (Docusaurus user docs)
@@ -30,8 +30,8 @@ yggdrasil-core/            (meta repo — GitHub: yggdrasil-hq/yggdrasil-core)
 | Submodule path | GitHub repo |
 |----------------|-------------|
 | _(meta repo)_ | `yggdrasil-core` |
-| `frontend/` | `yggdrasil-web` |
-| `backend/` | `yggdrasil-api` |
+| `web/` | `yggdrasil-web` |
+| `api/` | `yggdrasil-api` |
 | `orchestrator/` | `yggdrasil-orchestrator` |
 | `landing/` | `yggdrasil-landing` |
 | `docusaurus/` | `yggdrasil-docusaurus` |
@@ -59,7 +59,7 @@ yggdrasil-core/            (meta repo — GitHub: yggdrasil-hq/yggdrasil-core)
 
 ```bash
 # add a new component repo as a submodule
-git submodule add <git-url> <path>      # e.g. frontend
+git submodule add <git-url> <path>      # e.g. web
 # clone the meta repo with everything
 git clone --recurse-submodules git@github.com:yggdrasil-hq/yggdrasil-core.git
 # after a normal clone, pull submodule contents

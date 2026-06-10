@@ -1,8 +1,8 @@
-[submodule "frontend"]
-	path = frontend
+[submodule "web"]
+	path = web
 	url = git@github.com:yggdrasil-hq/yggdrasil-web.git
-[submodule "backend"]
-	path = backend
+[submodule "api"]
+	path = api
 	url = git@github.com:yggdrasil-hq/yggdrasil-api.git
 [submodule "orchestrator"]
 	path = orchestrator

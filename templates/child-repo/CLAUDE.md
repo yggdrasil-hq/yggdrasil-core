@@ -16,7 +16,7 @@
 <One paragraph: this component's responsibility. Mirror the summary in the meta
 repo's `docs/components/<x>.md`, but keep the detail here.>
 
-- **Role in Yggdrasil:** <Frontend | Backend | Forge | Landing | Docs site>
+- **Role in Yggdrasil:** <Web | API | Orchestrator | Landing | Docs site>
 - **Stack:** <languages/frameworks>
 - **Talks to:** <which other components, how>
 

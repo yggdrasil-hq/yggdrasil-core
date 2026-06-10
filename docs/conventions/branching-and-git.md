@@ -6,7 +6,7 @@
 
 ## Agent-generated branches
 
-The Forge creates feature branches named:
+The Orchestrator creates feature branches named:
 
 ```
 yggdrasil/<feature-slug>-<id>

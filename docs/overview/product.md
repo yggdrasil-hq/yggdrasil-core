@@ -20,15 +20,15 @@ GitHub can be managed through it.
 
 ## The three components
 
-1. **Frontend** — responsive web app (desktop-first, React/Next.js). Where users
+1. **Web** — responsive web app (desktop-first, React/Next.js). Where users
    create projects, write feature specs, monitor agent runs, review test
-   reports, and chat with the agent mid-run. → `components/frontend.md`
-2. **Backend** — REST + WebSocket API. Single source of truth for all persistent
+   reports, and chat with the agent mid-run. → `components/web.md`
+2. **API** — REST + WebSocket API. Single source of truth for all persistent
    state (users, teams, projects, features, agent jobs, test suites, reports,
-   notifications). Manages GitHub OAuth tokens, dispatches jobs to the Forge, and
-   delivers real-time events to the Frontend. PostgreSQL + object storage. →
-   `components/backend.md`
-3. **Forge (orchestrator)** — the stateless execution layer. Provisions
+   notifications). Manages GitHub OAuth tokens, dispatches jobs to the Orchestrator, and
+   delivers real-time events to the Web app. PostgreSQL + object storage. →
+   `components/api.md`
+3. **Orchestrator** — the stateless execution layer. Provisions
    ephemeral Docker containers, injects the Pi agent, clones the repo with a
    short-lived scoped token, creates a branch, opens a draft PR, runs Pi in
    RPC/SDK mode streaming events back, optionally tunnels a preview URL, then

@@ -1,7 +1,7 @@
 # Concept: the Pi agent
 
 **Read this when:** you need to understand the AI agent that does the actual
-coding inside Forge containers — how it's invoked, configured, or extended.
+coding inside Orchestrator containers — how it's invoked, configured, or extended.
 **Skip if:** you're working on UI/API plumbing that only references jobs/runs —
 see `concepts/job-dispatch.md` instead.
 
@@ -16,10 +16,10 @@ agent — it provisions an environment and drives Pi.
 
 ## How Yggdrasil runs Pi
 
-- The **Forge** injects Pi into an ephemeral container along with configured
+- The **Orchestrator** injects Pi into an ephemeral container along with configured
   tools, then clones the target repo with a short-lived scoped token.
-- Pi runs in **RPC / SDK mode** so the Forge can drive it programmatically and
-  stream every event back to the Backend (and on to the Frontend live).
+- Pi runs in **RPC / SDK mode** so the Orchestrator can drive it programmatically and
+  stream every event back to the API (and on to the Web app live).
 - Users can **chat with / steer** the agent mid-run (Phase 2 capability).
 
 ## Configuration knobs (see also `concepts/project-settings.md`)

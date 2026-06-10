@@ -19,9 +19,9 @@ Yggdrasil is a platform where you describe features in plain language and AI cod
 
 Three components work together:
 
-- **Frontend** — web app where you create projects, write feature specs, and monitor agent runs
-- **Backend** — API and database that manages state, GitHub tokens, and dispatches work to the Forge
-- **Forge** — the execution layer that spins up isolated Docker containers, runs the AI agent, and tears down cleanly
+- **Web** — web app where you create projects, write feature specs, and monitor agent runs
+- **API** — API and database that manages state, GitHub tokens, and dispatches work to the Orchestrator
+- **Orchestrator** — the execution layer that spins up isolated Docker containers, runs the AI agent, and tears down cleanly
 
 ## AI-first development
 
@@ -35,9 +35,9 @@ This is the meta repository. Application code lives in submodules:
 
 | Path | What lives there |
 |---|---|
-| `frontend/` | React/Next.js web app |
-| `backend/` | REST + WebSocket API, PostgreSQL |
-| `orchestrator/` | Docker-based job executor (the Forge) |
+| `web/` | React/Next.js web app |
+| `api/` | REST + WebSocket API, PostgreSQL |
+| `orchestrator/` | Docker-based job executor |
 | `landing/` | Marketing website |
 | `docusaurus/` | End-user documentation site |
 

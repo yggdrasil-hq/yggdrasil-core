@@ -9,7 +9,7 @@ which phase a feature belongs to.
 ## Phase 1 — Foundation
 
 Auth, GitHub OAuth, project CRUD, feature CRUD, basic Pi integration in the
-Forge, basic agent logging.
+Orchestrator, basic agent logging.
 
 ## Phase 2 — Team & Preview
 
@@ -18,7 +18,7 @@ state machine (`concepts/feature-lifecycle.md`), auto PR creation.
 
 ## Phase 3 — Testing
 
-Test suite manager, cron scheduling, Forge test runner, report generation,
+Test suite manager, cron scheduling, Orchestrator test runner, report generation,
 screen recording, test history UI.
 
 ## Phase 4 — Polish

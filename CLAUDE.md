@@ -31,8 +31,8 @@ requests and streaming progress back in real time. See
 
 | Path             | GitHub repo              | What lives there                                  | Status |
 |------------------|--------------------------|---------------------------------------------------|--------|
-| `frontend/`      | `yggdrasil-hq/yggdrasil-web` | React/Next.js web app                         | added  |
-| `backend/`       | `yggdrasil-hq/yggdrasil-api` | REST + WebSocket API, PostgreSQL              | added  |
+| `web/`           | `yggdrasil-hq/yggdrasil-web` | React/Next.js web app                         | added  |
+| `api/`           | `yggdrasil-hq/yggdrasil-api` | REST + WebSocket API, PostgreSQL              | added  |
 | `orchestrator/`  | `yggdrasil-hq/yggdrasil-orchestrator` | Stateless job executor / Docker orchestration | added  |
 | `landing/`       | `yggdrasil-hq/yggdrasil-landing` | Marketing / public website                 | added  |
 | `docusaurus/`    | `yggdrasil-hq/yggdrasil-docusaurus` | End-user product documentation (NOT agent docs) | added  |
@@ -47,20 +47,21 @@ requests and streaming progress back in real time. See
 |---------------------------------------------------------|----------------------------------------|
 | Understanding the product / scope / what it is NOT      | `docs/overview/product.md`             |
 | How the components fit together / data flow             | `docs/overview/architecture.md`        |
-| A domain term you don't recognize (Forge, job, run…)    | `docs/overview/glossary.md`            |
-| The Frontend (web app)                                  | `docs/components/frontend.md` → `frontend/CLAUDE.md` |
-| The Backend (API/DB)                                    | `docs/components/backend.md` → `backend/CLAUDE.md`   |
-| The Forge / orchestrator                                | `docs/components/orchestrator.md` → `orchestrator/CLAUDE.md` |
+| A domain term you don't recognize (Orchestrator, job, run…)    | `docs/overview/glossary.md`            |
+| The Web app                                             | `docs/components/web.md` → `web/CLAUDE.md`           |
+| The API (API/DB)                                        | `docs/components/api.md` → `api/CLAUDE.md`           |
+| The Orchestrator                                        | `docs/components/orchestrator.md` → `orchestrator/CLAUDE.md` |
 | The landing / marketing site                            | `docs/components/landing.md` → `landing/CLAUDE.md`   |
 | The end-user docs site (Docusaurus)                     | `docs/components/docusaurus.md` → `docusaurus/CLAUDE.md` |
 | The Pi agent (how the agent itself runs)                | `docs/concepts/pi-agent.md`            |
 | Feature states / lifecycle                              | `docs/concepts/feature-lifecycle.md`   |
-| How Backend dispatches jobs to the Forge                | `docs/concepts/job-dispatch.md`        |
+| How the API dispatches jobs to the Orchestrator         | `docs/concepts/job-dispatch.md`        |
 | Project / per-feature settings & config                 | `docs/concepts/project-settings.md`    |
 | What we're building now / build order                   | `docs/roadmap/phases.md`               |
 | Undecided design questions                              | `docs/roadmap/open-questions.md`       |
 | Repo/submodule layout & git workflow                    | `docs/conventions/repo-structure.md`   |
 | Branching, commits, PR conventions                      | `docs/conventions/branching-and-git.md`|
+| Theming / design tokens across web surfaces             | `docs/conventions/theming.md`          |
 | **Writing or updating docs** (do this right)            | `docs/conventions/documentation-guide.md` |
 
 A fuller index lives in `docs/README.md`.
