@@ -1,9 +1,15 @@
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="branding/svg/horizontal-lockup.svg">
-    <img alt="Yggdrasil" src="branding/svg/horizontal-knockout.svg" width="480">
+    <source media="(prefers-color-scheme: dark)" srcset="branding/app-tile.png">
+    <img alt="Yggdrasil" src="branding/app-tile.png" width="480">
   </picture>
 </div>
+
+<br/>
+
+---
+
+<br/>
 
 **AI-orchestrated software development for small teams and individuals.** Describe what to build — agents handle the rest.
 
@@ -33,13 +39,13 @@ If you make a change that affects how something works, update the relevant doc. 
 
 This is the meta repository. Application code lives in submodules:
 
-| Path | What lives there |
-|---|---|
-| `web/` | React/Next.js web app |
-| `api/` | REST + WebSocket API, PostgreSQL |
-| `orchestrator/` | Docker-based job executor |
-| `landing/` | Marketing website |
-| `docusaurus/` | End-user documentation site |
+| Path            | What lives there                 |
+| --------------- | -------------------------------- |
+| `web/`          | React/Next.js web app            |
+| `api/`          | REST + WebSocket API, PostgreSQL |
+| `orchestrator/` | Docker-based job executor        |
+| `landing/`      | Marketing website                |
+| `docusaurus/`   | End-user documentation site      |
 
 ## Getting started
 
