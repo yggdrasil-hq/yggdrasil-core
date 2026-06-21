@@ -67,6 +67,7 @@ services:
     environment:
       PORT: 3000
       NEXT_PUBLIC_BASE_PATH: ${WEB_BASE_PATH:-/app}
+      NEXT_PUBLIC_API_BASE_URL: ${WEB_API_BASE_URL:-/app/api}
     volumes:
       - ../web:/app
       - web_node_modules:/app/node_modules
