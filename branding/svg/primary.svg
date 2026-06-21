@@ -1,15 +1,18 @@
-<svg width="462" height="230" viewBox="0 0 462 230" fill="none" xmlns="http://www.w3.org/2000/svg">
-<mask id="path-1-inside-1_4_119" fill="white">
-<path d="M0 16C0 7.16345 7.16344 0 16 0H445.667C454.503 0 461.667 7.16344 461.667 16V214C461.667 222.837 454.503 230 445.667 230H16C7.16343 230 0 222.837 0 214V16Z"/>
-</mask>
-<path d="M0 16C0 7.16345 7.16344 0 16 0H445.667C454.503 0 461.667 7.16344 461.667 16V214C461.667 222.837 454.503 230 445.667 230H16C7.16343 230 0 222.837 0 214V16Z" fill="#080B11"/>
-<path d="M16 0V1H445.667V0V-1H16V0ZM461.667 16H460.667V214H461.667H462.667V16H461.667ZM445.667 230V229H16V230V231H445.667V230ZM0 214H1V16H0H-1V214H0ZM16 230V229C7.71571 229 1 222.284 1 214H0H-1C-1 223.389 6.61114 231 16 231V230ZM461.667 214H460.667C460.667 222.284 453.951 229 445.667 229V230V231C455.056 231 462.667 223.389 462.667 214H461.667ZM445.667 0V1C453.951 1 460.667 7.71573 460.667 16H461.667H462.667C462.667 6.61116 455.056 -1 445.667 -1V0ZM16 0V-1C6.61116 -1 -1 6.61116 -1 16H0H1C1 7.71573 7.71573 1 16 1V0Z" fill="#1F2937" mask="url(#path-1-inside-1_4_119)"/>
-<path d="M207.821 63.0558C214.668 72.4419 223.045 84.4718 229.464 98.1947C233.742 107.34 237.151 117.237 238.658 127.604C240.564 140.718 240.185 160.66 233.135 170M214.494 111.505C231.92 120.847 238.959 129.896 238.959 129.896C240.206 120.944 247.346 110.664 257.388 102.014C275.791 86.1634 272.716 91.8926 285.833 81.962M175.833 98.1947C186.45 98.0548 204.429 106.108 214.494 111.505M257.388 102.014C256.764 99.5697 257.388 86.1634 269.494 69.5489M229.464 98.1947C239.071 84.4603 252.465 77.9516 246.942 60.0002M214.494 111.505C210.537 103.365 217.256 94.1843 199.076 79.6704M224.39 118.629C224.39 118.629 210.352 116.91 199.191 121.78C188.03 126.65 175.833 116.146 175.833 116.146M283.302 102.014C283.302 102.014 278.699 110.226 247.284 112.518" stroke="url(#paint0_linear_4_119)" stroke-width="4" stroke-linecap="round"/>
-<defs>
-<linearGradient id="paint0_linear_4_119" x1="237.967" y1="55.7989" x2="237.967" y2="170" gradientUnits="userSpaceOnUse">
-<stop stop-color="#4F9BF0"/>
-<stop offset="0.5" stop-color="#2FD4C6"/>
-<stop offset="1" stop-color="#2D598A"/>
-</linearGradient>
-</defs>
+<svg width="280" height="230" viewBox="0 0 280 230" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="280" height="230" rx="16" fill="#080B11"/>
+  <rect x="0.5" y="0.5" width="279" height="229" rx="15.5" stroke="#1F2937"/>
+  <defs>
+  <style>
+    @font-face {
+      font-family: 'Cinzel';
+      font-weight: 700;
+      src: url('../fonts/cinzel.ttf') format('truetype');
+    }
+    @font-face {
+      font-family: 'Space Grotesk';
+      font-weight: 600;
+      src: url('../fonts/spaceGrotesk.ttf') format('truetype');
+    }
+  </style>
+</defs><text x="140" y="115" text-anchor="middle" dominant-baseline="central" font-family="Cinzel, Georgia, serif" font-weight="700" font-size="126" fill="#2FD4C6">Y</text>
 </svg>

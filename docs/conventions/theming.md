@@ -18,18 +18,20 @@ Load from [Google Fonts](https://fonts.google.com/):
 
 | Role | Family | Weights | Used for |
 |------|--------|---------|----------|
-| **UI / display / body** | [Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk) | 400, 500, 600, 700 | Headings, UI labels, marketing copy, body text |
+| **Mark** | [Cinzel](https://fonts.google.com/specimen/Cinzel) | 600, 700 | Logo Y letterform only |
+| **UI / display / body** | [Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk) | 400, 500, 600, 700 | Headings, UI labels, marketing copy, body text, wordmark body |
 | **Code / metadata** | [JetBrains Mono](https://fonts.google.com/specimen/JetBrains+Mono) | 400, 500, 600 | Code blocks, tokens, status labels, hex values |
 
 ```html
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 ```
 
 **Stack fallbacks:**
 
 ```css
+--font-display: "Cinzel", Georgia, serif;
 --font-sans: "Space Grotesk", system-ui, sans-serif;
 --font-mono: "JetBrains Mono", ui-monospace, monospace;
 ```
@@ -89,38 +91,22 @@ A cool blue-black foundation. Two brand accents carry the identity; status color
 
 ---
 
-## Mark colors
+## Mark
 
-The two-tone canopy (teal) + roots (blue) is load-bearing. Use the minimal mark below 32px.
+A single **Y** in **Cinzel** (weight 700) — inscriptional, Nordic. In wordmark lockups the Y is **1.32×** the body size and reads as the first letter of “Yggdrasil” (not a separate icon). **gg** uses `bifrost`; **drasil** uses `frost` on dark surfaces.
 
-### On dark (`niflheim`)
+| Context | Y color | gg | drasil |
+|---------|---------|-----|--------|
+| Dark UI / lockup | `bifrost` (`#2FD4C6`) | `bifrost` | `frost` |
+| On light (`#EEF3F7`) | `#0E7C73` | `#0E7C73` | `#0E131B` |
+| Knockout on Bifröst gradient | `#08110F` | `#08110F` | `#08110F` |
+| Mark only (sidebar icon, favicon) | `bifrost` | — | — |
+| Mono mark on dark | `frost` | — | — |
+| Disabled / muted mark | `shadow` (`#5E6E7E`) | — | — |
 
-| Part | Token | Value | Meaning |
-|------|-------|-------|---------|
-| Edge / connectors | `mk-edge` | `#52838D` | Visible teal-slate branch strokes |
-| Canopy (secondary branches) | `mk-canopy` | `#2FD4C6` (`bifrost`) | Parallel features, agents at work |
-| Root (primary branches) | `mk-root` | `#4F9BF0` (`aurora`) | Infrastructure, main spine |
-| Core / junction nodes | `mk-core` | `#BFE9EE` (`frostfire`) | Root anchor, branch points |
-| Commit nodes | `mk-commit` | `#5A9AA0` | Junction accents |
+Use the compact mark (`mark-mono.svg` / heavier weight) below 32px.
 
-### On light (`#EEF3F7`)
-
-| Part | Value |
-|------|-------|
-| `mk-canopy` | `#0E7C73` |
-| `mk-root` | `#2563B0` |
-| `mk-core` | `#0E131B` |
-| `mk-edge` | `#9DB0BE` |
-| `mk-commit` | `#9DB0BE` |
-
-### Single-color / muted
-
-| Context | Color |
-|---------|-------|
-| Mono mark on dark | `#08110F` |
-| Disabled / muted mark | `shadow` (`#5E6E7E`) |
-
-**Logo assets:** `branding/svg/` and `branding/png/` (primary, light, mono, muted, lockups, knockout).
+**Logo assets:** `branding/svg/` and `branding/png/` (mark, lockups, knockout, app tile). Regenerate with `node branding/scripts/generate-assets.mjs` — syncs into web, landing, and docs static folders.
 
 ---
 
@@ -224,15 +210,9 @@ Paste into `:root` (or a shared `tokens.css`):
   --gap: clamp(56px, 7vw, 104px);
 
   /* Typography */
+  --font-display: "Cinzel", Georgia, serif;
   --font-sans: "Space Grotesk", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
-
-  /* Mark (dark) */
-  --mk-edge: #52838d;
-  --mk-canopy: var(--bifrost);
-  --mk-root: var(--aurora);
-  --mk-core: var(--frostfire);
-  --mk-commit: #5a9aa0;
 }
 ```
 
@@ -276,8 +256,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["Space Grotesk", "system-ui", "sans-serif"],
-        mono: ["JetBrains Mono", "ui-monospace", "monospace"],
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "Georgia", "serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
       maxWidth: {
         content: "1200px",
@@ -373,16 +354,16 @@ Full rules and examples are in [`branding/brand-sheet.html`](../../branding/bran
 
 **Do**
 
-- Use the minimal mark below 32px
-- Keep canopy teal, roots blue — the two-tone is load-bearing
-- Give one clear-space node of breathing room around the mark
-- Use single-color on busy or colored backgrounds
+- Use the compact mark below 32px
+- Keep the Y in Cinzel at weight 600–700
+- In wordmarks, the Nordic Y is the first letter — not a separate icon beside the word
+- Give one clear-space letter-width of breathing room on each side
 
 **Don't**
 
 - Rotate, skew, or reflect the mark
 - Recolor with warm or off-brand hues
-- Add gradients, bevels, or drop shadows to the mark itself
-- Crowd the mark against the wordmark — respect lockup spacing
+- Add outlines, bevels, or drop shadows to the letter itself
+- Separate the Y from the wordmark in lockups
 
-**Clear-space scale:** 1× canopy-node radius at 96px (full mark), 48px, 24px (minimal), 16px (minimal small).
+**Clear-space scale:** 1× letter-width at full wordmark size; mark-only at 96px, 48px, 24px, 16px.
