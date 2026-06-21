@@ -24,3 +24,6 @@ the `docs/` agent folders.
   `CLAUDE.md` should clarify which `docs/` is which)
 
 > TODO: fill in once the docusaurus repo is scaffolded.
+
+User-facing guides live in `docusaurus/docs/` — see **Using Yggdrasil** (projects,
+features, tests, notifications) and **Reference** (glossary).
