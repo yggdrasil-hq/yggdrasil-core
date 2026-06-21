@@ -62,6 +62,7 @@ requests and streaming progress back in real time. See
 | Repo/submodule layout & git workflow                    | `docs/conventions/repo-structure.md`   |
 | Branching, commits, PR conventions                      | `docs/conventions/branching-and-git.md`|
 | Theming / design tokens across web surfaces             | `docs/conventions/theming.md`          |
+| Docker / compose / nginx deploy layout                  | `docs/conventions/deploy.md` → `deploy/README.md` |
 | **Writing or updating docs** (do this right)            | `docs/conventions/documentation-guide.md` |
 
 A fuller index lives in `docs/README.md`.

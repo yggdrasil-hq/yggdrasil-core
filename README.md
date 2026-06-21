@@ -47,7 +47,12 @@ Clone with all submodules:
 
 ```sh
 git clone --recurse-submodules git@github.com:yggdrasil-hq/yggdrasil-core.git
+cd yggdrasil-core
+./setup.sh
+docker compose -f deploy/docker-compose.dev.yml up --build
 ```
+
+Open http://localhost:8080 — see [`deploy/README.md`](deploy/README.md) for route map.
 
 ## Contributing
 

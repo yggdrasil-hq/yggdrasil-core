@@ -8,8 +8,8 @@ bridge — keep it short and link, don't duplicate.
 - **Submodule path:** `api/`
 - **GitHub repo:** `yggdrasil-hq/yggdrasil-api`
 - **Status:** added
-- **Stack (planned):** REST + WebSocket API, PostgreSQL primary DB, object
-  storage for logs/reports/recordings.
+- **Stack:** Express + TypeScript, REST + WebSocket (planned), PostgreSQL, MinIO/S3
+  for artefacts.
 
 ## Responsibility
 

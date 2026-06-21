@@ -12,6 +12,8 @@ these — surface them.**
 | 4 | **Secure injection of project-level env vars** into containers. | Orchestrator, project-settings, security |
 | 5 | **Branch conflicts** when two features are developed in parallel. | Orchestrator, feature-lifecycle |
 | 6 | **Container resource limits** and cost visibility for users. | Orchestrator, billing/UX |
+| 7 | **Agent chat wire path** — Web → API vs orchestrator subdomain vs direct preview WebSocket to Pi in container. | Orchestrator, API, Web, nginx |
+| 8 | **Dynamic preview upstream registration** — how orchestrator registers `/preview/<id>` (dev) and `*.preview.*` (prod) with nginx. | Orchestrator, deploy/nginx |
 
 ## How to use this list
 

@@ -51,3 +51,4 @@ doc is relevant before reading the body — that's how we keep context small.
 | [`conventions/branching-and-git.md`](conventions/branching-and-git.md) | Creating branches, commits, or PRs. |
 | [`conventions/documentation-guide.md`](conventions/documentation-guide.md) | **Writing or updating any doc.** Read before editing docs. |
 | [`conventions/theming.md`](conventions/theming.md) | Theming any web surface (tokens, Tailwind, ShadCN, Docusaurus). |
+| [`conventions/deploy.md`](conventions/deploy.md) | Dockerfiles, compose, nginx routing for dev/prod/CI. |

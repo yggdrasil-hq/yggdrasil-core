@@ -6,6 +6,7 @@
 - **Submodule path:** `landing/`
 - **GitHub repo:** `yggdrasil-hq/yggdrasil-landing`
 - **Status:** added
+- **Stack:** Next.js
 - **Purpose:** public-facing marketing/landing site. Separate from both the app
   (Web) and the user docs (Docusaurus).
 

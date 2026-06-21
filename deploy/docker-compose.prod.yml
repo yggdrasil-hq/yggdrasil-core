@@ -1,0 +1,116 @@
+name: yggdrasil-prod
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    environment:
+      LANDING_HOST: ${LANDING_HOST}
+      APP_HOST: ${APP_HOST}
+      DOCS_HOST: ${DOCS_HOST}
+      API_HOST: ${API_HOST}
+      ORCHESTRATOR_HOST: ${ORCHESTRATOR_HOST}
+      PREVIEW_HOST: ${PREVIEW_HOST}
+    volumes:
+      - ./nginx/prod.conf.template:/etc/nginx/templates/default.conf.template:ro
+    depends_on:
+      - landing
+      - web
+      - docusaurus
+      - api
+      - orchestrator
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ../api
+      dockerfile: deploy/Dockerfile.prod
+    env_file:
+      - ../api/.env
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      S3_BUCKET: ${MINIO_BUCKET}
+      S3_REGION: us-east-1
+      S3_FORCE_PATH_STYLE: "true"
+      ORCHESTRATOR_URL: http://orchestrator:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ../web
+      dockerfile: deploy/Dockerfile.prod
+    environment:
+      PORT: 3000
+      NEXT_PUBLIC_BASE_PATH: ""
+    restart: unless-stopped
+    depends_on:
+      - api
+
+  landing:
+    build:
+      context: ../landing
+      dockerfile: deploy/Dockerfile.prod
+    environment:
+      PORT: 3000
+    restart: unless-stopped
+
+  docusaurus:
+    build:
+      context: ../docusaurus
+      dockerfile: deploy/Dockerfile.prod
+    environment:
+      PORT: 3000
+      DOCS_BASE_URL: /
+    restart: unless-stopped
+
+  orchestrator:
+    build:
+      context: ../orchestrator
+      dockerfile: deploy/Dockerfile.prod
+    env_file:
+      - ../orchestrator/.env
+    environment:
+      PORT: 8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  minio_data:
