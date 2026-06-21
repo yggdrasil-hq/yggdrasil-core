@@ -34,6 +34,7 @@ doc is relevant before reading the body — that's how we keep context small.
 |-----|----------------|
 | [`adr/README.md`](adr/README.md) | You need the ADR format or the index of decisions. |
 | [`adr/001-authentication.md`](adr/001-authentication.md) | You need the *rationale* for auth (sessions, OAuth, no email). |
+| [`adr/002-projects-features-tests.md`](adr/002-projects-features-tests.md) | You need the *rationale* for projects, features, tests, and project UX. |
 
 ## concepts/ — cross-cutting domain logic
 

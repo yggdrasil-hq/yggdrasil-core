@@ -10,16 +10,24 @@ definition. This is a lookup table, not a narrative — read only the row you ne
 | **API** | REST + WebSocket API; source of truth for all persistent state. |
 | **Orchestrator** | Stateless execution layer that runs jobs in containers. |
 | **Pi** | The minimal terminal-based coding agent (pi.dev, by Earendil Inc.) that does the actual coding inside a container. See `concepts/pi-agent.md`. |
-| **Project** | A managed codebase (one or more GitHub repos) plus its configuration. |
-| **Feature** | A unit of work a user describes for the agent to build. Has a lifecycle/state machine. See `concepts/feature-lifecycle.md`. |
+| **Project** | A managed codebase: one **primary repository** plus optional **linked sub-repositories**, plus agent configuration. See ADR 002. |
+| **Primary repository** | The repo where Yggdrasil opens branches/PRs and anchors project identity. |
+| **Linked sub-repository** | An additional repo cloned alongside the primary on every job. |
+| **Feature** | A unit of work for the agent to build. Two phases: spec grill → ADR → build. See `concepts/feature-lifecycle.md` and ADR 002. |
+| **Feature ADR** | The spec artifact generated during `spec_grill`; stored in the API until build commits it to the repo. |
+| **Project init** | Auto-created `project_init` feature; hard-gates the project until merged. |
+| **Test** | A scheduled verification scenario (markdown spec) run by the agent against an ephemeral `main` preview. Separate from features. |
+| **Test subtask** | A `##` section in a test's markdown spec; not a separate DB entity. |
+| **Test report** | Output of a test run: per-step pass/fail, screenshots, optional screen recording. |
+| **Action queue** | Per-project list of items blocking progress until a human acts. |
+| **Notification** | Global, cross-project informational event (in-app only in v1). |
 | **Feature slug** | URL/branch-safe identifier derived from a feature; used in branch names `yggdrasil/<feature-slug>-<id>`. |
 | **Job / job spec** | The unit of work the API dispatches to the Orchestrator, plus the data describing it. See `concepts/job-dispatch.md`. |
 | **Run** | A single execution of a job in the Orchestrator (one container lifecycle). |
 | **Draft PR** | The GitHub pull request the Orchestrator opens immediately when a run starts. |
 | **Preview tunnel** | An optional public URL exposing a running web-app build from inside the container. |
 | **Artefact** | Output saved after a run (logs, reports, recordings) in object storage. |
-| **Test suite** | A configured set of tests that can be scheduled (cron) and run by the Orchestrator. |
-| **Test report** | Generated output of a test run, with optional screen recording. |
+| **Test suite** | *(Deprecated term — use **Test**.)* See ADR 002. |
 | **Pi extension** | A custom TypeScript module uploaded to extend the Pi agent. |
 | **Tool allowlist** | Packages/tools the agent is permitted to install inside the container. |
 | **Token budget** | Optional cap on tokens (and a timeout) per job. |

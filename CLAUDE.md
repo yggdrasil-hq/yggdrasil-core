@@ -54,6 +54,7 @@ requests and streaming progress back in real time. See
 | The landing / marketing site                            | `docs/components/landing.md` → `landing/CLAUDE.md`   |
 | The end-user docs site (Docusaurus)                     | `docs/components/docusaurus.md` → `docusaurus/CLAUDE.md` |
 | Authentication / login / signup / sessions / GitHub OAuth | `docs/concepts/authentication.md` → ADR `docs/adr/001-authentication.md` |
+| Projects / features / tests / project home / notifications | ADR `docs/adr/002-projects-features-tests.md` → `docs/concepts/feature-lifecycle.md`, `docs/concepts/job-dispatch.md` |
 | The Pi agent (how the agent itself runs)                | `docs/concepts/pi-agent.md`            |
 | Feature states / lifecycle                              | `docs/concepts/feature-lifecycle.md`   |
 | Architecture decisions (why we chose X)                 | `docs/adr/` → start at `docs/CONTEXT.md` |

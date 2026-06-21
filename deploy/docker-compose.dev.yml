@@ -16,6 +16,8 @@ services:
 
   postgres:
     image: postgres:16-alpine
+    ports:
+      - "${DEV_POSTGRES_PORT:-5432}:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-yggdrasil}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-yggdrasil}
@@ -71,6 +73,7 @@ services:
       PORT: 3000
       NEXT_PUBLIC_BASE_PATH: ${WEB_BASE_PATH:-/app}
       NEXT_PUBLIC_API_BASE_URL: ${WEB_API_BASE_URL:-/api}
+      NEXT_PUBLIC_USE_MSW: "false"
       API_INTERNAL_URL: http://api:3000
     volumes:
       - ../web:/app

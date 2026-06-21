@@ -4,7 +4,7 @@
 before diving into code or docs. For details, follow the links — do not treat this
 file as the full spec.
 
-Last updated: 2026-06-21
+Last updated: 2026-06-22
 
 ## Product
 
@@ -23,6 +23,18 @@ focus.
 - HttpOnly session cookies, PostgreSQL sessions, API-owned GitHub OAuth.
 - Progressive GitHub scopes (`read:user` first, `repo` when needed).
 - Implementation reference: [`concepts/authentication.md`](concepts/authentication.md)
+
+## Decided (projects, features, tests)
+
+**ADR 002 — Projects, features, tests, and project UX**
+([`adr/002-projects-features-tests.md`](adr/002-projects-features-tests.md))
+
+- Project = primary repo + linked sub-repos; all jobs clone all repos.
+- Project init (`project_init` feature) hard-gates until merged.
+- Features: two-phase workflow (`spec_grill` → ADR review → `feature_build`).
+- Tests: separate entity; markdown spec with `##` subtasks; scheduled `test_run`
+  against ephemeral main preview.
+- Project home: feature buckets + action queue; global notifications page.
 
 ## Still open
 
@@ -47,5 +59,6 @@ identity; App deferred but schema must be ready.
 | # | Title |
 |---|-------|
 | 001 | [Authentication](adr/001-authentication.md) |
+| 002 | [Projects, features, tests, and project UX](adr/002-projects-features-tests.md) |
 
 → [`adr/README.md`](adr/README.md)

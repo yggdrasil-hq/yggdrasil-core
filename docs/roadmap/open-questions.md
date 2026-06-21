@@ -8,7 +8,6 @@ these — surface them.**
 |---|----------|---------|
 | 1 | **Self-hosted vs. managed Orchestrator compute** — will users bring their own servers? | Orchestrator, job-dispatch transport, billing |
 | 2 | **GitHub App** — installation model, org-level repo access, webhooks (Phase 1 auth uses a **GitHub OAuth App** for identity and user tokens; see ADR 001). | API, job-dispatch |
-| 3 | **Multi-repo project handling** — which repo does the agent target for a given feature? | API, project-settings, job-dispatch |
 | 4 | **Secure injection of project-level env vars** into containers. | Orchestrator, project-settings, security |
 | 5 | **Branch conflicts** when two features are developed in parallel. | Orchestrator, feature-lifecycle |
 | 6 | **Container resource limits** and cost visibility for users. | Orchestrator, billing/UX |
