@@ -24,6 +24,9 @@ definition. This is a lookup table, not a narrative — read only the row you ne
 | **Tool allowlist** | Packages/tools the agent is permitted to install inside the container. |
 | **Token budget** | Optional cap on tokens (and a timeout) per job. |
 | **Meta repo / parent repo** | This repo — docs + submodules, no application code. |
+| **Session** | Server-side login state referenced by an HttpOnly cookie set by the API. See `concepts/authentication.md`. |
+| **OAuth intent** | Query param on `GET /api/auth/github` (`login`, `signup`, `link`, `upgrade`) controlling post-callback behaviour. |
+| **pending_username** | Onboarding state after GitHub signup — user must confirm username before using the app. |
 
 > Missing a term? Add a row (alphabetical-ish by importance) when you introduce
 > new vocabulary, per `conventions/documentation-guide.md`.

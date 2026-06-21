@@ -23,10 +23,9 @@ source-of-truth state — everything comes from the API.
 - **API WebSocket** — live run/agent events.
 - Never talks to the Orchestrator directly.
 
-## Deep docs (in the submodule, once added)
+## Deep docs
 
-When `web/` exists, look there first:
 - `web/CLAUDE.md` — router for the web repo
-- `web/docs/` — component architecture, routing, state, design system
-
-> TODO: fill in once the web repo is scaffolded.
+- [`../concepts/authentication.md`](../concepts/authentication.md) — auth flows and Web routes (canonical)
+- [`../adr/001-authentication.md`](../adr/001-authentication.md) — auth rationale (ADR)
+- `web/docs/concepts/authentication.md` — Web-specific implementation notes

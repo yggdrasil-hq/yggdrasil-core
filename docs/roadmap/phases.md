@@ -4,11 +4,12 @@
 which phase a feature belongs to.
 **Skip if:** you don't need scheduling/scope context.
 
-> Status: planning. No application code written yet.
+> Status: Phase 1 in progress. Auth design accepted (ADR 001); implementation
+> starting. Other features remain planned.
 
 ## Phase 1 — Foundation
 
-Auth, GitHub OAuth, project CRUD, feature CRUD, basic Pi integration in the
+Auth (see `concepts/authentication.md`), GitHub OAuth, project CRUD, feature CRUD, basic Pi integration in the
 Orchestrator, basic agent logging.
 
 ## Phase 2 — Team & Preview

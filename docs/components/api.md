@@ -25,9 +25,9 @@ Web app.
   streamed run events.
 - **GitHub** — OAuth, mints short-lived scoped tokens for Orchestrator runs.
 
-## Deep docs (in the submodule, once added)
+## Deep docs
 
 - `api/CLAUDE.md` — router for the API repo
-- `api/docs/` — data model, API surface, auth, event system, migrations
-
-> TODO: fill in once the API repo is scaffolded.
+- [`../concepts/authentication.md`](../concepts/authentication.md) — auth flows and API surface (canonical)
+- [`../adr/001-authentication.md`](../adr/001-authentication.md) — auth rationale (ADR)
+- `api/docs/concepts/authentication.md` — API-specific implementation notes

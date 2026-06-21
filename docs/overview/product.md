@@ -47,6 +47,6 @@ See `overview/architecture.md` for how they talk to each other.
 
 ## Current phase
 
-Specification / planning. No application code written yet. See
-`roadmap/phases.md` for build order and `roadmap/open-questions.md` for
-undecided design points.
+Early implementation — Web UI shell exists; **Phase 1 auth design is accepted**
+(see `docs/adr/001-authentication.md`). See `roadmap/phases.md` for build order
+and `roadmap/open-questions.md` for undecided design points.

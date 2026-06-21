@@ -53,8 +53,10 @@ requests and streaming progress back in real time. See
 | The Orchestrator                                        | `docs/components/orchestrator.md` → `orchestrator/CLAUDE.md` |
 | The landing / marketing site                            | `docs/components/landing.md` → `landing/CLAUDE.md`   |
 | The end-user docs site (Docusaurus)                     | `docs/components/docusaurus.md` → `docusaurus/CLAUDE.md` |
+| Authentication / login / signup / sessions / GitHub OAuth | `docs/concepts/authentication.md` → ADR `docs/adr/001-authentication.md` |
 | The Pi agent (how the agent itself runs)                | `docs/concepts/pi-agent.md`            |
 | Feature states / lifecycle                              | `docs/concepts/feature-lifecycle.md`   |
+| Architecture decisions (why we chose X)                 | `docs/adr/` → start at `docs/CONTEXT.md` |
 | How the API dispatches jobs to the Orchestrator         | `docs/concepts/job-dispatch.md`        |
 | Project / per-feature settings & config                 | `docs/concepts/project-settings.md`    |
 | What we're building now / build order                   | `docs/roadmap/phases.md`               |
@@ -76,5 +78,7 @@ A fuller index lives in `docs/README.md`.
   lives in that repo's `docs/`. Don't duplicate — link.
 - **User docs ≠ agent docs.** `docusaurus/` (Docusaurus) is for end users. The
   `docs/` folders described here are for agents and developers.
-- **Status:** the project is in planning. Docs marked `TODO` / `DRAFT` are not
-  yet authoritative — flag assumptions rather than inventing details.
+- **Living context:** `docs/CONTEXT.md` — quick snapshot of decided vs open.
+- **Status:** early implementation. Auth design is accepted (ADR 001). Other docs
+  marked `TODO` / `DRAFT` are not yet authoritative — flag assumptions rather
+  than inventing details.

@@ -3,7 +3,8 @@
 These are **agent + developer** docs for the meta repo. End-user product docs
 live in the `docusaurus/` (Docusaurus) submodule, not here.
 
-Start from the root [`../CLAUDE.md`](../CLAUDE.md) router. This index is the full
+Start from the root [`../CLAUDE.md`](../CLAUDE.md) router. For a quick snapshot of
+what is decided vs open, see [`CONTEXT.md`](CONTEXT.md). This index is the full
 map; the router only lists the common entry points.
 
 Every doc opens with a `**Read this when:**` line. Use it to decide whether the
@@ -27,10 +28,18 @@ doc is relevant before reading the body — that's how we keep context small.
 | [`components/landing.md`](components/landing.md) | Working on the marketing site. |
 | [`components/docusaurus.md`](components/docusaurus.md) | Working on the Docusaurus user docs. |
 
+## adr/ — architecture decision records
+
+| Doc | Read this when |
+|-----|----------------|
+| [`adr/README.md`](adr/README.md) | You need the ADR format or the index of decisions. |
+| [`adr/001-authentication.md`](adr/001-authentication.md) | You need the *rationale* for auth (sessions, OAuth, no email). |
+
 ## concepts/ — cross-cutting domain logic
 
 | Doc | Read this when |
 |-----|----------------|
+| [`concepts/authentication.md`](concepts/authentication.md) | You implement login, signup, sessions, or GitHub OAuth. |
 | [`concepts/pi-agent.md`](concepts/pi-agent.md) | You need to understand the Pi coding agent. |
 | [`concepts/feature-lifecycle.md`](concepts/feature-lifecycle.md) | You touch feature states / the state machine. |
 | [`concepts/job-dispatch.md`](concepts/job-dispatch.md) | You touch how the API hands work to the Orchestrator. |
