@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+# Run any git command across every submodule in this repo.
+set -uo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+BOLD='\033[1m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+RED='\033[0;31m'
+CYAN='\033[0;36m'
+RESET='\033[0m'
+
+usage() {
+  cat <<EOF
+Usage: scripts/git-all [options] <git-command> [args...]
+
+Runs a git command in every submodule.
+
+Options:
+  -k, --keep-going   Continue past failures instead of stopping at the first one
+  -h, --help         Show this help
+
+Examples:
+  scripts/git-all pull
+  scripts/git-all fetch --prune
+  scripts/git-all checkout main
+  scripts/git-all checkout -b feature/my-feature
+  scripts/git-all status
+  scripts/git-all push origin HEAD
+  scripts/git-all branch --show-current
+  scripts/git-all log --oneline -5
+EOF
+  exit 0
+}
+
+KEEP_GOING=false
+GIT_ARGS=()
+
+for arg in "$@"; do
+  case "$arg" in
+    -k|--keep-going) KEEP_GOING=true ;;
+    -h|--help) usage ;;
+    *) GIT_ARGS+=("$arg") ;;
+  esac
+done
+
+if [ ${#GIT_ARGS[@]} -eq 0 ]; then
+  usage
+fi
+
+cd "$REPO_ROOT"
+
+# Read submodule paths dynamically from .gitmodules so this script stays in
+# sync automatically as submodules are added or removed.
+SUBMODULES=()
+while IFS= read -r line; do
+  if [[ "$line" =~ ^[[:space:]]*path[[:space:]]*=[[:space:]]*(.+)$ ]]; then
+    SUBMODULES+=("${BASH_REMATCH[1]}")
+  fi
+done < .gitmodules
+
+if [ ${#SUBMODULES[@]} -eq 0 ]; then
+  echo "No submodules found in .gitmodules" >&2
+  exit 1
+fi
+
+FAILED=0
+SUCCEEDED=0
+
+for module in "${SUBMODULES[@]}"; do
+  printf "${BOLD}${CYAN}==> %s${RESET}\n" "$module"
+  if (cd "$REPO_ROOT/$module" && git "${GIT_ARGS[@]}"); then
+    SUCCEEDED=$((SUCCEEDED + 1))
+  else
+    FAILED=$((FAILED + 1))
+    if [ "$KEEP_GOING" = false ]; then
+      printf "\n${RED}Failed in '%s'. Use -k / --keep-going to continue past failures.${RESET}\n" "$module" >&2
+      exit 1
+    else
+      printf "${YELLOW}  (failed — continuing)${RESET}\n"
+    fi
+  fi
+  echo
+done
+
+if [ "$FAILED" -gt 0 ]; then
+  printf "${RED}Done: %d succeeded, %d failed.${RESET}\n" "$SUCCEEDED" "$FAILED" >&2
+  exit 1
+else
+  printf "${GREEN}Done: all %d submodules succeeded.${RESET}\n" "$SUCCEEDED"
+fi
