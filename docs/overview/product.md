@@ -25,12 +25,12 @@ GitHub can be managed through it.
    reports, and chat with the agent mid-run. → `components/web.md`
 2. **API** — REST + WebSocket API. Single source of truth for all persistent
    state (users, teams, projects, features, agent jobs, test suites, reports,
-   notifications). Manages GitHub OAuth tokens, dispatches jobs to the Orchestrator, and
-   delivers real-time events to the Web app. PostgreSQL + object storage. →
-   `components/api.md`
+   notifications). Manages GitHub OAuth (identity) and GitHub App installations,
+   dispatches jobs to the Orchestrator, and delivers real-time events to the Web app.
+   PostgreSQL + object storage. → `components/api.md`
 3. **Orchestrator** — the stateless execution layer. Provisions
    ephemeral Docker containers, injects the Pi agent, clones the repo with a
-   short-lived scoped token, creates a branch, opens a draft PR, runs Pi in
+   short-lived installation token, creates a branch, opens a draft PR, runs Pi in
    RPC/SDK mode streaming events back, optionally tunnels a preview URL, then
    tears down and archives artefacts. → `components/orchestrator.md`
 

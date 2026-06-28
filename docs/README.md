@@ -35,12 +35,14 @@ doc is relevant before reading the body — that's how we keep context small.
 | [`adr/README.md`](adr/README.md) | You need the ADR format or the index of decisions. |
 | [`adr/001-authentication.md`](adr/001-authentication.md) | You need the *rationale* for auth (sessions, OAuth, no email). |
 | [`adr/002-projects-features-tests.md`](adr/002-projects-features-tests.md) | You need the *rationale* for projects, features, tests, and project UX. |
+| [`adr/003-github-app-repository-access.md`](adr/003-github-app-repository-access.md) | You need the *rationale* for GitHub App repo access vs OAuth. |
 
 ## concepts/ — cross-cutting domain logic
 
 | Doc | Read this when |
 |-----|----------------|
-| [`concepts/authentication.md`](concepts/authentication.md) | You implement login, signup, sessions, or GitHub OAuth. |
+| [`concepts/authentication.md`](concepts/authentication.md) | You implement login, signup, sessions, or GitHub OAuth (identity). |
+| [`concepts/github-app.md`](concepts/github-app.md) | You implement GitHub App install, webhooks, or job token minting. |
 | [`concepts/pi-agent.md`](concepts/pi-agent.md) | You need to understand the Pi coding agent. |
 | [`concepts/feature-lifecycle.md`](concepts/feature-lifecycle.md) | You touch feature states / the state machine. |
 | [`concepts/job-dispatch.md`](concepts/job-dispatch.md) | You touch how the API hands work to the Orchestrator. |

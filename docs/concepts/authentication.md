@@ -1,10 +1,11 @@
 # Authentication
 
 **Read this when:** you implement or modify login, signup, sessions, password
-management, GitHub OAuth, or account settings in the API or Web app.
+management, GitHub OAuth (identity), or account settings in the API or Web app.
 **Skip if:** you only need the rationale — see [`../adr/001-authentication.md`](../adr/001-authentication.md).
+For repository access, see [`github-app.md`](github-app.md) (ADR 003).
 
-> **Status:** Accepted (ADR 001). This doc is the implementation reference.
+> **Status:** Accepted (ADR 001, amended by ADR 003). This doc is the implementation reference.
 
 ## Summary
 
@@ -15,7 +16,8 @@ management, GitHub OAuth, or account settings in the API or Web app.
 | Password recovery | None — warn users at signup |
 | Registration | Open (anyone who can reach the instance) |
 | Session | HttpOnly cookie, PostgreSQL-backed, API-issued |
-| GitHub (Phase 1) | OAuth App; progressive scopes; schema ready for GitHub App |
+| GitHub OAuth | Identity only (`read:user`); no `repo` scope |
+| Repo access | GitHub App — see [`github-app.md`](github-app.md) |
 | Avatar | DiceBear `thumbs`, seed = username |
 
 ## User model (sketch)
@@ -33,8 +35,9 @@ users
 sessions
   id, user_id, expires_at, remember_me, created_at, last_seen_at
 
-github_tokens (encrypted)
-  user_id, access_token, refresh_token?, scopes[], updated_at
+github_tokens (encrypted, optional)
+  user_id, access_token, refresh_token?, scopes[]  -- read:user only
+  updated_at
 ```
 
 Password hashing: argon2 or bcrypt (pick one in implementation).
@@ -78,11 +81,6 @@ Password hashing: argon2 or bcrypt (pick one in implementation).
 2. OAuth with `read:user`; reject if `github_id` belongs to another user.
 3. Store token; update `github_id` / `github_login`.
 
-### Upgrade to `repo` scope
-
-When connecting a repo or from Settings → `GET /api/auth/github?intent=upgrade` (or
-dedicated upgrade endpoint) requesting `repo`. Store updated token + scopes.
-
 ### Disconnect GitHub
 
 `DELETE /api/settings/github` — only if `password_hash` is set. Clear token and
@@ -104,7 +102,7 @@ GitHub fields.
 | POST | `/api/auth/logout` | session | End session |
 | GET | `/api/auth/me` | session | Current user |
 | POST | `/api/auth/onboarding/confirm-username` | session | Finish GitHub onboarding |
-| GET | `/api/auth/github` | optional | Start OAuth (`intent=login\|signup\|link\|upgrade`) |
+| GET | `/api/auth/github` | optional | Start OAuth (`intent=login\|signup\|link`) |
 | GET | `/api/auth/github/callback` | — | OAuth callback |
 | PATCH | `/api/settings/account` | session | Update display name |
 | POST | `/api/settings/password` | session | Set or change password |
@@ -115,7 +113,7 @@ Session cookie: `Path=/`, `HttpOnly`, `SameSite=Lax`, `Secure` in production.
 ## Web routes (Phase 1)
 
 | Route | Purpose |
-|-------|---------|
+|-------|------|
 | `/login` | Password login + GitHub; remember me (default off) |
 | `/signup` | Password signup + GitHub; no-recovery warning |
 | `/onboarding/confirm-username` | Hard gate for `pending_username` |
@@ -128,7 +126,8 @@ Session cookie: `Path=/`, `HttpOnly`, `SameSite=Lax`, `Secure` in production.
 
 1. **Profile** — display name; DiceBear thumbs avatar (username seed).
 2. **Security** — set/change password; logout.
-3. **Connections** — GitHub status, connect, disconnect (guarded).
+3. **Connections** — GitHub status, connect, disconnect (guarded). Linking GitHub is
+   for sign-in convenience only — not required for project/repo access.
 
 ## Avatars
 
@@ -139,6 +138,6 @@ for all users regardless of GitHub link. Render client-side or via deterministic
 ## Related docs
 
 - Rationale: [`../adr/001-authentication.md`](../adr/001-authentication.md)
+- Repository access: [`github-app.md`](github-app.md) → [`../adr/003-github-app-repository-access.md`](../adr/003-github-app-repository-access.md)
 - API implementation notes: `api/docs/concepts/authentication.md`
 - Web implementation notes: `web/docs/concepts/authentication.md`
-- GitHub App (still open): [`../roadmap/open-questions.md`](../roadmap/open-questions.md) #2

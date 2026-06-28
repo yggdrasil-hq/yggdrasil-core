@@ -50,7 +50,8 @@ injected token).
 
 - Job kind: `spec_grill` | `feature_build` | `test_run`.
 - Target repos (all linked) + ref / branch name as applicable.
-- Short-lived scoped GitHub token (minted by API).
+- Short-lived **GitHub App installation token** (minted by API from project's
+  installation). See [`github-app.md`](github-app.md).
 - Kind-specific payload (ADR, test markdown, build commands from project config).
 - Pi config: model, extensions, tool allowlist, timeout, token budget.
 - Callback/stream endpoint for events.

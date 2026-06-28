@@ -15,19 +15,22 @@ bridge — keep it short and link, don't duplicate.
 
 Single source of truth for all persistent state: users, teams, projects,
 features, agent jobs, test suites, test reports, notifications. Manages GitHub
-OAuth tokens, dispatches jobs to the Orchestrator, and delivers real-time events to the
-Web app.
+OAuth (identity) and GitHub App installations, dispatches jobs to the Orchestrator,
+and delivers real-time events to the Web app.
 
 ## Talks to
 
 - **Web** — serves REST + WebSocket.
 - **Orchestrator** — dispatches job specs (see `concepts/job-dispatch.md`), receives
   streamed run events.
-- **GitHub** — OAuth, mints short-lived scoped tokens for Orchestrator runs.
+- **GitHub** — OAuth (identity), GitHub App (installations, webhooks), mints
+  installation tokens for Orchestrator runs.
 
 ## Deep docs
 
 - `api/CLAUDE.md` — router for the API repo
 - [`../concepts/authentication.md`](../concepts/authentication.md) — auth flows and API surface (canonical)
+- [`../concepts/github-app.md`](../concepts/github-app.md) — GitHub App install, webhooks, job tokens
 - [`../adr/001-authentication.md`](../adr/001-authentication.md) — auth rationale (ADR)
+- [`../adr/003-github-app-repository-access.md`](../adr/003-github-app-repository-access.md) — repo access rationale (ADR)
 - `api/docs/concepts/authentication.md` — API-specific implementation notes

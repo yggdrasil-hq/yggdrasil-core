@@ -1,7 +1,7 @@
 # ADR 002: Projects, features, tests, and project UX
 
 **Status:** Accepted  
-**Date:** 2026-06-22  
+**Date:** 2026-06-22 (amended 2026-06-28 by ADR 003)  
 **Deciders:** Product/design session (grill-me)
 
 ## Context
@@ -21,8 +21,8 @@ Prior state:
 
 Constraints:
 
-- Phase 1 auth uses progressive GitHub OAuth scopes (ADR 001); repo access requires
-  `repo` scope for every linked repository.
+- Phase 1 auth: GitHub OAuth for identity only (ADR 001); repository access via
+  GitHub App installation (ADR 003).
 - Orchestrator is stateless — job specs must carry everything needed for a run.
 - Self-hosted, small-team product; no email notifications in v1.
 
@@ -33,8 +33,10 @@ Constraints:
 1. A **project** has one **primary repository** (coordination root — branches, PRs,
    project identity) and zero or more **linked sub-repositories** (dependencies
    cloned alongside the primary).
-2. When linking repos, OAuth requests **`repo` scope for all linked repos** (progressive
-   upgrade per ADR 001).
+2. When linking repos, user completes a **GitHub App install** (or reuses an
+   existing installation on the same org/account) and selects repos from the
+   installation's granted list (ADR 003). Flow: name → install/configure → repo
+   picker → create.
 3. **Every feature and test run clones all linked repos** — no per-feature repo
    scoping. Simple single-repo projects are the degenerate case (primary only).
 4. Project status: **`initializing`** until project init completes, then **`ready`**.
@@ -119,6 +121,7 @@ A per-project **action queue** surfaces items blocking progress until a human ac
 | Changes requested | Reviewer requested PR changes |
 | Test failure | Scheduled test run failed (any step) |
 | Failed build | Feature in `failed` |
+| Fix GitHub access | Project has `github_access_warning` (installation revoked or repo removed) |
 
 Sorted oldest-first. Each row deep-links to the relevant surface.
 
@@ -182,7 +185,6 @@ Implementation reference: `docs/concepts/job-dispatch.md`.
 
 ### Follow-ups (out of scope for this ADR)
 
-- GitHub App for org-level repo installs (open question #2).
 - Team RBAC and multi-user project permissions (Phase 2).
 - Email/push notifications.
 - Exact job-dispatch transport and event schema.

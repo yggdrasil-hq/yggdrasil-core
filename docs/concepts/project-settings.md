@@ -16,7 +16,8 @@ per-feature/run overrides for the agent.
 
 - **Primary repository** — coordination root; branches and PRs open here.
 - **Linked sub-repositories** — cloned alongside primary on every job (`spec_grill`,
-  `feature_build`, `test_run`). All linked repos require OAuth `repo` scope.
+  `feature_build`, `test_run`). All linked repos must be granted on the project's
+  **GitHub App installation** (ADR 003).
 - Every feature and test run uses **all linked repos** — no per-feature repo picker.
 
 ## Project status
@@ -25,6 +26,9 @@ per-feature/run overrides for the agent.
 |--------|---------|
 | `initializing` | `project_init` feature not yet merged; features and tests blocked. |
 | `ready` | Init complete; normal features and tests allowed. |
+
+`github_access_warning` (set when installation access breaks) blocks new jobs — see
+[`github-app.md`](github-app.md).
 
 ## Known settings (project level)
 

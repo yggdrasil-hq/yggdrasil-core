@@ -12,7 +12,7 @@ component's own `CLAUDE.md`.
 
 - **Web** — UI only. Talks to the API over REST (commands/queries) and
   WebSocket (live run events). Holds no source-of-truth state.
-- **API** — source of truth. Owns the database, GitHub OAuth tokens, and the
+- **API** — source of truth. Owns the database, GitHub App installations, and the
   event stream. Decides *when* work runs and dispatches **job specs** to the
   Orchestrator. Relays Orchestrator events to the Web app.
 - **Orchestrator** — stateless worker. Receives a job spec, executes it in an ephemeral
@@ -26,7 +26,7 @@ User (Web)
    │  writes feature spec, hits "run"
    ▼
 API
-   │  persists feature, mints short-lived scoped GitHub token,
+   │  persists feature, mints installation access token,
    │  builds a job spec, dispatches to Orchestrator
    ▼
 Orchestrator
@@ -55,5 +55,5 @@ See `concepts/job-dispatch.md` for the API→Orchestrator contract,
 
 - Web never talks to the Orchestrator directly — always via the API.
 - Orchestrator never persists durable state — the API owns it.
-- GitHub tokens are minted by the API and injected short-lived into the
+- GitHub installation tokens are minted by the API and injected short-lived into the
   Orchestrator container; they are never stored in the Web app.

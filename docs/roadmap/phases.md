@@ -9,7 +9,8 @@ which phase a feature belongs to.
 
 ## Phase 1 — Foundation
 
-Auth (see `concepts/authentication.md`), GitHub OAuth, project CRUD, feature CRUD, basic Pi integration in the
+Auth (see `concepts/authentication.md`), GitHub App repo access
+(`concepts/github-app.md`), project CRUD, feature CRUD, basic Pi integration in the
 Orchestrator, basic agent logging.
 
 ## Phase 2 — Team & Preview

@@ -15,7 +15,7 @@ keep short, link, don't duplicate.
 
 1. Provision an ephemeral Docker container.
 2. Inject the Pi coding agent (see `concepts/pi-agent.md`) and configured tools.
-3. Clone the target GitHub repo with a short-lived scoped token.
+3. Clone the target GitHub repo with a short-lived installation token.
 4. Create a feature branch `yggdrasil/<feature-slug>-<id>`.
 5. Open a draft PR immediately.
 6. Run Pi in RPC/SDK mode, streaming all events back to the API.
@@ -26,7 +26,7 @@ keep short, link, don't duplicate.
 
 - **API** — receives job specs, streams events/results back. See
   `concepts/job-dispatch.md`.
-- **GitHub** — clone, branch, PR (using the injected scoped token).
+- **GitHub** — clone, branch, PR (using the injected installation token).
 
 ## Deep docs (in the submodule, once added)
 

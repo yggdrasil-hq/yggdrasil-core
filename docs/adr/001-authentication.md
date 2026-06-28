@@ -1,7 +1,7 @@
 # ADR 001: Authentication and user identity
 
 **Status:** Accepted  
-**Date:** 2026-06-21  
+**Date:** 2026-06-21 (amended 2026-06-28 by ADR 003)  
 **Deciders:** Product/design session (grill-me)
 
 ## Context
@@ -18,8 +18,8 @@ Constraints from product:
 - **Open registration** on a self-hosted instance (anyone who can reach the URL).
 - Small-team, self-hosted deployment behind nginx (`/app` + `/api` on one origin in
   dev).
-- GitHub is needed for identity now and for repo access later (Orchestrator runs).
-  Open question #2 (GitHub App vs OAuth App) blocked a full auth design.
+- GitHub is needed for **identity** (login/linking). **Repository access** uses a
+  **GitHub App** (ADR 003) — not user OAuth tokens.
 
 ## Decision
 
@@ -46,21 +46,21 @@ Constraints from product:
 8. **Password change / first-time set** revokes all other sessions; current session
    stays valid.
 
-### GitHub OAuth
+### GitHub OAuth (identity only)
 
-9. **Phase 1:** **GitHub OAuth App** for login, signup, linking, and token storage.
-   DB schema and API boundaries must allow a **GitHub App** later (org installs,
-   webhooks) without migrating users.
+9. **GitHub OAuth App** (per instance) for login, signup, and account linking only.
+   Scope: **`read:user`** — no `repo` scope. Repository access is ADR 003 (GitHub App).
 10. **API owns the OAuth flow:** `GET /api/auth/github?intent=…` → GitHub →
     `GET /api/auth/github/callback` → API sets session cookie → redirect to Web.
-11. **Progressive scopes:** `read:user` for login/signup/link; `repo` only when
-    connecting a repo to a project or upgrading scopes in Settings.
-12. **Linking:** password users connect GitHub from Settings while authenticated.
+    Intents: `login`, `signup`, `link` only — no `upgrade`.
+11. **Linking:** password users connect GitHub from Settings while authenticated.
     Hard reject if GitHub is already linked to another user.
-13. **Unlinked GitHub on login page:** offer choice — create a new account **or**
+12. **Unlinked GitHub on login page:** offer choice — create a new account **or**
     sign in with password first to link (prevents accidental duplicate accounts).
-14. **Disconnect GitHub:** allowed only if the user has a password set (never leave
+13. **Disconnect GitHub:** allowed only if the user has a password set (never leave
     an account with zero login methods).
+14. **GitHub link optional** for project creation — not required to install the
+    GitHub App on repos (ADR 003).
 
 ### Security and UX
 
@@ -80,8 +80,8 @@ Implementation reference (API routes, flows, data model sketch):
 
 - No email infrastructure; auth ships quickly for self-hosted teams.
 - Session cookies on a shared origin are simple for REST and WebSocket.
-- Progressive GitHub scopes reduce consent friction at signup.
-- Schema ready for GitHub App without rewriting identity.
+- Minimal GitHub consent at signup (`read:user` only).
+- Clean split: OAuth for identity, GitHub App for repos (ADR 003).
 
 ### Negative / trade-offs
 
@@ -89,12 +89,9 @@ Implementation reference (API routes, flows, data model sketch):
 - **Open registration** — instances exposed to the internet can accumulate
   unwanted accounts (mitigation deferred; no invite-only gate in Phase 1).
 - **No account merge** — duplicate accounts from user error require manual cleanup.
-- **OAuth App user tokens** for repo access may be insufficient for org-level GitHub
-  App installs — GitHub App work remains in open questions.
 
 ### Follow-ups (out of scope for this ADR)
 
-- GitHub App for org repos, webhooks, installation tokens (see open questions #2).
 - Team invites and RBAC (Phase 2).
 - “Logout all devices” as an explicit UI action (session revocation on password
   change covers the security case).
@@ -107,7 +104,8 @@ Implementation reference (API routes, flows, data model sketch):
 | Email + verification + password reset | Explicit product choice to avoid email hassle |
 | JWT in localStorage | XSS token theft; harder WebSocket auth |
 | First-user bootstrap / closed registration | Chosen open registration instead |
-| GitHub App from day one | Too much scope before auth ships; OAuth App sufficient for Phase 1 identity |
+| GitHub App from day one | Deferred for auth scope; adopted in ADR 003 for repo access |
+| `repo` scope on OAuth | Repo access via GitHub App installation tokens instead (ADR 003) |
 | `repo` scope on every OAuth | Heavy consent before users understand why |
 | Auto-create account on unlinked GitHub login | Creates duplicate accounts for password users |
 | Account merge on GitHub conflict | Complex; deferred |

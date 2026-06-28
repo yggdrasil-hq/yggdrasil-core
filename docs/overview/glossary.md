@@ -33,7 +33,12 @@ definition. This is a lookup table, not a narrative — read only the row you ne
 | **Token budget** | Optional cap on tokens (and a timeout) per job. |
 | **Meta repo / parent repo** | This repo — docs + submodules, no application code. |
 | **Session** | Server-side login state referenced by an HttpOnly cookie set by the API. See `concepts/authentication.md`. |
-| **OAuth intent** | Query param on `GET /api/auth/github` (`login`, `signup`, `link`, `upgrade`) controlling post-callback behaviour. |
+| **OAuth intent** | Query param on `GET /api/auth/github` (`login`, `signup`, `link`) controlling post-callback behaviour. |
+| **GitHub App installation** | Org/user grant of repo access to the Yggdrasil GitHub App. See `concepts/github-app.md`. |
+| **Job-scoped GitHub credential** | Short-lived installation token injected into one Orchestrator run. |
+| **GitHub App bot** | GitHub identity (`yggdrasil[bot]`) that authors commits and PRs. |
+| **Project installer** | Yggdrasil user who completed the App install for a project (audit). |
+| **GitHub access warning** | Project flag when installation access breaks; blocks jobs. |
 | **pending_username** | Onboarding state after GitHub signup — user must confirm username before using the app. |
 
 > Missing a term? Add a row (alphabetical-ish by importance) when you introduce
