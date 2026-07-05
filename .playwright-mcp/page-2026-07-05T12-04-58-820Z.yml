@@ -1,0 +1,31 @@
+- generic [active] [ref=f2e1]:
+  - generic [ref=f2e4]:
+    - generic [ref=f2e5]:
+      - generic "Yggdrasil" [ref=f2e6]:
+        - generic [ref=f2e7]: Yggdrasil
+      - generic [ref=f2e8]:
+        - heading "Create account" [level=1] [ref=f2e9]
+        - paragraph [ref=f2e10]: Join your Yggdrasil instance
+    - generic [ref=f2e11]:
+      - generic [ref=f2e12]:
+        - heading "Sign up" [level=3] [ref=f2e13]
+        - paragraph [ref=f2e14]: Choose a permanent username
+      - generic [ref=f2e15]:
+        - paragraph [ref=f2e16]: We do not use email. If you forget your password, you will not be able to recover this account.
+        - generic [ref=f2e17]:
+          - text: Username
+          - textbox "Username" [ref=f2e18]
+        - generic [ref=f2e19]:
+          - text: Display name (optional)
+          - textbox "Display name (optional)" [ref=f2e20]
+        - generic [ref=f2e21]:
+          - text: Password
+          - textbox "Password" [ref=f2e22]
+        - button "Create account" [ref=f2e23] [cursor=pointer]
+      - generic [ref=f2e24]:
+        - button "Continue with GitHub" [ref=f2e25] [cursor=pointer]
+        - paragraph [ref=f2e26]:
+          - text: Already have an account?
+          - link "Sign in" [ref=f2e27] [cursor=pointer]:
+            - /url: /app/login
+  - alert [ref=f2e28]

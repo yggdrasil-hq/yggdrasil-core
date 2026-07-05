@@ -4,7 +4,7 @@
 before diving into code or docs. For details, follow the links — do not treat this
 file as the full spec.
 
-Last updated: 2026-06-22
+Last updated: 2026-07-05
 
 ## Product
 
@@ -36,12 +36,16 @@ focus.
   against ephemeral main preview.
 - Project home: feature buckets + action queue; global notifications page.
 
+## Decided (GitHub App)
+
+Separate from the OAuth App used for login (ADR 001): a GitHub **App** handles
+project→repo linking. Permissions: Contents (read/write), Pull requests
+(read/write), Metadata (read). Setup URL required for post-install redirect.
+Implementation reference: [`concepts/github-app.md`](concepts/github-app.md)
+
 ## Still open
 
 → [`roadmap/open-questions.md`](roadmap/open-questions.md)
-
-Notable: **GitHub App** (org installs, webhooks) — Phase 1 uses OAuth App for
-identity; App deferred but schema must be ready.
 
 ## Repo map
 

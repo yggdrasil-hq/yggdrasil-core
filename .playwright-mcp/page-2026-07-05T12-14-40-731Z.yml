@@ -1,0 +1,42 @@
+- generic [active] [ref=f6e1]:
+  - generic [ref=f6e3]:
+    - banner [ref=f6e4]:
+      - generic [ref=f6e5]:
+        - link "Yggdrasil" [ref=f6e6] [cursor=pointer]:
+          - /url: /app/projects
+          - generic [ref=f6e7]:
+            - generic [ref=f6e8]: "Y"
+            - generic [ref=f6e9]: Yggdrasil
+        - navigation [ref=f6e10]:
+          - link "Projects" [ref=f6e11] [cursor=pointer]:
+            - /url: /app/projects
+          - link "Notifications" [ref=f6e12] [cursor=pointer]:
+            - /url: /app/notifications
+            - img [ref=f6e13]
+            - text: Notifications
+          - link "Settings" [ref=f6e16] [cursor=pointer]:
+            - /url: /app/settings/account
+            - img [ref=f6e17]
+            - text: Settings
+        - generic [ref=f6e36]:
+          - generic [ref=f6e37]:
+            - paragraph [ref=f6e38]: claudetest
+            - paragraph [ref=f6e39]: "@claudetest"
+          - img "claudetest avatar" [ref=f6e40]
+          - button "Log out" [ref=f6e41] [cursor=pointer]:
+            - img
+            - generic [ref=f6e42]: Log out
+    - main [ref=f6e20]:
+      - generic [ref=f6e21]:
+        - heading "Create project" [level=1] [ref=f6e22]
+        - paragraph [ref=f6e23]: Name your project, connect the Yggdrasil GitHub App, then pick repositories.
+      - generic [ref=f6e44]:
+        - generic [ref=f6e45]:
+          - generic [ref=f6e46]:
+            - heading "GitHub App access" [level=3] [ref=f6e47]
+            - paragraph [ref=f6e48]: Install the Yggdrasil GitHub App on your org or account, or reuse an existing installation.
+          - generic [ref=f6e49]:
+            - button "Install on GitHub" [ref=f6e50] [cursor=pointer]
+            - paragraph [ref=f6e51]: Org installs may require an admin. If GitHub blocks you, ask your org admin to install the app and grant repository access.
+        - button "Back" [ref=f6e52] [cursor=pointer]
+  - alert [ref=f6e43]

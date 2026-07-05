@@ -41,6 +41,7 @@ doc is relevant before reading the body — that's how we keep context small.
 | Doc | Read this when |
 |-----|----------------|
 | [`concepts/authentication.md`](concepts/authentication.md) | You implement login, signup, sessions, or GitHub OAuth. |
+| [`concepts/github-app.md`](concepts/github-app.md) | You implement or debug GitHub App install, permissions, or repo sync. |
 | [`concepts/pi-agent.md`](concepts/pi-agent.md) | You need to understand the Pi coding agent. |
 | [`concepts/feature-lifecycle.md`](concepts/feature-lifecycle.md) | You touch feature states / the state machine. |
 | [`concepts/job-dispatch.md`](concepts/job-dispatch.md) | You touch how the API hands work to the Orchestrator. |
