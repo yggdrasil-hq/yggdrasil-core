@@ -196,8 +196,19 @@ Constraints:
 - Tool allowlist policy beyond scoping the contract extension's own tools —
   the broader "which packages/tools may Pi install" knob from `pi-agent.md`
   is unaffected by this ADR.
-- CI/release process for `yggdrasil-agent-images` (build, tag, push to the
-  ADR-003 registry) is not designed here.
+- ~~CI/release process for `yggdrasil-agent-images` (build, tag, push to the
+  ADR-003 registry) is not designed here.~~ **Resolved:**
+  `.github/workflows/build-images.yml` in `agent-images/` builds and pushes
+  all four images on every push to `main`. Registry target turned out to need
+  its own call, not deferred to ADR 003's per-install registries: those are
+  for per-project app images living inside each install's own
+  cluster/namespace, which centralized CI can't push into. `agent-images` is
+  one shared, suite-maintained artifact instead, so CI publishes to
+  `ghcr.io/yggdrasil-hq/yggdrasil-agent-images/*`, and every Orchestrator
+  (self-hosted or managed) pulls directly from there. See
+  `agent-images/docs/concepts/images.md`. New open follow-up this raised:
+  GHCR packages default to private, so self-hosted installs need a
+  `read:packages` pull secret provisioned — not yet designed.
 - Whether `feature_build`'s Playwright self-verification should gate PR
   creation (fail the build) or stay advisory — left to implementation.
 

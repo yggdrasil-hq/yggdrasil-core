@@ -7,17 +7,22 @@ keep short, link, don't duplicate.
 
 - **Submodule path:** `agent-images/`
 - **GitHub repo:** `yggdrasil-hq/yggdrasil-agent-images`
-- **Status:** Dockerfiles, skills, and the shared extension are scaffolded
-  (untested — no CI build has run against them, and no image has been pushed
-  to a registry yet)
+- **Status:** Dockerfiles, skills, and the shared extension are scaffolded and
+  build cleanly. CI builds and pushes all four images to GitHub Container
+  Registry on every push to `main` — registry pull-secret provisioning for
+  self-hosted installs is an open follow-up (GHCR packages default to
+  private)
 - **Design rationale:** ADR 004 (`docs/adr/004-agent-base-containers.md`)
 
 ## Responsibility
 
-Build-time only — publishes container images to the registry ADR 003
-established. No runtime service; the Orchestrator resolves an image tag per
-job kind via env var (`SPEC_GRILL_IMAGE` / `FEATURE_BUILD_IMAGE` /
-`TEST_RUN_IMAGE`) and never calls this repo directly.
+Build-time only — publishes container images to GitHub Container Registry,
+**not** the per-install registry ADR 003 established (that one is for
+per-project app images living inside each install's own cluster; this is one
+shared, suite-maintained artifact instead). No runtime service; the
+Orchestrator resolves an image tag per job kind via env var
+(`SPEC_GRILL_IMAGE` / `FEATURE_BUILD_IMAGE` / `TEST_RUN_IMAGE`) and never
+calls this repo directly.
 
 1. A common base layer: Pi installed + the shared `yggdrasil-contract`
    extension (structured tool calls for turn/completion signaling, replacing
@@ -33,8 +38,11 @@ job kind via env var (`SPEC_GRILL_IMAGE` / `FEATURE_BUILD_IMAGE` /
 
 ## Talks to
 
-- **Container registry** (ADR 003) — this repo's CI publishes images here.
-- **Orchestrator** — pulls images by tag; no other coupling.
+- **GitHub Container Registry** (`ghcr.io/yggdrasil-hq/yggdrasil-agent-images/*`)
+  — this repo's CI publishes images here, not to ADR 003's per-install
+  registry.
+- **Orchestrator** — pulls images by tag directly from GHCR; no other
+  coupling.
 
 ## Deep docs (in the submodule)
 
