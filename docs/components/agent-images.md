@@ -7,8 +7,9 @@ keep short, link, don't duplicate.
 
 - **Submodule path:** `agent-images/`
 - **GitHub repo:** `yggdrasil-hq/yggdrasil-agent-images`
-- **Status:** added (scaffold only — Dockerfiles, skills, and the shared
-  extension are not yet implemented)
+- **Status:** Dockerfiles, skills, and the shared extension are scaffolded
+  (untested — no CI build has run against them, and no image has been pushed
+  to a registry yet)
 - **Design rationale:** ADR 004 (`docs/adr/004-agent-base-containers.md`)
 
 ## Responsibility
@@ -39,7 +40,7 @@ job kind via env var (`SPEC_GRILL_IMAGE` / `FEATURE_BUILD_IMAGE` /
 
 - `agent-images/CLAUDE.md` — router for this repo
 - `agent-images/docs/` — image layout, skills, the shared extension, model
-  config template (mostly TODO stubs until the repo is implemented)
+  config template
 
 See ADR 004 (`docs/adr/004-agent-base-containers.md`) for the full design and
 its trade-offs/follow-ups.
