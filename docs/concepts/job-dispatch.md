@@ -67,10 +67,18 @@ in the Orchestrator itself.
 ## Job spec (common fields)
 
 - Job kind: `spec_grill` | `feature_build` | `test_run`.
+- Container image: resolved by the Orchestrator from one env var per job kind
+  (`SPEC_GRILL_IMAGE` / `FEATURE_BUILD_IMAGE` / `TEST_RUN_IMAGE`), pointing at
+  an image built by `agent-images/` (ADR 004) — replaces the placeholder
+  `JOB_PLACEHOLDER_IMAGE` used today.
 - Target repos (all linked) + ref / branch name as applicable.
 - Short-lived scoped GitHub token (minted by API).
 - Kind-specific payload (ADR, test markdown, build commands from project config).
-- Pi config: model, extensions, tool allowlist, timeout, token budget.
+- Pi config: model (per-project `MODEL_BASE_URL`/`MODEL_API_KEY`/`MODEL_ID` from
+  `project_secrets`, decrypted server-side and injected as pod env vars — same
+  path as the GitHub token; see ADR 004), extensions (the shared
+  `yggdrasil-contract` extension, baked into the image), tool allowlist,
+  timeout, token budget.
 - Callback/stream endpoint for events.
 
 ## Test scheduling

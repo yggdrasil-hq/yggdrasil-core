@@ -27,6 +27,7 @@ doc is relevant before reading the body — that's how we keep context small.
 | [`components/orchestrator.md`](components/orchestrator.md) | Working on or referencing the Orchestrator. |
 | [`components/landing.md`](components/landing.md) | Working on the marketing site. |
 | [`components/docusaurus.md`](components/docusaurus.md) | Working on the Docusaurus user docs. |
+| [`components/agent-images.md`](components/agent-images.md) | Working on Pi base container images, skills, or the shared extension. |
 
 ## adr/ — architecture decision records
 
@@ -36,6 +37,7 @@ doc is relevant before reading the body — that's how we keep context small.
 | [`adr/001-authentication.md`](adr/001-authentication.md) | You need the *rationale* for auth (sessions, OAuth, no email). |
 | [`adr/002-projects-features-tests.md`](adr/002-projects-features-tests.md) | You need the *rationale* for projects, features, tests, and project UX. |
 | [`adr/003-orchestrator-kubernetes.md`](adr/003-orchestrator-kubernetes.md) | You need the *rationale* for the Orchestrator's Kubernetes compute model, project hosting, or job queue. |
+| [`adr/004-agent-base-containers.md`](adr/004-agent-base-containers.md) | You need the *rationale* for Pi base container images, skills, MCP-vs-Playwright, or per-project model config. |
 
 ## concepts/ — cross-cutting domain logic
 
