@@ -112,9 +112,14 @@ services:
     environment:
       PORT: ${ORCHESTRATOR_PORT:-8080}
       DATABASE_URL: postgresql://${POSTGRES_USER:-yggdrasil}:${POSTGRES_PASSWORD:-yggdrasil}@postgres:5432/${POSTGRES_DB:-yggdrasil}
+      # Local dev only: points at a kubeconfig for a cluster reachable from
+      # this container (e.g. a k3d cluster on this same Docker network). Not
+      # part of the bundled-k3s self-hosted story yet — see ADR 003 follow-ups.
+      KUBECONFIG: /kube/config
     volumes:
       - ../orchestrator:/app
       - orchestrator_go_pkg:/go/pkg
+      - ./.kube/config-container:/kube/config:ro
     depends_on:
       postgres:
         condition: service_healthy

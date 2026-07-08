@@ -7,6 +7,10 @@ single-node prod machine.
 
 - Docker Engine + Docker Compose v2
 - Submodules checked out (`git clone --recurse-submodules`)
+- A reachable Kubernetes cluster for the Orchestrator (ADR 003) — dev uses a
+  local `k3d` cluster; see `../orchestrator/docs/overview/setup.md` for the
+  one-time setup. Without it, the `orchestrator` service fails to start
+  (`deploy/.kube/config-container` won't exist to mount).
 
 ## Setup
 

@@ -27,7 +27,7 @@ Root compose **builds inline** from submodule contexts (`../api`, `../web`, …)
 | web | Next.js | `node:22-bookworm-slim` |
 | landing | Next.js | `node:22-bookworm-slim` |
 | docusaurus | Docusaurus 3 | `node:22-bookworm-slim` |
-| orchestrator | Go | `golang:1.25-bookworm` / distroless prod |
+| orchestrator | Go | `golang:1.26-bookworm` / distroless prod |
 
 Use official multi-arch images; build natively on each machine.
 
