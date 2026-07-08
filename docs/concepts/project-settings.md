@@ -5,6 +5,7 @@ per-feature/run overrides for the agent.
 **Skip if:** you're not dealing with config.
 
 > **Project/repo model:** ADR 002 (`docs/adr/002-projects-features-tests.md`).
+> **Hosting, secrets injection mechanism:** ADR 003 (`docs/adr/003-orchestrator-kubernetes.md`).
 
 ## Levels
 
@@ -41,4 +42,7 @@ per-feature/run overrides for the agent.
 
 - Confirm the full settings list — e.g. environment variables.
 - Define precedence rules when project and feature settings conflict.
-- Secure injection of project-level env vars into containers — open question.
+
+Secure injection of project-level env vars is decided (ADR 003): encrypted at
+rest in the API's PostgreSQL, decrypted in-memory by the API, pushed by the
+Orchestrator into a per-project Kubernetes `Secret` at deploy time.

@@ -8,7 +8,9 @@ definition. This is a lookup table, not a narrative — read only the row you ne
 | **Yggdrasil** | The whole AI-orchestrated software-development suite. |
 | **Web** | The React/Next.js web app users interact with. |
 | **API** | REST + WebSocket API; source of truth for all persistent state. |
-| **Orchestrator** | Stateless execution layer that runs jobs in containers. |
+| **Orchestrator** | Execution layer (stateless process) that runs jobs in Kubernetes and hosts each project's primary deployment. See ADR 003. |
+| **Primary deployment** | A project's single always-on, stateful Kubernetes deployment tracking `main`; auto-redeploys on merge. See ADR 003. |
+| **Temporary deployment** | An ephemeral, per-run Kubernetes deployment backing a `spec_grill`, `feature_build`, or `test_run` job; torn down after. See ADR 003. |
 | **Pi** | The minimal terminal-based coding agent (pi.dev, by Earendil Inc.) that does the actual coding inside a container. See `concepts/pi-agent.md`. |
 | **Project** | A managed codebase: one **primary repository** plus optional **linked sub-repositories**, plus agent configuration. See ADR 002. |
 | **Primary repository** | The repo where Yggdrasil opens branches/PRs and anchors project identity. |

@@ -4,7 +4,7 @@
 before diving into code or docs. For details, follow the links — do not treat this
 file as the full spec.
 
-Last updated: 2026-07-05
+Last updated: 2026-07-08
 
 ## Product
 
@@ -43,6 +43,27 @@ project→repo linking. Permissions: Contents (read/write), Pull requests
 (read/write), Metadata (read). Setup URL required for post-install redirect.
 Implementation reference: [`concepts/github-app.md`](concepts/github-app.md)
 
+## Decided (Orchestrator compute)
+
+**ADR 003 — Orchestrator compute: Kubernetes-based job execution and project
+hosting** ([`adr/003-orchestrator-kubernetes.md`](adr/003-orchestrator-kubernetes.md))
+
+- Orchestrator targets **Kubernetes**, not a raw Docker socket; supports both
+  self-hosted (bundled k3s by default) and managed deployment, one target
+  cluster per Orchestrator instance for MVP.
+- Namespace-per-project isolation + sandboxed RuntimeClass (gVisor/Kata) by
+  default.
+- Each project: one **always-on primary deployment** (stateful, auto-redeploys
+  on merge to `main`, no migration safety net yet) + ephemeral **temporary
+  deployments** for `spec_grill`/`feature_build`/`test_run`.
+- Build contract: **Helm chart** in the primary repo (strict, scaffolded at
+  `project_init`) + **Dockerfile** per linked sub-repo; Orchestrator applies
+  Helm imperatively.
+- Job dispatch transport: **Postgres-backed durable queue**, no broker.
+  Orchestrator stays a single "modular monolith" service, 2+ replicas.
+- Implementation reference: [`components/orchestrator.md`](components/orchestrator.md),
+  [`conventions/deploy.md`](conventions/deploy.md)
+
 ## Still open
 
 → [`roadmap/open-questions.md`](roadmap/open-questions.md)
@@ -53,8 +74,8 @@ Implementation reference: [`concepts/github-app.md`](concepts/github-app.md)
 |------|------|
 | `web/` | Next.js UI — no source-of-truth state |
 | `api/` | Express API, PostgreSQL, OAuth, sessions |
-| `orchestrator/` | Stateless job runner |
-| `deploy/` | Docker Compose + nginx |
+| `orchestrator/` | Kubernetes-based job runner + project hosting (ADR 003) |
+| `deploy/` | Docker Compose + nginx (Yggdrasil's own control plane only) |
 
 → [`CLAUDE.md`](../CLAUDE.md) routing table for task-specific docs.
 
@@ -64,5 +85,6 @@ Implementation reference: [`concepts/github-app.md`](concepts/github-app.md)
 |---|-------|
 | 001 | [Authentication](adr/001-authentication.md) |
 | 002 | [Projects, features, tests, and project UX](adr/002-projects-features-tests.md) |
+| 003 | [Orchestrator compute — Kubernetes](adr/003-orchestrator-kubernetes.md) |
 
 → [`adr/README.md`](adr/README.md)

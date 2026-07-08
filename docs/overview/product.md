@@ -28,11 +28,12 @@ GitHub can be managed through it.
    notifications). Manages GitHub OAuth tokens, dispatches jobs to the Orchestrator, and
    delivers real-time events to the Web app. PostgreSQL + object storage. →
    `components/api.md`
-3. **Orchestrator** — the stateless execution layer. Provisions
-   ephemeral Docker containers, injects the Pi agent, clones the repo with a
-   short-lived scoped token, creates a branch, opens a draft PR, runs Pi in
-   RPC/SDK mode streaming events back, optionally tunnels a preview URL, then
-   tears down and archives artefacts. → `components/orchestrator.md`
+3. **Orchestrator** — the execution layer. Runs on Kubernetes: provisions
+   ephemeral Pods/Jobs for agent runs (injects the Pi agent, clones the repo
+   with a short-lived scoped token, creates a branch, opens a draft PR, runs Pi
+   in RPC/SDK mode streaming events back, optionally exposes a preview URL,
+   then tears down and archives artefacts), and separately maintains each
+   project's always-on primary deployment via Helm. → `components/orchestrator.md`
 
 See `overview/architecture.md` for how they talk to each other.
 

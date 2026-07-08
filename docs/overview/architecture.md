@@ -15,9 +15,12 @@ component's own `CLAUDE.md`.
 - **API** — source of truth. Owns the database, GitHub OAuth tokens, and the
   event stream. Decides *when* work runs and dispatches **job specs** to the
   Orchestrator. Relays Orchestrator events to the Web app.
-- **Orchestrator** — stateless worker. Receives a job spec, executes it in an ephemeral
-  container, streams events back, and reports a final result. Keeps nothing
-  between runs.
+- **Orchestrator** — stateless worker process. Receives job/deploy specs over a
+  Postgres-backed queue, executes ephemeral runs in Kubernetes Pods/Jobs, and
+  maintains each project's always-on primary deployment via Helm. The process
+  itself keeps nothing in memory between runs, but per ADR 003
+  (`adr/003-orchestrator-kubernetes.md`) it now manages durable *project* state
+  that lives in the target Kubernetes cluster, not in the API's database.
 
 ## End-to-end flow (a feature being built)
 
@@ -54,6 +57,9 @@ See `concepts/job-dispatch.md` for the API→Orchestrator contract,
 ## Key boundaries (don't cross them)
 
 - Web never talks to the Orchestrator directly — always via the API.
-- Orchestrator never persists durable state — the API owns it.
+- The Orchestrator process persists no state itself — the API owns all
+  control-plane state. Per-project *hosted application* state (a project's
+  primary deployment) lives in the target Kubernetes cluster, which the
+  Orchestrator manages but does not itself store data in — see ADR 003.
 - GitHub tokens are minted by the API and injected short-lived into the
-  Orchestrator container; they are never stored in the Web app.
+  Orchestrator's job Pods; they are never stored in the Web app.
