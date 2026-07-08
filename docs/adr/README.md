@@ -24,7 +24,9 @@ Each ADR is numbered sequentially: `NNN-short-title.md`.
 |-----|-------|--------|
 | [001](001-authentication.md) | Authentication and user identity | Accepted |
 | [002](002-projects-features-tests.md) | Projects, features, tests, and project UX | Accepted |
-| [003](003-github-app-repository-access.md) | GitHub App for repository access | Accepted |
+| [003](003-orchestrator-kubernetes.md) | Orchestrator compute — Kubernetes-based job execution and project hosting | Accepted |
+| [004](004-agent-base-containers.md) | Agent base container images (Pi integration) | Accepted |
+| [005](005-github-app-repository-access.md) | GitHub App for repository access | Accepted |
 
 When adding an ADR, update this index, add a routing row in root `CLAUDE.md`, and
 link from `docs/CONTEXT.md` if the decision affects suite-wide context.

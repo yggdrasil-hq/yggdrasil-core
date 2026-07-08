@@ -1,7 +1,7 @@
 # ADR 002: Projects, features, tests, and project UX
 
 **Status:** Accepted  
-**Date:** 2026-06-22 (amended 2026-06-28 by ADR 003)  
+**Date:** 2026-06-22 (amended 2026-06-28 by ADR 005)  
 **Deciders:** Product/design session (grill-me)
 
 ## Context
@@ -22,7 +22,7 @@ Prior state:
 Constraints:
 
 - Phase 1 auth: GitHub OAuth for identity only (ADR 001); repository access via
-  GitHub App installation (ADR 003).
+  GitHub App installation (ADR 005).
 - Orchestrator is stateless — job specs must carry everything needed for a run.
 - Self-hosted, small-team product; no email notifications in v1.
 
@@ -35,7 +35,7 @@ Constraints:
    cloned alongside the primary).
 2. When linking repos, user completes a **GitHub App install** (or reuses an
    existing installation on the same org/account) and selects repos from the
-   installation's granted list (ADR 003). Flow: name → install/configure → repo
+   installation's granted list (ADR 005). Flow: name → install/configure → repo
    picker → create.
 3. **Every feature and test run clones all linked repos** — no per-feature repo
    scoping. Simple single-repo projects are the degenerate case (primary only).

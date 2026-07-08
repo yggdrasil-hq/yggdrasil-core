@@ -1,11 +1,17 @@
-# GitHub App (repository access)
+# GitHub App (repository access, installation & sync)
 
 **Read this when:** you implement or modify GitHub App installation, installation
-tokens, webhooks, project repo linking, or job credential minting.
+tokens, webhooks, project→repo linking, the install/callback flow, repo-list
+syncing, or job credential minting.
 **Skip if:** you only need identity/login — see [`authentication.md`](authentication.md)
-and ADR [`../adr/001-authentication.md`](../adr/001-authentication.md).
+and ADR [`../adr/001-authentication.md`](../adr/001-authentication.md) (a separate
+GitHub app registration from the one described here).
 
-> **Status:** Accepted (ADR 003). Rationale: [`../adr/003-github-app-repository-access.md`](../adr/003-github-app-repository-access.md).
+> **Status:** Accepted (ADR 005). Rationale:
+> [`../adr/005-github-app-repository-access.md`](../adr/005-github-app-repository-access.md).
+> Also resolves open question #2 from
+> [`../roadmap/open-questions.md`](../roadmap/open-questions.md) (installation
+> model + permissions).
 
 ## Summary
 
@@ -21,6 +27,15 @@ and ADR [`../adr/001-authentication.md`](../adr/001-authentication.md).
 | Webhooks | `installation`, `installation_repositories` only |
 | Broken access | `github_access_warning` flag + action queue item |
 
+## Two separate GitHub integrations
+
+Yggdrasil registers **two different GitHub apps**, easy to conflate:
+
+| | Purpose | Auth | Where |
+|---|---|---|---|
+| GitHub **OAuth App** | User login/signup/identity | `read:user` scope on a user token | `concepts/authentication.md` |
+| GitHub **App** (this doc) | Org/repo installation for cloning, branches, PRs | JWT (app) → short-lived installation access token | `api/src/github/*.ts` |
+
 ## Instance admin setup
 
 Each self-hosted deployment registers **two** GitHub integrations:
@@ -33,10 +48,40 @@ Each self-hosted deployment registers **two** GitHub integrations:
 
 ### GitHub App (repository access)
 
-- Permissions: Metadata (read), Contents (read & write), Pull requests (read & write)
+The GitHub App (Settings → Developer settings → GitHub Apps → your app →
+**Permissions & events**) must request:
+
+| Permission | Level | Why |
+|---|---|---|
+| **Contents** | Read and write | Clone repos, create branches, commit (see `job-dispatch.md`) |
+| **Pull requests** | Read and write | Open draft PRs |
+| **Metadata** | Read-only | Required by GitHub for every App install |
+
+Without at least Contents + Pull requests, GitHub's install/configure screen
+shows **"This App does not require access to your repositories"** and offers no
+repo picker at all — the installation succeeds but is useless. If you hit that
+screen, the fix is in the App's GitHub settings, not in Yggdrasil config.
+
 - Webhook URL: `POST /api/webhooks/github`
 - Install callback: `GET /api/github/install/callback`
-- Env: `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY` (PEM), `GITHUB_APP_WEBHOOK_SECRET`
+- Env: `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY` (PEM, real or `\n`-escaped
+  newlines — both normalized in `app-jwt.ts`), `GITHUB_APP_SLUG`,
+  `GITHUB_APP_WEBHOOK_SECRET`. `isGitHubAppConfigured()` in `api/src/config.ts`
+  gates the install routes with a `503` if any of app id/private key/slug is
+  missing.
+
+#### Setup URL (post-install redirect)
+
+GitHub does **not** redirect back to the app after install unless a **Setup URL**
+is configured on the GitHub App itself:
+
+- **Setup URL:** `<APP_PUBLIC_URL-derived origin>/api/github/install/callback`
+  (e.g. `http://localhost:8080/api/github/install/callback` in dev)
+- Check **"Redirect on update"** so re-configuring an existing installation also
+  redirects back (not just fresh installs).
+
+Without this, GitHub shows its own generic "app installed" confirmation page and
+the flow silently stalls — this looks like a bug but is a GitHub App setting.
 
 Document the checklist in `deploy/` when implementation lands.
 
@@ -91,6 +136,38 @@ Projects reference one installation. Linked repos must be a subset of
    `project_init`.
 
 GitHub identity link in Settings is **not** required for this flow.
+
+### Install flow (implementation detail)
+
+1. Web: `GET /api/github/install?name=&description=&return_to=`
+   (session-authed). API stores a one-time `installState` (draft project name/
+   description + `return_to`) and redirects to
+   `https://github.com/apps/<slug>/installations/new?state=<state>`.
+2. User installs/configures on GitHub.
+3. GitHub redirects to the **Setup URL** above with
+   `installation_id`, `setup_action`, `state`.
+4. API (`api/src/github/install-routes.ts`, `GET /install/callback`) consumes the
+   `installState` (one-time use), calls `syncInstallationFromGitHub`, then
+   redirects to `return_to` (or `/projects/new`) with `step=repos&installation_id=...`.
+5. Web repo-picker step lists synced repos; "Configure on GitHub" /
+   "Refresh" re-trigger sync if permissions/repos change.
+
+### Repo sync — correct GitHub API contract
+
+`syncInstallationFromGitHub` (`api/src/github/sync-installation.ts`) must:
+
+1. `GET /app/installations/{id}` — **app JWT** auth. Confirms installation +
+   account.
+2. `POST /app/installations/{id}/access_tokens` — **app JWT** auth. Mints a
+   short-lived installation access token (`mintInstallationAccessToken` in
+   `github-api.ts`).
+3. `GET /installation/repositories` — **installation token** auth (not JWT).
+   Returns `{ total_count, repository_selection, repositories: [] }`; paginate
+   with `?page=`.
+
+There is **no** `/app/installations/{id}/repositories` endpoint — calling it with
+a JWT 404s. This was a real bug fixed in `github-api.ts`'s
+`fetchInstallationRepositories`; don't reintroduce it.
 
 ## Installation token minting (jobs)
 

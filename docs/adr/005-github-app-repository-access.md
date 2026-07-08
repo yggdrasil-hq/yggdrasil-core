@@ -1,4 +1,4 @@
-# ADR 003: GitHub App for repository access
+# ADR 005: GitHub App for repository access
 
 **Status:** Accepted  
 **Date:** 2026-06-28  

@@ -1,0 +1,42 @@
+- generic [active] [ref=f2e1]:
+  - generic [ref=f2e29]:
+    - banner [ref=f2e30]:
+      - generic [ref=f2e31]:
+        - link "Yggdrasil" [ref=f2e32] [cursor=pointer]:
+          - /url: /app/projects
+          - generic [ref=f2e33]:
+            - generic [ref=f2e34]: "Y"
+            - generic [ref=f2e35]: Yggdrasil
+        - navigation [ref=f2e36]:
+          - link "Projects" [ref=f2e37] [cursor=pointer]:
+            - /url: /app/projects
+          - link "Notifications" [ref=f2e38] [cursor=pointer]:
+            - /url: /app/notifications
+            - img [ref=f2e39]
+            - text: Notifications
+          - link "Settings" [ref=f2e42] [cursor=pointer]:
+            - /url: /app/settings/account
+            - img [ref=f2e43]
+            - text: Settings
+        - generic [ref=f2e46]:
+          - generic [ref=f2e47]:
+            - paragraph [ref=f2e48]: claudetest
+            - paragraph [ref=f2e49]: "@claudetest"
+          - img "claudetest avatar" [ref=f2e50]
+          - button "Log out" [ref=f2e51] [cursor=pointer]:
+            - img
+            - generic [ref=f2e52]: Log out
+    - main [ref=f2e53]:
+      - generic [ref=f2e54]:
+        - heading "Projects" [level=1] [ref=f2e55]
+        - paragraph [ref=f2e56]: Connect GitHub repositories and manage agent work from one place.
+      - link "New project" [ref=f2e58] [cursor=pointer]:
+        - /url: /app/projects/new
+        - img
+        - text: New project
+      - generic [ref=f2e60]:
+        - heading "No projects yet" [level=3] [ref=f2e61]
+        - paragraph [ref=f2e62]: Create your first project by linking a primary GitHub repository. You can add sub-repositories for multi-repo setups like meta repos with submodules.
+        - link "Create project" [ref=f2e63] [cursor=pointer]:
+          - /url: /app/projects/new
+  - alert [ref=f2e28]

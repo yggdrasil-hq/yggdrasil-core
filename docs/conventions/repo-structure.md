@@ -22,7 +22,8 @@ yggdrasil-core/            (meta repo — GitHub: yggdrasil-hq/yggdrasil-core)
 ├── api/           → submodule
 ├── orchestrator/  → submodule
 ├── landing/       → submodule
-└── docusaurus/    → submodule (Docusaurus user docs)
+├── docusaurus/    → submodule (Docusaurus user docs)
+└── agent-images/  → submodule (Pi base container images, ADR 004)
 ```
 
 ## GitHub repos (`yggdrasil-hq`)
@@ -35,6 +36,7 @@ yggdrasil-core/            (meta repo — GitHub: yggdrasil-hq/yggdrasil-core)
 | `orchestrator/` | `yggdrasil-orchestrator` |
 | `landing/` | `yggdrasil-landing` |
 | `docusaurus/` | `yggdrasil-docusaurus` |
+| `agent-images/` | `yggdrasil-agent-images` |
 
 ## Where does a doc belong? (parent vs. child)
 

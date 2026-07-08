@@ -13,3 +13,6 @@
 [submodule "docusaurus"]
 	path = docusaurus
 	url = git@github.com:yggdrasil-hq/yggdrasil-docusaurus.git
+[submodule "agent-images"]
+	path = agent-images
+	url = git@github.com:yggdrasil-hq/yggdrasil-agent-images.git

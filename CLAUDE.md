@@ -36,6 +36,7 @@ requests and streaming progress back in real time. See
 | `orchestrator/`  | `yggdrasil-hq/yggdrasil-orchestrator` | Stateless job executor / Docker orchestration | added  |
 | `landing/`       | `yggdrasil-hq/yggdrasil-landing` | Marketing / public website                 | added  |
 | `docusaurus/`    | `yggdrasil-hq/yggdrasil-docusaurus` | End-user product documentation (NOT agent docs) | added  |
+| `agent-images/`  | `yggdrasil-hq/yggdrasil-agent-images` | Pi base container images: skills, shared extension, model config (ADR 004) | added  |
 
 > Meta repo: `yggdrasil-hq/yggdrasil-core`. Clone with submodules:
 > `git clone --recurse-submodules git@github.com:yggdrasil-hq/yggdrasil-core.git`
@@ -54,9 +55,10 @@ requests and streaming progress back in real time. See
 | The landing / marketing site                            | `docs/components/landing.md` → `landing/CLAUDE.md`   |
 | The end-user docs site (Docusaurus)                     | `docs/components/docusaurus.md` → `docusaurus/CLAUDE.md` |
 | Authentication / login / signup / sessions / GitHub OAuth | `docs/concepts/authentication.md` → ADR `docs/adr/001-authentication.md` |
-| GitHub App / repo install / webhooks / job tokens | `docs/concepts/github-app.md` → ADR `docs/adr/003-github-app-repository-access.md` |
+| GitHub App / repo install / webhooks / permissions / repo sync / job tokens | `docs/concepts/github-app.md` → ADR `docs/adr/005-github-app-repository-access.md` |
 | Projects / features / tests / project home / notifications | ADR `docs/adr/002-projects-features-tests.md` → `docs/concepts/feature-lifecycle.md`, `docs/concepts/job-dispatch.md` |
 | The Pi agent (how the agent itself runs)                | `docs/concepts/pi-agent.md`            |
+| Base container images / skills / MCP-vs-Playwright / model config | `docs/components/agent-images.md` → ADR `docs/adr/004-agent-base-containers.md` → `agent-images/CLAUDE.md` |
 | Feature states / lifecycle                              | `docs/concepts/feature-lifecycle.md`   |
 | Architecture decisions (why we chose X)                 | `docs/adr/` → start at `docs/CONTEXT.md` |
 | How the API dispatches jobs to the Orchestrator         | `docs/concepts/job-dispatch.md`        |

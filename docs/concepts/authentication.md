@@ -3,9 +3,9 @@
 **Read this when:** you implement or modify login, signup, sessions, password
 management, GitHub OAuth (identity), or account settings in the API or Web app.
 **Skip if:** you only need the rationale — see [`../adr/001-authentication.md`](../adr/001-authentication.md).
-For repository access, see [`github-app.md`](github-app.md) (ADR 003).
+For repository access, see [`github-app.md`](github-app.md) (ADR 005).
 
-> **Status:** Accepted (ADR 001, amended by ADR 003). This doc is the implementation reference.
+> **Status:** Accepted (ADR 001, amended by ADR 005). This doc is the implementation reference.
 
 ## Summary
 
@@ -138,6 +138,6 @@ for all users regardless of GitHub link. Render client-side or via deterministic
 ## Related docs
 
 - Rationale: [`../adr/001-authentication.md`](../adr/001-authentication.md)
-- Repository access: [`github-app.md`](github-app.md) → [`../adr/003-github-app-repository-access.md`](../adr/003-github-app-repository-access.md)
+- Repository access: [`github-app.md`](github-app.md) → [`../adr/005-github-app-repository-access.md`](../adr/005-github-app-repository-access.md)
 - API implementation notes: `api/docs/concepts/authentication.md`
 - Web implementation notes: `web/docs/concepts/authentication.md`

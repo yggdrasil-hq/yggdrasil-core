@@ -32,5 +32,5 @@ and delivers real-time events to the Web app.
 - [`../concepts/authentication.md`](../concepts/authentication.md) — auth flows and API surface (canonical)
 - [`../concepts/github-app.md`](../concepts/github-app.md) — GitHub App install, webhooks, job tokens
 - [`../adr/001-authentication.md`](../adr/001-authentication.md) — auth rationale (ADR)
-- [`../adr/003-github-app-repository-access.md`](../adr/003-github-app-repository-access.md) — repo access rationale (ADR)
+- [`../adr/005-github-app-repository-access.md`](../adr/005-github-app-repository-access.md) — repo access rationale (ADR)
 - `api/docs/concepts/authentication.md` — API-specific implementation notes

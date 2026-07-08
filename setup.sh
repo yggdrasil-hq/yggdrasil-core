@@ -11,11 +11,33 @@ copy_env() {
     return 0
   fi
 
-  if [[ -f "$target" ]]; then
-    echo "skip (exists): $target"
-  else
+  if [[ ! -f "$target" ]]; then
     cp "$example" "$target"
     echo "created: $target"
+    return 0
+  fi
+
+  local added=0
+  while IFS= read -r line; do
+    # Skip empty lines and comments
+    [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+    # Extract variable name (strip optional 'export' prefix, take everything before '=')
+    local stripped="${line#export }"
+    local key="${stripped%%=*}"
+    [[ -z "$key" ]] && continue
+    # Append to target if the variable is missing
+    if ! grep -qE "^(export[[:space:]]+)?${key}=" "$target" 2>/dev/null; then
+      [[ $added -eq 0 ]] && echo "" >> "$target"
+      echo "$line" >> "$target"
+      echo "  + $key"
+      added=$((added + 1))
+    fi
+  done < "$example"
+
+  if [[ $added -eq 0 ]]; then
+    echo "up to date: $target"
+  else
+    echo "updated ($added added): $target"
   fi
 }
 
