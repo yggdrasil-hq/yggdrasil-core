@@ -7,10 +7,12 @@ single-node prod machine.
 
 - Docker Engine + Docker Compose v2
 - Submodules checked out (`git clone --recurse-submodules`)
-- A reachable Kubernetes cluster for the Orchestrator (ADR 003) — dev uses a
-  local `k3d` cluster; see `../orchestrator/docs/overview/setup.md` for the
-  one-time setup. Without it, the `orchestrator` service fails to start
-  (`deploy/.kube/config-container` won't exist to mount).
+
+The Orchestrator targets Kubernetes, not a Docker socket (ADR 003). Dev compose
+(below) bundles a disposable single-node k3s cluster for this automatically —
+no separate cluster setup needed. See `../orchestrator/docs/overview/setup.md`
+for the cert-manager step (still manual) and how to point at your own cluster
+instead.
 
 ## Setup
 
@@ -38,6 +40,10 @@ Open http://localhost:8080
 | `/api` | API |
 | `/orchestrator` | Orchestrator |
 | `/preview/<run-id>/` | Agent previews (stub until orchestrator registers upstreams) |
+
+The Kubernetes dashboard (Headlamp) isn't routed through nginx — open it
+directly at http://localhost:4466 to inspect pods/logs/events on the bundled
+dev k3s cluster.
 
 ## Prod (env-driven subdomains)
 

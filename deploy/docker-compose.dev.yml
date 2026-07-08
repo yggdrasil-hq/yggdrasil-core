@@ -112,17 +112,97 @@ services:
     environment:
       PORT: ${ORCHESTRATOR_PORT:-8080}
       DATABASE_URL: postgresql://${POSTGRES_USER:-yggdrasil}:${POSTGRES_PASSWORD:-yggdrasil}@postgres:5432/${POSTGRES_DB:-yggdrasil}
-      # Local dev only: points at a kubeconfig for a cluster reachable from
-      # this container (e.g. a k3d cluster on this same Docker network). Not
-      # part of the bundled-k3s self-hosted story yet — see ADR 003 follow-ups.
+      # Local dev only: the disposable k3s cluster below, reached over this
+      # same Docker network. Not part of the bundled-k3s self-hosted story
+      # yet (that targets a real install, not dev) — see ADR 003 follow-ups.
       KUBECONFIG: /kube/config
     volumes:
       - ../orchestrator:/app
       - orchestrator_go_pkg:/go/pkg
-      - ./.kube/config-container:/kube/config:ro
+      - orchestrator_kubeconfig:/kube:ro
     depends_on:
       postgres:
         condition: service_healthy
+      k3s-kubeconfig:
+        condition: service_completed_successfully
+
+  # Disposable single-node Kubernetes cluster for local dev (ADR 003 targets
+  # Kubernetes, not a Docker socket). Bundles Traefik + local-path storage,
+  # same as k3d did in the old host-side setup. State lives in the k3s_data
+  # volume; delete it (`docker compose down -v`) for a clean cluster.
+  k3s:
+    image: rancher/k3s:v1.32.5-k3s1
+    privileged: true
+    # Without a fixed hostname, Docker assigns a random one per container, and
+    # k3s uses it as the node name — recreating the container (e.g. `up
+    # --build`) would then register a second, permanently-stale node next to
+    # the old one in the state persisted in k3s_data.
+    hostname: k3s
+    tmpfs:
+      - /run
+      - /var/run
+    environment:
+      K3S_KUBECONFIG_OUTPUT: /output/kubeconfig.yaml
+      K3S_KUBECONFIG_MODE: "644"
+    # --tls-san lets the server cert validate when reached as "k3s" (this
+    # service's Docker DNS name) — the default cert only covers
+    # localhost/127.0.0.1.
+    command: server --tls-san=k3s --write-kubeconfig-mode=644
+    volumes:
+      - k3s_data:/var/lib/rancher/k3s
+      - k3s_kubeconfig:/output
+    ports:
+      - "${DEV_K3S_PORT:-6443}:6443"
+    healthcheck:
+      test: ["CMD", "kubectl", "get", "--raw=/healthz"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  # One-shot: k3s writes its kubeconfig with `server: https://127.0.0.1:6443`,
+  # which only resolves from inside the k3s container itself. Rewrites that
+  # to an address reachable from the orchestrator container (Docker DNS name
+  # "k3s") and, separately, from the host (for your own kubectl/cert-manager
+  # setup — see orchestrator/docs/overview/setup.md).
+  k3s-kubeconfig:
+    image: alpine:3.20
+    depends_on:
+      k3s:
+        condition: service_healthy
+    volumes:
+      - k3s_kubeconfig:/input:ro
+      - orchestrator_kubeconfig:/output
+      - ./.kube:/host-output
+    entrypoint:
+      - sh
+      - -c
+      - |
+        set -eu
+        until [ -s /input/kubeconfig.yaml ]; do sleep 1; done
+        sed 's#server: https://127.0.0.1:6443#server: https://k3s:6443#' \
+          /input/kubeconfig.yaml > /output/config
+        sed 's#server: https://127.0.0.1:6443#server: https://localhost:${DEV_K3S_PORT:-6443}#' \
+          /input/kubeconfig.yaml > /host-output/config-host
+        chmod 644 /output/config /host-output/config-host
+    restart: "no"
+
+  # Web UI for poking around the bundled dev k3s cluster (pods, logs, events
+  # for orchestrator-launched jobs) without needing kubectl on the host.
+  # Reuses the same rewritten kubeconfig the orchestrator mounts, so no
+  # separate RBAC/token setup — talk to it directly via port ${DEV_K8S_DASHBOARD_PORT:-4466},
+  # not through the nginx path router.
+  k8s-dashboard:
+    image: ghcr.io/headlamp-k8s/headlamp:latest
+    environment:
+      KUBECONFIG: /kube/config
+    volumes:
+      - orchestrator_kubeconfig:/kube:ro
+    ports:
+      - "${DEV_K8S_DASHBOARD_PORT:-4466}:4466"
+    depends_on:
+      k3s-kubeconfig:
+        condition: service_completed_successfully
 
 volumes:
   postgres_data:
@@ -132,3 +212,6 @@ volumes:
   landing_node_modules:
   docusaurus_node_modules:
   orchestrator_go_pkg:
+  k3s_data:
+  k3s_kubeconfig:
+  orchestrator_kubeconfig:
