@@ -188,10 +188,11 @@ Constraints:
    `POST /internal/jobs/:id/events`, same bearer-token pattern. Implemented
    as a new `job_events` table + `JobEventRepository` +
    `POST /internal/jobs/:jobId/events` (`api/src/jobs/`).
-   - **Scope cut from the original plan:** the API only **persists** the
-     event for now — WebSocket relay to the Web app and notification
-     creation are **not implemented**, consistent with this pass staying
-     backend-only (item 16). A failed relay is logged and swallowed by the
+   - **Scope cut from the original plan, partially resolved:** the API
+     originally only **persisted** the event. A read side now exists (item
+     15) so the Web app can show them; WebSocket relay to the Web app and
+     notification creation are still **not implemented** — the Web app
+     polls instead (item 15). A failed relay is logged and swallowed by the
      Orchestrator, not treated as a job failure: the job's actual outcome
      doesn't depend on this side channel succeeding.
 
@@ -290,26 +291,63 @@ Constraints:
       7), so the API's `jobEventSchema` enum and `job_events.type` CHECK
       constraint (`api/src/db/migrations/006_job_events.sql`) both had to
       grow it too, or `PostJobEvent` would 400 every time a job is
-      cancelled. `syncAwaitingUserInput` (item 10) treats it exactly like
-      `run_failed` — clearing `awaiting_user_input`, so a job cancelled
-      while genuinely waiting on a human's reply doesn't leave the flag
-      stuck true forever.
+      cancelled. `syncFeatureState` (item 10, renamed/extended by item 14)
+      treats it exactly like `run_failed` — clearing `awaiting_user_input`,
+      so a job cancelled while genuinely waiting on a human's reply doesn't
+      leave the flag stuck true forever.
+
+### Web app wiring (spec_grill's core loop)
+
+14. **`submit_adr` now actually moves the feature forward.** Fixed a gap
+    left by item 8: the internal events handler persisted every curated
+    event but never reacted to `submit_adr` itself, so a feature stayed
+    stuck on `draft` forever even after a successful grill.
+    `syncAwaitingUserInput` (`api/src/jobs/internal-routes.ts`) is renamed
+    `syncFeatureState` and extended: on `submit_adr` it calls
+    `FeatureRepository.setSpecReady` (`draft` -> `spec_ready`, storing the
+    submitted markdown, clearing `awaiting_user_input`) instead of touching
+    the awaiting-input flag; `ask_user`/`run_failed`/`run_cancelled` still
+    go through the item 10/13 path unchanged.
+15. **Read side for job events, and the Web app's live grill view.** New
+    `GET /:projectId/features/:featureId/events`
+    (`api/src/projects/routes.ts`, session-authenticated) resolves the
+    feature's most recent spec_grill job —
+    `JobRepository.findLatestSpecGrillJob`, deliberately not limited to
+    `running` like `findActiveSpecGrillJob` (item 9), so the conversation
+    and its outcome stay visible after the job finishes, fails, or is
+    cancelled — and returns `{ jobStatus, events }`
+    (`JobEventRepository.listByJob`). Item 8's WebSocket-relay scope cut
+    still stands: the Web app (`SpecGrillPanel`,
+    `web/components/features/spec-grill-panel.tsx`) polls this endpoint
+    every 2s instead, alongside the feature itself, for as long as
+    `FeatureDetailClient` renders it (i.e. while the feature is `draft`).
+    The reply (item 9) and cancel (item 12) endpoints already existed as
+    API surface; this pass wires them into the same panel — a reply box
+    shown while `awaiting_user_input && jobStatus === "running"`, a Cancel
+    button while `jobStatus === "running"`, and a terminal banner for
+    `run_failed`/`run_cancelled`. Verified manually end-to-end (reply →
+    `submit_adr` → `spec_ready`, and cancel → `run_cancelled`) against MSW
+    mocks — a real Pi image/model wasn't wired up in this pass (item 18).
 
 ### Explicitly deferred
 
-14. **Crash recovery / reattachment.** If the Orchestrator process restarts
+16. **Crash recovery / reattachment.** If the Orchestrator process restarts
     while attached to a live `spec_grill` pod, that job is orphaned (pod
     keeps running, unattended) until someone notices and cancels/retries it.
     No startup reconciliation against already-`running` jobs in this pass.
-15. **Timeout / token budget enforcement.** Already an open TODO in
+17. **Timeout / token budget enforcement.** Already an open TODO in
     `pi-agent.md`, unaffected by this ADR. A stuck `ask_user` wait blocks its
     goroutine (bounded by the concurrency semaphore, not fatal to the
     Orchestrator process) but nothing cancels it automatically yet — a human
     can now cancel it manually (item 12), but nothing does so on a timeout.
-16. **Web app UI and `feature_build`/`test_run` wiring.** Feature creation,
-    the live grill view, and the reply/cancel inputs are not built in this
-    pass — verified via direct internal/API calls. The other two job kinds
-    reuse this machinery in a later pass rather than shipping here.
+18. **`feature_build`/`test_run` wiring, WebSocket relay, and a real
+    Pi image/model.** Item 15 covers spec_grill's own live view end-to-end,
+    but the other two job kinds don't yet reuse this attach/event-relay
+    machinery — that's a later pass. The Web app still only polls (no
+    WebSocket relay/notifications, item 8). This pass was also only
+    verified against MSW mocks and the placeholder job path, not a real
+    `SPEC_GRILL_IMAGE`/model — GHCR registry auth for pulling agent-images
+    and model credentials are separate, not-yet-done setup steps.
 
 Implementation reference: `docs/concepts/pi-agent.md`,
 `docs/concepts/job-dispatch.md`, `orchestrator/CLAUDE.md`,
@@ -343,7 +381,7 @@ Implementation reference: `docs/concepts/pi-agent.md`,
   conversation's *liveness* now depends on one specific Orchestrator replica
   staying up.
 - Crash mid-grill orphans that job with no automatic recovery (deferred,
-  item 14) — a real gap for anything beyond local/dev use.
+  item 16) — a real gap for anything beyond local/dev use.
 - Kubernetes Job status stops being authoritative for RPC-driven job kinds,
   splitting "how do I know a job finished" into two different mechanisms
   (Helm/Job-status for `deploy`, RPC-event-stream for agent jobs) future
@@ -360,8 +398,11 @@ Implementation reference: `docs/concepts/pi-agent.md`,
 - Extending this machinery to `feature_build` and `test_run` (no
   `ask_user`/multi-turn complexity, but the same attach/event-relay/teardown
   mechanics).
-- Web app UI for feature creation, the live grill view, and reply/cancel
-  submission.
+- WebSocket relay to the Web app and notification creation on job events
+  (the Web app polls in the meantime).
+- Registry auth for pulling private `agent-images` packages into a cluster
+  (or making them public instead — both undesigned), and documenting how to
+  configure a real `SPEC_GRILL_IMAGE` + model credentials for local dev.
 
 ## Alternatives considered
 
