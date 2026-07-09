@@ -110,6 +110,31 @@ hosting** ([`adr/003-orchestrator-kubernetes.md`](adr/003-orchestrator-kubernete
 - `project_init` now scaffolds `docs/CONTEXT.md` + `docs/adr/` into every
   managed project's repo, so `spec_grill` always has a corpus to grill against.
 
+## Decided (Pi RPC integration)
+
+**ADR 006 — Pi RPC integration in the Orchestrator**
+([`adr/006-pi-rpc-orchestrator-integration.md`](adr/006-pi-rpc-orchestrator-integration.md))
+
+- Scope: `spec_grill` only, backend only (no Web UI yet). `feature_build`/
+  `test_run` reuse the same machinery in a later pass.
+- The Orchestrator attaches directly to a job pod's stdin/stdout
+  (`client-go` `remotecommand`, like `kubectl attach -i`) and speaks Pi's
+  JSONL RPC protocol itself — no pod-side bridging service. A single
+  `pi --mode rpc` process persists across `ask_user` turns.
+- Worker loop becomes internally concurrent (one goroutine per running job,
+  capped by a semaphore) instead of one job at a time, synchronously.
+- Job payload (feature title + repos) fetched via a new internal API
+  endpoint keyed by `feature_id`; repo cloning moves into
+  `base/entrypoint.sh`.
+- Curated event vocabulary (`agent_text`/`ask_user`/`submit_adr`/
+  `run_failed`) relayed to a new `/internal/jobs/:id/events` endpoint;
+  mid-run human replies delivered back via Postgres `LISTEN`/`NOTIFY`.
+- Kubernetes Job status is no longer the completion signal for RPC-driven
+  jobs — the Orchestrator deletes the Job itself on seeing the contract
+  extension's terminating tool call.
+- Deferred: crash-recovery/reattachment, timeout/token-budget enforcement,
+  Web UI.
+
 ## Still open
 
 → [`roadmap/open-questions.md`](roadmap/open-questions.md)
@@ -135,5 +160,6 @@ hosting** ([`adr/003-orchestrator-kubernetes.md`](adr/003-orchestrator-kubernete
 | 003 | [Orchestrator compute — Kubernetes](adr/003-orchestrator-kubernetes.md) |
 | 004 | [Agent base container images](adr/004-agent-base-containers.md) |
 | 005 | [GitHub App repository access](adr/005-github-app-repository-access.md) |
+| 006 | [Pi RPC integration in the Orchestrator](adr/006-pi-rpc-orchestrator-integration.md) |
 
 → [`adr/README.md`](adr/README.md)

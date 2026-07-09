@@ -58,6 +58,7 @@ requests and streaming progress back in real time. See
 | GitHub App / repo install / webhooks / permissions / repo sync / job tokens | `docs/concepts/github-app.md` → ADR `docs/adr/005-github-app-repository-access.md` |
 | Projects / features / tests / project home / notifications | ADR `docs/adr/002-projects-features-tests.md` → `docs/concepts/feature-lifecycle.md`, `docs/concepts/job-dispatch.md` |
 | The Pi agent (how the agent itself runs)                | `docs/concepts/pi-agent.md`            |
+| Pi RPC transport / how the Orchestrator drives Pi (attach, event relay, mid-run replies) | ADR `docs/adr/006-pi-rpc-orchestrator-integration.md` |
 | Base container images / skills / MCP-vs-Playwright / model config | `docs/components/agent-images.md` → ADR `docs/adr/004-agent-base-containers.md` → `agent-images/CLAUDE.md` |
 | Feature states / lifecycle                              | `docs/concepts/feature-lifecycle.md`   |
 | Architecture decisions (why we chose X)                 | `docs/adr/` → start at `docs/CONTEXT.md` |

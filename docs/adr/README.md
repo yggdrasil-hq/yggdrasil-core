@@ -27,6 +27,7 @@ Each ADR is numbered sequentially: `NNN-short-title.md`.
 | [003](003-orchestrator-kubernetes.md) | Orchestrator compute — Kubernetes-based job execution and project hosting | Accepted |
 | [004](004-agent-base-containers.md) | Agent base container images (Pi integration) | Accepted |
 | [005](005-github-app-repository-access.md) | GitHub App for repository access | Accepted |
+| [006](006-pi-rpc-orchestrator-integration.md) | Pi RPC integration in the Orchestrator | Accepted |
 
 When adding an ADR, update this index, add a routing row in root `CLAUDE.md`, and
 link from `docs/CONTEXT.md` if the decision affects suite-wide context.

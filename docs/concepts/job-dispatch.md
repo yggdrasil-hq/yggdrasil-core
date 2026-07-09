@@ -97,7 +97,15 @@ to the Web app over WebSocket.
 
 ## TODO
 
-- Exact event schema (align with Pi's event taxonomy — `concepts/pi-agent.md`).
+- ~~Exact event schema (align with Pi's event taxonomy —
+  `concepts/pi-agent.md`).~~ **Resolved for `spec_grill` by ADR 006**
+  (`docs/adr/006-pi-rpc-orchestrator-integration.md`): a curated vocabulary
+  (`agent_text`/`ask_user`/`submit_adr`/`run_failed`), POSTed by the
+  Orchestrator to `/internal/jobs/:id/events`. Not yet extended to
+  `feature_build`/`test_run`.
 - Idempotency / retry / dedupe for dispatch and events (delivery guarantees for
   the Postgres-backed queue itself are decided in ADR 003, but retry/dedupe
   semantics at the job level are not yet specified).
+- Mid-run reply delivery (`ask_user` → human reply → back into a running job)
+  is decided for `spec_grill` by ADR 006 (Postgres `LISTEN`/`NOTIFY` on a new
+  `job_messages` table) but not yet implemented.

@@ -29,6 +29,10 @@ Playwright CLI tool instead.
   the Web app live). RPC mode has no built-in tool-approval gate — tools
   execute autonomously once prompted; container isolation (ADR 003's sandboxed
   RuntimeClass) is the security boundary, not an in-band confirmation flow.
+  For `spec_grill`, the Orchestrator drives this by attaching directly to the
+  pod's stdin/stdout (`kubectl attach`-style) and holding the connection open
+  for the whole multi-turn session — see ADR 006
+  (`docs/adr/006-pi-rpc-orchestrator-integration.md`).
 - Users can **chat with / steer** the agent mid-run (Phase 2 capability) — for
   `spec_grill` this is required from the start, since grilling is inherently
   multi-turn (see "Skills and the shared extension" below).
@@ -67,8 +71,18 @@ Playwright CLI tool instead.
 
 ## Open / TODO
 
-- Exact RPC/SDK event taxonomy Pi emits, and the `yggdrasil-contract`
-  extension's own event schema back to the Orchestrator (ADR 004 follow-up).
-- Tool allowlist and timeout/token-budget enforcement mechanism.
+- ~~Exact RPC/SDK event taxonomy Pi emits, and the `yggdrasil-contract`
+  extension's own event schema back to the Orchestrator (ADR 004
+  follow-up).~~ **Resolved for `spec_grill` by ADR 006**
+  (`docs/adr/006-pi-rpc-orchestrator-integration.md`): the Orchestrator
+  attaches to the pod's stdin/stdout and drives Pi's RPC protocol directly,
+  translating the raw event stream into a small curated vocabulary
+  (`agent_text`/`ask_user`/`submit_adr`/`run_failed`) before relaying to the
+  API. Not yet extended to `feature_build`/`test_run`.
+- Tool allowlist and timeout/token-budget enforcement mechanism — still
+  open; ADR 006 explicitly defers this (a stuck `ask_user` wait has no
+  automatic timeout yet).
 - Failure/retry semantics when Pi errors or exceeds budget.
+- Crash recovery: if the Orchestrator restarts mid-run, the job's pod is
+  orphaned with no reattachment — deferred by ADR 006.
 - CI/release process for `agent-images` (build, tag, push) — not yet designed.
