@@ -1,7 +1,7 @@
 # ADR 002: Projects, features, tests, and project UX
 
 **Status:** Accepted  
-**Date:** 2026-06-22 (amended 2026-06-28 by ADR 005)  
+**Date:** 2026-06-22 (amended 2026-06-28 by ADR 005; amended 2026-07-10 by ADR 007)  
 **Deciders:** Product/design session (grill-me)
 
 ## Context
@@ -122,6 +122,7 @@ A per-project **action queue** surfaces items blocking progress until a human ac
 | Test failure | Scheduled test run failed (any step) |
 | Failed build | Feature in `failed` |
 | Fix GitHub access | Project has `github_access_warning` (installation revoked or repo removed) |
+| Fix model configuration | Project has `model_config_warning` (no resolvable model config at dispatch time — see ADR 007) |
 
 Sorted oldest-first. Each row deep-links to the relevant surface.
 

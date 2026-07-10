@@ -4,7 +4,7 @@
 before diving into code or docs. For details, follow the links — do not treat this
 file as the full spec.
 
-Last updated: 2026-07-09
+Last updated: 2026-07-10
 
 ## Glossary
 
@@ -23,6 +23,8 @@ Last updated: 2026-07-09
 | **GitHub App** | Per Yggdrasil instance: the instance admin registers one GitHub App in GitHub (app ID, private key, webhook secret) pointing at that deployment's URLs. Not a shared marketplace app. Repository permissions: Metadata (read), Contents (read & write), Pull requests (read & write). Coexists with a separate **GitHub OAuth App** on the same instance for user identity only. |
 | **GitHub access warning** | Project flag set when installation webhooks report revoked/suspended access or removed repos. Jobs fail fast; action queue surfaces "Fix GitHub access" with re-install/configure link. Cleared when access is restored. |
 | **GitHub App bot** | The GitHub identity (`yggdrasil[bot]`) that authors commits and opens PRs for all job kinds. Attribution to humans is in Yggdrasil (acting user), not on GitHub. |
+| **Model configuration** | The `MODEL_BASE_URL`/`MODEL_API_KEY`/`MODEL_ID` bundle Pi uses as its OpenAI-chat-completions-compatible backend. Always all three together — never a subset. Not "agent configuration": Pi itself is fixed (ADR 004); only the model it talks to varies. |
+| **Account default (model configuration)** | A user's personal fallback model configuration, stored in `user_secrets`. Resolved live at job-dispatch time when a project has no model configuration of its own — not copied into the project at creation. Per-user, not per-instance (no team/org entity exists yet). |
 
 ## Product
 
@@ -104,9 +106,9 @@ hosting** ([`adr/003-orchestrator-kubernetes.md`](adr/003-orchestrator-kubernete
 - Shared `yggdrasil-contract` Pi extension replaces prose-based turn/completion
   signaling with explicit tool calls (`ask_user`/`submit_adr`,
   `submit_build_result`, `report_test_step`/`submit_test_report`).
-- Model config is OpenAI-chat-completions-shaped, per-project, stored
-  encrypted in `project_secrets`, delivered as job-pod env vars (same path as
-  the GitHub token). Web settings UI is a tracked follow-up.
+- Model config is OpenAI-chat-completions-shaped, stored encrypted, delivered
+  as job-pod env vars (same path as the GitHub token). Web settings UI exists
+  on the project settings page. Resolution and per-user defaults: ADR 007.
 - `project_init` now scaffolds `docs/CONTEXT.md` + `docs/adr/` into every
   managed project's repo, so `spec_grill` always has a corpus to grill against.
 
@@ -135,6 +137,25 @@ hosting** ([`adr/003-orchestrator-kubernetes.md`](adr/003-orchestrator-kubernete
 - Deferred: crash-recovery/reattachment, timeout/token-budget enforcement,
   Web UI.
 
+## Decided (per-user default model configuration)
+
+**ADR 007 — Per-user default model configuration**
+([`adr/007-per-user-default-model-configuration.md`](adr/007-per-user-default-model-configuration.md))
+
+- Scope is **per-user**, not per-instance — each user has their own default; no
+  shared instance-wide config (no team/org entity exists yet).
+- New `user_secrets` table (mirrors `project_secrets`). Resolution is a **live
+  fallback** at every dispatch site (project secrets checked first, then the
+  owning user's default) — not a snapshot copied at project creation.
+- The three model keys are an **all-or-nothing bundle**: a project has none of
+  them set (fully inherits) or all three (fully custom); no per-key mixing.
+- Every dispatch site (project creation, feature creation, start build,
+  `test_run` cron) gates on a resolvable model config. Synchronous requests
+  get a 400; `test_run` sets a `model_config_warning` project flag + action
+  queue item ("Fix model configuration"), mirroring `github_access_warning`.
+- Adds a retry path for a `project_init` feature stuck on a failed/missing
+  `spec_grill` once configuration is fixed.
+
 ## Still open
 
 → [`roadmap/open-questions.md`](roadmap/open-questions.md)
@@ -161,5 +182,6 @@ hosting** ([`adr/003-orchestrator-kubernetes.md`](adr/003-orchestrator-kubernete
 | 004 | [Agent base container images](adr/004-agent-base-containers.md) |
 | 005 | [GitHub App repository access](adr/005-github-app-repository-access.md) |
 | 006 | [Pi RPC integration in the Orchestrator](adr/006-pi-rpc-orchestrator-integration.md) |
+| 007 | [Per-user default model configuration](adr/007-per-user-default-model-configuration.md) |
 
 → [`adr/README.md`](adr/README.md)

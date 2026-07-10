@@ -56,13 +56,15 @@ Playwright CLI tool instead.
 
 ## Configuration knobs (see also `concepts/project-settings.md`)
 
-- **Model** — OpenAI-chat-completions-compatible only, for now. Configured
-  **per project**: `MODEL_BASE_URL`/`MODEL_API_KEY`/`MODEL_ID` stored encrypted
-  in `project_secrets`, decrypted server-side by the API, and injected as job
-  PodSpec env vars — the same delivery path already used for the scoped GitHub
-  token (ADR 004). A `web/` settings page for editing these directly is a
-  tracked follow-up; today they're only reachable by writing `project_secrets`
-  rows.
+- **Model** — OpenAI-chat-completions-compatible only, for now.
+  `MODEL_BASE_URL`/`MODEL_API_KEY`/`MODEL_ID`, stored encrypted, decrypted
+  server-side by the API, and injected as job PodSpec env vars — the same
+  delivery path already used for the scoped GitHub token (ADR 004). Editable in
+  the Web app: a per-user account default (`user_secrets`) and an optional
+  per-project override (`project_secrets`), resolved live at dispatch time —
+  project first, then the owning user's default. Every dispatch site refuses
+  to dispatch if neither resolves (ADR 007,
+  `docs/adr/007-per-user-default-model-configuration.md`).
 - **Tool allowlist** — which packages/tools Pi may install inside the
   container. Still TODO beyond the contract extension's own `allowed-tools`
   scoping.

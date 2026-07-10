@@ -6,10 +6,19 @@ per-feature/run overrides for the agent.
 
 > **Project/repo model:** ADR 002 (`docs/adr/002-projects-features-tests.md`).
 > **Hosting, secrets injection mechanism:** ADR 003 (`docs/adr/003-orchestrator-kubernetes.md`).
+> **Account default model config, resolution order, dispatch-site gating:** ADR 007
+> (`docs/adr/007-per-user-default-model-configuration.md`).
 
 ## Levels
 
+0. **Account default** — a user's personal fallback **model configuration**
+   (`MODEL_BASE_URL`/`MODEL_API_KEY`/`MODEL_ID`), set once in Account settings.
+   Resolved live at job-dispatch time for any of the user's projects that don't
+   set their own — not copied in at project creation (ADR 007).
 1. **Project level** — defaults applied to every feature and test in the project.
+   For model configuration specifically: either none of the three keys are set
+   (project fully inherits the account default) or all three are (fully
+   custom) — no partial per-key override (ADR 007).
 2. **Per-feature / per-run** — individual features can override the model and
    some settings for a single run.
 
@@ -29,7 +38,9 @@ per-feature/run overrides for the agent.
 | `ready` | Init complete; normal features and tests allowed. |
 
 `github_access_warning` (set when installation access breaks) blocks new jobs — see
-[`github-app.md`](github-app.md).
+[`github-app.md`](github-app.md). `model_config_warning` (set when a dispatch site can't
+resolve a model configuration, e.g. a `test_run` cron fire after the account default was
+cleared) works the same way — action queue item "Fix model configuration" (ADR 007).
 
 ## Known settings (project level)
 
