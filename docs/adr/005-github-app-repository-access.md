@@ -79,9 +79,15 @@ Both registrations are required at instance setup. See `docs/concepts/github-app
     credentials** at dispatch time. No user OAuth `repo` tokens.
 15. Commits and PRs appear as the **GitHub App bot** (`yggdrasil[bot]`), not the acting
     user. Acting user is tracked in Yggdrasil for audit/UX only.
-16. **Container access tier** unchanged: `spec_grill` / `test_run` are read-only by
-    Orchestrator tool allowlist; `feature_build` gets write tools. Token carries write
-    permissions; enforcement remains operational.
+16. **Container access tier**: `spec_grill` / `test_run` are read-only by Orchestrator
+    tool allowlist; `feature_build` gets write tools. **Amended 2026-07-11:**
+    `spec_grill`'s installation token is now also minted scoped to `contents: read`
+    (`mintInstallationAccessToken`'s `permissions` param) — enforcement is no longer
+    tool-allowlist-only for that job kind, since its bash tool is unrestricted and a
+    write-capable token there was a real gap (a confused agent attempted `git init` +
+    a planned push when it lost track of its own read-only repo). `test_run` still
+    gets a full-permission token pending its own dispatch implementation; scope it the
+    same way when that lands. `feature_build`'s token is unaffected.
 
 ### Webhooks (installation lifecycle only)
 
@@ -115,8 +121,10 @@ Implementation reference: `docs/concepts/github-app.md`.
 - **Bot authorship** on GitHub — human attribution only inside Yggdrasil.
 - **Selected repos** — adding sub-repos requires a GitHub configure trip.
 - **Same-org constraint** — cross-org sub-repos need a future escape hatch.
-- Installation tokens carry write permissions even for read jobs — same as before with
-  operational enforcement.
+- Installation tokens still carry write permissions for `test_run` (not yet
+  dispatched for real) and, previously, `spec_grill` — see item 16's 2026-07-11
+  amendment for why `spec_grill` moved to a `contents: read`-scoped token instead of
+  relying on operational enforcement alone.
 
 ### Follow-ups (out of scope)
 

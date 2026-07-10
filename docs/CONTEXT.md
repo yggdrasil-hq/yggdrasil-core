@@ -4,7 +4,7 @@
 before diving into code or docs. For details, follow the links — do not treat this
 file as the full spec.
 
-Last updated: 2026-07-10
+Last updated: 2026-07-11
 
 ## Glossary
 
@@ -14,7 +14,7 @@ Last updated: 2026-07-10
 | **GitHub OAuth App** | Per Yggdrasil instance: separate from the GitHub App. Used only for user identity (`read:user`) — login, signup, account linking. Does not grant repo access. |
 | **GitHub App installation** | Org or user grants the Yggdrasil GitHub App access to **selected repos**. GitHub allows one installation per (app, org/account) — multiple Yggdrasil projects on the same org **share** that installation; each project picks its own primary + sub-repos from the granted repo list. Adding repos later requires re-configuring the installation on GitHub. Lifecycle kept in sync via **installation webhooks** (`installation`, `installation_repositories`). |
 | **Job-scoped GitHub credential** | Short-lived installation access token minted by the API for one Orchestrator run, scoped to the project's linked repos. |
-| **Container access tier** | How much GitHub access a job kind gets inside its ephemeral container. `spec_grill` and `test_run`: clone + fetch only (read). `feature_build`: read + write on all linked repos. Enforcement in Phase 1 is operational (Orchestrator/tool allowlist), not token-level. |
+| **Container access tier** | How much GitHub access a job kind gets inside its ephemeral container. `spec_grill` and `test_run`: clone + fetch only (read). `feature_build`: read + write on all linked repos. `spec_grill`'s installation token is minted `contents: read`-scoped (ADR 005 item 16, amended 2026-07-11) — token-level, not just operational (Orchestrator/tool allowlist). `test_run` is still tool-allowlist-only pending its own dispatch implementation; `feature_build` still gets a full-permission token. |
 | **Feature branch** | Agent branch `yggdrasil/<feature-slug>-<id>`, created on every linked repo the build touches. Same name across repos for one feature. |
 | **Coordination PR** | Draft PR on the **primary** repo for a `feature_build`. The human review entry point; links to sibling repo PRs when sub-repos changed. |
 | **Repo PR** | Draft PR on a **sub-repo** that received commits during `feature_build`. One per touched sub-repo; opened alongside the coordination PR. |
