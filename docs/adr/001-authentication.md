@@ -1,8 +1,18 @@
 # ADR 001: Authentication and user identity
 
-**Status:** Accepted  
-**Date:** 2026-06-21 (amended 2026-06-28 by ADR 005)  
+**Status:** Accepted, partially superseded by [ADR 009](009-github-only-authentication.md)
+**Date:** 2026-06-21 (amended 2026-06-28 by ADR 005; amended 2026-07-11 by ADR 009)
 **Deciders:** Product/design session (grill-me)
+
+> **ADR 009 removed username/password auth entirely — GitHub OAuth is now the
+> only sign-in method.** Everything below about password signup/login,
+> account linking/disconnecting, password rate limiting, and "Remember me" is
+> historical context only. The current implementation reference is
+> [`../concepts/authentication.md`](../concepts/authentication.md); read
+> [ADR 009](009-github-only-authentication.md) for what changed and why. The
+> parts of this ADR that still hold: no email, open registration, session
+> cookies in PostgreSQL, hybrid `pending_username` onboarding, DiceBear avatars,
+> and the OAuth-identity/GitHub-App-repo-access split (ADR 005).
 
 ## Context
 

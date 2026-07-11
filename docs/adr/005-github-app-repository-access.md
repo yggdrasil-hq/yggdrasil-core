@@ -1,9 +1,16 @@
 # ADR 005: GitHub App for repository access
 
 **Status:** Accepted  
-**Date:** 2026-06-28  
+**Date:** 2026-06-28 (identity references below partially superseded 2026-07-11 by [ADR 009](009-github-only-authentication.md))
 **Deciders:** Product/design session (grill-with-docs)  
 **Amends:** [ADR 001](001-authentication.md) (GitHub OAuth scope model), [ADR 002](002-projects-features-tests.md) (project linking)
+
+> **ADR 009 removed username/password auth and account linking** — GitHub OAuth
+> is now the only sign-in method (still identity-only, `read:user`, still fully
+> separate from this ADR's GitHub App for repo access). The "login, signup,
+> account linking" and "password-only users" language below is historical; see
+> [ADR 009](009-github-only-authentication.md). Everything else in this ADR
+> (the OAuth App / GitHub App split itself) is unaffected.
 
 ## Context
 

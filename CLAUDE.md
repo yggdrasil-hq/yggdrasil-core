@@ -54,7 +54,7 @@ requests and streaming progress back in real time. See
 | The Orchestrator                                        | `docs/components/orchestrator.md` → `orchestrator/CLAUDE.md` |
 | The landing / marketing site                            | `docs/components/landing.md` → `landing/CLAUDE.md`   |
 | The end-user docs site (Docusaurus)                     | `docs/components/docusaurus.md` → `docusaurus/CLAUDE.md` |
-| Authentication / login / signup / sessions / GitHub OAuth | `docs/concepts/authentication.md` → ADR `docs/adr/001-authentication.md` |
+| Authentication / login / sessions / GitHub OAuth (identity) | `docs/concepts/authentication.md` → ADR `docs/adr/009-github-only-authentication.md` (amends `docs/adr/001-authentication.md`) |
 | GitHub App / repo install / webhooks / permissions / repo sync / job tokens | `docs/concepts/github-app.md` → ADR `docs/adr/005-github-app-repository-access.md` |
 | Projects / features / tests / project home / notifications | ADR `docs/adr/002-projects-features-tests.md` → `docs/concepts/feature-lifecycle.md`, `docs/concepts/job-dispatch.md` |
 | `project_init` grill workflow / child-project structure standard (setup.sh/run.sh/Helm/docs) / submodule sub-repos | ADR `docs/adr/008-project-init-grill-and-submodule-repos.md` |

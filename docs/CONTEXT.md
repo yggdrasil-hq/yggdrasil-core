@@ -4,14 +4,14 @@
 before diving into code or docs. For details, follow the links — do not treat this
 file as the full spec.
 
-Last updated: 2026-07-11 (ADR 008)
+Last updated: 2026-07-11 (ADR 009)
 
 ## Glossary
 
 | Term | Meaning |
 |------|---------|
 | **GitHub identity** | Proof of who a human is on GitHub (`read:user` OAuth or linked `github_id`). Used only for Yggdrasil login/linking — optional; not required to create projects or complete an App install. |
-| **GitHub OAuth App** | Per Yggdrasil instance: separate from the GitHub App. Used only for user identity (`read:user`) — login, signup, account linking. Does not grant repo access. |
+| **GitHub OAuth App** | Per Yggdrasil instance: separate from the GitHub App. Used only for user identity (`read:user`) — the only sign-in method (ADR 009). Does not grant repo access. |
 | **GitHub App installation** | Org or user grants the Yggdrasil GitHub App access to **selected repos**. GitHub allows one installation per (app, org/account) — multiple Yggdrasil projects on the same org **share** that installation; each project picks its own primary + sub-repos from the granted repo list. Adding repos later requires re-configuring the installation on GitHub. Lifecycle kept in sync via **installation webhooks** (`installation`, `installation_repositories`). |
 | **Job-scoped GitHub credential** | Short-lived installation access token minted by the API for one Orchestrator run, scoped to the project's linked repos. |
 | **Container access tier** | How much GitHub access a job kind gets inside its ephemeral container. `spec_grill` and `test_run`: clone + fetch only (read). `feature_build`: read + write on all linked repos. `spec_grill`'s installation token is minted `contents: read`-scoped (ADR 005 item 16, amended 2026-07-11) — token-level, not just operational (Orchestrator/tool allowlist). `test_run` is still tool-allowlist-only pending its own dispatch implementation; `feature_build` still gets a full-permission token. |
@@ -36,10 +36,15 @@ focus.
 
 ## Decided (Phase 1 auth)
 
-**ADR 001 — Authentication** ([`adr/001-authentication.md`](adr/001-authentication.md))
+**ADR 001 — Authentication** ([`adr/001-authentication.md`](adr/001-authentication.md)),
+amended by **ADR 009 — GitHub-only authentication**
+([`adr/009-github-only-authentication.md`](adr/009-github-only-authentication.md))
 
-- Username/password **or** GitHub OAuth; no email; no password reset.
-- Open registration; permanent username; DiceBear **thumbs** avatars (username seed).
+- **GitHub OAuth only** — no username/password, no linking/disconnecting, no
+  password rate limiting (ADR 009; pre-launch simplification, no real users to
+  migrate).
+- No email. Open registration; permanent username (hybrid `pending_username`
+  onboarding from the GitHub login); DiceBear **thumbs** avatars (username seed).
 - HttpOnly session cookies, PostgreSQL sessions, API-owned GitHub OAuth.
 - GitHub OAuth for **identity only** (`read:user`); repo access via **GitHub App** (ADR 005).
 - Implementation reference: [`concepts/authentication.md`](concepts/authentication.md), [`concepts/github-app.md`](concepts/github-app.md)
@@ -217,5 +222,6 @@ sub-repos** ([`adr/008-project-init-grill-and-submodule-repos.md`](adr/008-proje
 | 006 | [Pi RPC integration in the Orchestrator](adr/006-pi-rpc-orchestrator-integration.md) |
 | 007 | [Per-user default model configuration](adr/007-per-user-default-model-configuration.md) |
 | 008 | [`project_init` grill workflow, structure standard, and submodule sub-repos](adr/008-project-init-grill-and-submodule-repos.md) |
+| 009 | [GitHub-only authentication (remove username/password)](adr/009-github-only-authentication.md) |
 
 → [`adr/README.md`](adr/README.md)

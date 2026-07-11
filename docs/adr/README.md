@@ -22,7 +22,7 @@ Each ADR is numbered sequentially: `NNN-short-title.md`.
 
 | ADR | Title | Status |
 |-----|-------|--------|
-| [001](001-authentication.md) | Authentication and user identity | Accepted |
+| [001](001-authentication.md) | Authentication and user identity | Partially superseded by 009 |
 | [002](002-projects-features-tests.md) | Projects, features, tests, and project UX | Accepted |
 | [003](003-orchestrator-kubernetes.md) | Orchestrator compute — Kubernetes-based job execution and project hosting | Accepted |
 | [004](004-agent-base-containers.md) | Agent base container images (Pi integration) | Accepted |
@@ -30,6 +30,7 @@ Each ADR is numbered sequentially: `NNN-short-title.md`.
 | [006](006-pi-rpc-orchestrator-integration.md) | Pi RPC integration in the Orchestrator | Accepted |
 | [007](007-per-user-default-model-configuration.md) | Per-user default model configuration | Accepted |
 | [008](008-project-init-grill-and-submodule-repos.md) | `project_init` grill workflow, structure standard, and submodule sub-repos | Accepted |
+| [009](009-github-only-authentication.md) | GitHub-only authentication (remove username/password) | Accepted |
 
 When adding an ADR, update this index, add a routing row in root `CLAUDE.md`, and
 link from `docs/CONTEXT.md` if the decision affects suite-wide context.

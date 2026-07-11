@@ -33,7 +33,7 @@ Yggdrasil registers **two different GitHub apps**, easy to conflate:
 
 | | Purpose | Auth | Where |
 |---|---|---|---|
-| GitHub **OAuth App** | User login/signup/identity | `read:user` scope on a user token | `concepts/authentication.md` |
+| GitHub **OAuth App** | User login/identity (the only sign-in method, ADR 009) | `read:user` scope on a user token | `concepts/authentication.md` |
 | GitHub **App** (this doc) | Org/repo installation for cloning, branches, PRs | JWT (app) → short-lived installation access token | `api/src/github/*.ts` |
 
 ## Instance admin setup
