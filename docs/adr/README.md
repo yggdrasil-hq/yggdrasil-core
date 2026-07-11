@@ -31,6 +31,8 @@ Each ADR is numbered sequentially: `NNN-short-title.md`.
 | [007](007-per-user-default-model-configuration.md) | Per-user default model configuration | Accepted |
 | [008](008-project-init-grill-and-submodule-repos.md) | `project_init` grill workflow, structure standard, and submodule sub-repos | Accepted |
 | [009](009-github-only-authentication.md) | GitHub-only authentication (remove username/password) | Accepted |
+| [010](010-feature-build-rpc-wiring.md) | Extending Pi RPC wiring to `feature_build` | Accepted |
+| [011](011-feature-build-running-state.md) | Feature `running` state — closing the queued → running gap | Accepted |
 
 When adding an ADR, update this index, add a routing row in root `CLAUDE.md`, and
 link from `docs/CONTEXT.md` if the decision affects suite-wide context.

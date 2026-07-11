@@ -106,8 +106,12 @@ to the Web app over WebSocket.
   `concepts/pi-agent.md`).~~ **Resolved for `spec_grill` by ADR 006**
   (`docs/adr/006-pi-rpc-orchestrator-integration.md`): a curated vocabulary
   (`agent_text`/`ask_user`/`submit_adr`/`run_failed`), POSTed by the
-  Orchestrator to `/internal/jobs/:id/events`. Not yet extended to
-  `feature_build`/`test_run`.
+  Orchestrator to `/internal/jobs/:id/events`. **Extended to `feature_build`
+  by ADR 010** (`docs/adr/010-feature-build-rpc-wiring.md`): a single
+  terminating `submit_build_result` event (no `ask_user`-equivalent — the
+  implement skill runs unattended), plus `TARGET_REPOS`/`GITHUB_TOKEN`
+  (write-scoped) and `ADR_MARKDOWN`/`FEATURE_BRANCH` job-pod env vars. Not
+  yet extended to `test_run`.
 - Idempotency / retry / dedupe for dispatch and events (delivery guarantees for
   the Postgres-backed queue itself are decided in ADR 003, but retry/dedupe
   semantics at the job level are not yet specified).

@@ -4,7 +4,7 @@
 before diving into code or docs. For details, follow the links — do not treat this
 file as the full spec.
 
-Last updated: 2026-07-11 (ADR 009)
+Last updated: 2026-07-12 (ADR 011)
 
 ## Glossary
 
@@ -194,6 +194,50 @@ sub-repos** ([`adr/008-project-init-grill-and-submodule-repos.md`](adr/008-proje
   also bumping the touched submodule's pointer commit. Linking a sub-repo to
   an already-`ready` project later is a tracked follow-up, not solved here.
 
+## Decided (feature_build RPC wiring)
+
+**ADR 010 — Extending Pi RPC wiring to `feature_build`**
+([`adr/010-feature-build-rpc-wiring.md`](adr/010-feature-build-rpc-wiring.md))
+
+- Extends ADR 006's attach-driven RPC machinery (previously `spec_grill`-only)
+  to `feature_build`: `buildAgentEnv`'s repo/token-fetch gate widens to both
+  job kinds; `runInCluster`'s routing sends any kind with a real image
+  configured through the attach-driven path, not just `spec_grill`.
+- New `submit_build_result` curated event (terminal): success moves the
+  feature `running` → `in_review` and stores the PR URL; failure matches
+  `run_failed`'s existing handling.
+- The internal feature-spec endpoint grows a `kind` param: `feature_build`
+  gets `adrMarkdown`/`branch` in the response and a `contents:write` +
+  `pull-requests:write` token, vs. `spec_grill`'s `contents:read`.
+- `entrypoint.sh` checks out the feature branch and writes the approved ADR
+  to `/workspace/.yggdrasil/adr.md` when `FEATURE_BRANCH`/`ADR_MARKDOWN` are
+  set — no-ops for `spec_grill`.
+- Deferred: `test_run` wiring, crash recovery, Web app surface for
+  `feature_build`'s live state.
+
+## Decided (feature `running` state)
+
+**ADR 011 — Feature `running` state: closing the queued → running gap**
+([`adr/011-feature-build-running-state.md`](adr/011-feature-build-running-state.md))
+
+- Closes a gap ADR 010 surfaced but didn't solve: nothing ever wrote
+  `features.status = 'running'` when a `feature_build` job actually started
+  (`jobs.status` already did, via `queue.Claim` — a different column).
+- New synthesized (not Pi-decoded) curated event `run_started`, fired once
+  in `runAgentRPCJob` right after `k8s.WaitForJobPod` confirms the pod is up
+  — the one call site shared by both `spec_grill` and `feature_build`, no
+  `job.Kind` branch needed.
+- `FeatureRepository.setRunning` is a **guarded** `UPDATE ... WHERE status =
+  'queued'` — a new precedent vs. the file's other (unguarded) transition
+  methods. The guard does double duty: it's also what makes `run_started`
+  safe to fire unconditionally for `spec_grill` too (a no-op there, since
+  that job kind's feature sits in `draft`, not `queued`).
+- Also fixes an adjacent silent-failure gap: if `WaitForJobPod` itself
+  errors, a `run_failed` event is now synthesized there too, instead of the
+  feature being left stuck in `queued` forever with no event ever posted.
+- Deferred: Web UI actually distinguishing `queued` from `running` visually
+  (still just a shared placeholder), `test_run`'s equivalent gap.
+
 ## Still open
 
 → [`roadmap/open-questions.md`](roadmap/open-questions.md)
@@ -223,5 +267,7 @@ sub-repos** ([`adr/008-project-init-grill-and-submodule-repos.md`](adr/008-proje
 | 007 | [Per-user default model configuration](adr/007-per-user-default-model-configuration.md) |
 | 008 | [`project_init` grill workflow, structure standard, and submodule sub-repos](adr/008-project-init-grill-and-submodule-repos.md) |
 | 009 | [GitHub-only authentication (remove username/password)](adr/009-github-only-authentication.md) |
+| 010 | [Extending Pi RPC wiring to `feature_build`](adr/010-feature-build-rpc-wiring.md) |
+| 011 | [Feature `running` state — closing the queued → running gap](adr/011-feature-build-running-state.md) |
 
 → [`adr/README.md`](adr/README.md)

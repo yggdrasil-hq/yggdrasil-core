@@ -120,6 +120,17 @@ Constraints:
    directory). Both are no-ops when absent, exactly like `TARGET_REPOS`
    itself — so `spec_grill` runs are unaffected. This satisfies both
    assumptions the `implement` skill already documented.
+   - **Caught during implementation:** the `git config --global --unset-all`
+     cleanup line itself had to become conditional, not just get two new
+     steps inserted before it. It existed to strip the credential rewrite
+     immediately after cloning so nothing that runs afterwards — including
+     the agent, once Pi starts — can push with it, which is correct for
+     `spec_grill` (never writes) but would have silently broken
+     `feature_build`: `implement/SKILL.md` step 6 (`git push` + `gh pr
+     create`) runs *after* Pi starts, i.e. after this line, and needs that
+     same rewrite still live to authenticate. The unset is now itself gated
+     on `FEATURE_BRANCH` being unset — skipped for exactly (and only) a
+     `feature_build` run, so the rewrite survives for the whole session.
 
 ### Orchestrator: route `feature_build` through the attach-driven path too
 
