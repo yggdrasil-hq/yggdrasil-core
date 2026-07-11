@@ -27,9 +27,10 @@ calls this repo directly.
 1. A common base layer: Pi installed + the shared `yggdrasil-contract`
    extension (structured tool calls for turn/completion signaling, replacing
    prose-convention parsing).
-2. Three per-job-kind images on top of that base, each with the one skill that
-   maps to its job kind:
-   - `spec_grill` → grill-with-docs-derived skill.
+2. Three per-job-kind images on top of that base:
+   - `spec_grill` → **two** skills (ADR 008), `project-init` and
+     `feature-grill` — the Orchestrator's initial prompt names exactly one
+     per run, never left to model inference.
    - `feature_build` → unattended "implement" skill + Playwright CLI.
    - `test_run` → "run-tests" skill + Playwright CLI.
 3. A `models.json` template reading `MODEL_BASE_URL` / `MODEL_API_KEY` /

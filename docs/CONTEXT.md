@@ -4,7 +4,7 @@
 before diving into code or docs. For details, follow the links — do not treat this
 file as the full spec.
 
-Last updated: 2026-07-11
+Last updated: 2026-07-11 (ADR 008)
 
 ## Glossary
 
@@ -156,6 +156,39 @@ hosting** ([`adr/003-orchestrator-kubernetes.md`](adr/003-orchestrator-kubernete
 - Adds a retry path for a `project_init` feature stuck on a failed/missing
   `spec_grill` once configuration is fixed.
 
+## Decided (project_init grill workflow, structure standard, submodule sub-repos)
+
+**ADR 008 — `project_init` grill workflow, structure standard, and submodule
+sub-repos** ([`adr/008-project-init-grill-and-submodule-repos.md`](adr/008-project-init-grill-and-submodule-repos.md))
+
+- `project_init` becomes explicit, not inferred: `FeatureSpec` gains a
+  `featureType` field; the Orchestrator's initial prompt branches on it and
+  names the exact skill file to read (`project-init` vs. `feature-grill`) —
+  no reliance on the model guessing intent from a title string.
+- `grill-with-docs` is replaced by two skills: **`project-init`** (interviews
+  purpose / tech stack / repo relationships — not "single vs. multi-repo",
+  already fixed by the project-creation repo picker — then checks the target
+  repo against a bundled structure standard) and **`feature-grill`** (normal
+  feature grilling, same substance as before, renamed).
+- **Structure standard** every managed project's primary repo must meet:
+  `setup.sh` (env/bootstrap/seed, optional), `run.sh` (the one deterministic
+  local-run command), `docs/CONTEXT.md` + `docs/adr/` (ADR 004 §14), the Helm
+  chart (ADR 003 §12, hosting only — never local dev), and a `CLAUDE.md`/
+  `AGENTS.md` router mirroring `templates/child-repo/`. Lives as a bundled
+  reference file inside the `project-init` skill, baked in at image build
+  time, not fetched live.
+- Restructuring a non-conforming existing repo is written into the ADR with
+  **no separate mid-grill consent gate** — the existing `spec_ready` → human
+  review → Start build gate (ADR 002 §14) is the approval mechanism.
+- **Sub-repos become git submodules** of the primary (reversing ADR 002's
+  sibling-clone model for customer projects, matching how yggdrasil-core
+  nests its own component repos): wired once during `project_init`'s
+  `feature_build` via `git submodule add`; `entrypoint.sh` moves to a global
+  git URL auth rewrite + `git clone --recurse-submodules`; `feature_build`'s
+  Coordination-PR/Repo-PR split is unchanged, with the Coordination PR now
+  also bumping the touched submodule's pointer commit. Linking a sub-repo to
+  an already-`ready` project later is a tracked follow-up, not solved here.
+
 ## Still open
 
 → [`roadmap/open-questions.md`](roadmap/open-questions.md)
@@ -183,5 +216,6 @@ hosting** ([`adr/003-orchestrator-kubernetes.md`](adr/003-orchestrator-kubernete
 | 005 | [GitHub App repository access](adr/005-github-app-repository-access.md) |
 | 006 | [Pi RPC integration in the Orchestrator](adr/006-pi-rpc-orchestrator-integration.md) |
 | 007 | [Per-user default model configuration](adr/007-per-user-default-model-configuration.md) |
+| 008 | [`project_init` grill workflow, structure standard, and submodule sub-repos](adr/008-project-init-grill-and-submodule-repos.md) |
 
 → [`adr/README.md`](adr/README.md)

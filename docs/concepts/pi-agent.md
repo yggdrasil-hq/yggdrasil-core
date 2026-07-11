@@ -40,9 +40,13 @@ Playwright CLI tool instead.
 ## Skills and the shared extension (ADR 004)
 
 - **Skills** are Pi's on-demand capability packages (a directory with
-  `SKILL.md` + optional scripts). Skills map **one-to-one onto job kinds**:
-  `spec_grill` → grill-with-docs-derived skill, `feature_build` → an
-  "implement" skill (unattended, no user interruption), `test_run` → a
+  `SKILL.md` + optional scripts). Skills map onto job kinds, with `spec_grill`
+  the one exception carrying two (ADR 008): `project-init` (a project's very
+  first `spec_grill` run — interviews purpose/tech-stack/repo-relationships,
+  checks the target repo against Yggdrasil's structure standard) and
+  `feature-grill` (every other feature, grill-with-docs-derived). The
+  Orchestrator's initial prompt names exactly one per run. `feature_build` →
+  an "implement" skill (unattended, no user interruption), `test_run` → a
   "run-tests" skill (executes a markdown spec's `##` steps).
 - A single shared Pi **extension**, `yggdrasil-contract`, is loaded in every
   image's common base layer. It exposes structured tool calls in place of

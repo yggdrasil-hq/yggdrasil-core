@@ -28,7 +28,12 @@ in the Orchestrator itself.
 
 ### `spec_grill`
 
-- Clone **all linked repos** (primary + sub-repos).
+- Clone the primary repo (`--recurse-submodules`, ADR 008 item 10; any linked
+  sub-repo not yet wired as a submodule falls back to a sibling clone).
+- Payload includes `featureType` (`"normal" | "project_init"`, ADR 008 item
+  1) alongside the title — the Orchestrator's initial prompt names exactly
+  one of the two `spec_grill` skills (`project-init` vs. `feature-grill`)
+  per run, never left to model inference.
 - Agent explores codebase, runs grill-me conversation with user.
 - Output: ADR markdown → persisted on feature record in API.
 - Feature transitions: `draft` → `spec_ready`.

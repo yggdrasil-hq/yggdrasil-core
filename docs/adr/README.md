@@ -28,6 +28,8 @@ Each ADR is numbered sequentially: `NNN-short-title.md`.
 | [004](004-agent-base-containers.md) | Agent base container images (Pi integration) | Accepted |
 | [005](005-github-app-repository-access.md) | GitHub App for repository access | Accepted |
 | [006](006-pi-rpc-orchestrator-integration.md) | Pi RPC integration in the Orchestrator | Accepted |
+| [007](007-per-user-default-model-configuration.md) | Per-user default model configuration | Accepted |
+| [008](008-project-init-grill-and-submodule-repos.md) | `project_init` grill workflow, structure standard, and submodule sub-repos | Accepted |
 
 When adding an ADR, update this index, add a routing row in root `CLAUDE.md`, and
 link from `docs/CONTEXT.md` if the decision affects suite-wide context.
