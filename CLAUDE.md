@@ -59,7 +59,7 @@ requests and streaming progress back in real time. See
 | Projects / features / tests / project home / notifications | ADR `docs/adr/002-projects-features-tests.md` → `docs/concepts/feature-lifecycle.md`, `docs/concepts/job-dispatch.md` |
 | `project_init` grill workflow / child-project structure standard (setup.sh/run.sh/Helm/docs) / submodule sub-repos | ADR `docs/adr/008-project-init-grill-and-submodule-repos.md` |
 | The Pi agent (how the agent itself runs)                | `docs/concepts/pi-agent.md`            |
-| Pi RPC transport / how the Orchestrator drives Pi (attach, event relay, mid-run replies) | ADR `docs/adr/006-pi-rpc-orchestrator-integration.md` (spec_grill) → ADR `docs/adr/010-feature-build-rpc-wiring.md` (feature_build) → ADR `docs/adr/011-feature-build-running-state.md` (queued→running) |
+| Pi RPC transport / how the Orchestrator drives Pi (attach, event relay, mid-run replies) | ADR `docs/adr/006-pi-rpc-orchestrator-integration.md` (spec_grill) → ADR `docs/adr/010-feature-build-rpc-wiring.md` (feature_build) → ADR `docs/adr/011-feature-build-running-state.md` (queued→running) → ADR `docs/adr/012-spec-grill-retry-state-reset.md` (retry status reset, live retry feedback) |
 | Base container images / skills / MCP-vs-Playwright / model config | `docs/components/agent-images.md` → ADR `docs/adr/004-agent-base-containers.md` → `agent-images/CLAUDE.md` |
 | Feature states / lifecycle                              | `docs/concepts/feature-lifecycle.md`   |
 | Architecture decisions (why we chose X)                 | `docs/adr/` → start at `docs/CONTEXT.md` |

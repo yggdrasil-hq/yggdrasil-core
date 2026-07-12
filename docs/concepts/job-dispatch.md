@@ -113,8 +113,13 @@ to the Web app over WebSocket.
   (write-scoped) and `ADR_MARKDOWN`/`FEATURE_BRANCH` job-pod env vars. Not
   yet extended to `test_run`.
 - Idempotency / retry / dedupe for dispatch and events (delivery guarantees for
-  the Postgres-backed queue itself are decided in ADR 003, but retry/dedupe
-  semantics at the job level are not yet specified).
+  the Postgres-backed queue itself are decided in ADR 003). **Partially
+  resolved for `spec_grill`/`project_init` by ADR 012**
+  (`docs/adr/012-spec-grill-retry-state-reset.md`): retry always dispatches a
+  new job row (old one kept as history, never reused/mutated), and the
+  feature's status is explicitly reset so the retried run re-enters the same
+  driven state machine as a first attempt. Retry for other feature types /
+  job kinds remains unspecified.
 - Mid-run reply delivery (`ask_user` → human reply → back into a running job)
   is decided for `spec_grill` by ADR 006 (Postgres `LISTEN`/`NOTIFY` on a new
   `job_messages` table) but not yet implemented.
