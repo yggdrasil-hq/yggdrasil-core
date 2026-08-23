@@ -5,6 +5,14 @@
 **Deciders:** Product/design session (grill-with-docs)
 **Amends:** [ADR 002](002-projects-features-tests.md) (action queue table, project creation flow)
 
+> **ADR 012's follow-up (2026-08-24) generalized `retry-grill`** beyond
+> `project_init` — the `featureType !== "project_init"` guard described in
+> item 8 below was dropped, and the "general re-grilling/retry for normal
+> features" follow-up and "generic retry-grill for any feature" rejected
+> alternative are no longer accurate. Everything else in this ADR (per-user
+> default model config itself) is unaffected. See
+> [ADR 012](012-spec-grill-retry-state-reset.md#follow-ups-out-of-scope-for-this-adr).
+
 ## Context
 
 Project creation (`POST /projects`) dispatches the `project_init` feature's `spec_grill`

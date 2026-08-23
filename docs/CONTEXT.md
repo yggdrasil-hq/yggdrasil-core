@@ -166,8 +166,9 @@ hosting** ([`adr/003-orchestrator-kubernetes.md`](adr/003-orchestrator-kubernete
   `test_run` cron) gates on a resolvable model config. Synchronous requests
   get a 400; `test_run` sets a `model_config_warning` project flag + action
   queue item ("Fix model configuration"), mirroring `github_access_warning`.
-- Adds a retry path for a `project_init` feature stuck on a failed/missing
-  `spec_grill` once configuration is fixed.
+- Adds a retry path for a feature stuck on a failed/missing `spec_grill` once
+  configuration is fixed. Originally `project_init`-only; generalized to any
+  feature type by ADR 012's 2026-08-24 follow-up.
 
 ## Decided (project_init grill workflow, structure standard, submodule sub-repos)
 

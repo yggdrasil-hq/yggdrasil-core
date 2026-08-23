@@ -146,9 +146,10 @@ Explicitly out of scope, confirmed during this session:
   observes `jobStatus === 'failed'` (both fetched together in the panel's
   own `Promise.all`), unmounting the panel before that branch could ever
   render. Pre-existing, orthogonal to this fix — not removed here.
-- `retry-grill` stays `project_init`-only; a normal feature's failed
+- ~~`retry-grill` stays `project_init`-only; a normal feature's failed
   spec_grill still has no retry path at all. Pre-existing gap, not
-  introduced or worsened by this ADR.
+  introduced or worsened by this ADR.~~ **Resolved (2026-08-24):** see the
+  "Generalizing retry" follow-up below.
 - `job_events` still doesn't stitch across retries — a superseded attempt's
   events simply disappear from `SpecGrillPanel`'s view once a newer job
   exists for the same feature. Acceptable given this ADR's scope (live
@@ -160,7 +161,17 @@ Explicitly out of scope, confirmed during this session:
 
 - Removing or fixing the reachability of `SpecGrillPanel`'s local
   retry/cancel dead-code branch.
-- Generalizing retry to non-`project_init` features.
+- ~~Generalizing retry to non-`project_init` features.~~ **Done (2026-08-24):**
+  `retry-grill`'s `featureType !== "project_init"` guard
+  (`api/src/projects/routes.ts`) and the matching frontend gating
+  (`feature-detail-client.tsx`) were dropped — `resetForRetry` and
+  `dispatchJob` were already feature-type-agnostic, so no state-reset
+  semantics changed. ADR 007's original scoping rationale, and this ADR's
+  own "Alternatives considered" rejection of generalizing retry, no longer
+  apply. Grill chat history semantics (raised as the open question at the
+  time) turned out to be moot: a retried run always starts a brand-new pod
+  session with no memory of the prior attempt, project_init or not, and
+  `job_events` already only ever surfaces the latest job per feature.
 - A feature-level event timeline spanning multiple spec_grill attempts.
 - Crash-recovery / reattachment (standing gap, ADR 006/010/011).
 - The three independent copies of the `FeatureStatus` literal union
