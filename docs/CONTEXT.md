@@ -73,6 +73,13 @@ amended by **ADR 009 — GitHub-only authentication**
 - One installation per (app, org/account), shared across projects on that org;
   installation webhooks (`installation`, `installation_repositories`) keep repo
   access in sync.
+- **ADR 013 — PR-merge and review-status webhook events**
+  ([`adr/013-pr-merge-webhooks.md`](adr/013-pr-merge-webhooks.md)): reverses
+  ADR 005's Phase-1 "no PR-merge webhooks" cut. `pull_request` (closed +
+  merged) sets a feature `merged` (and completes project_init via
+  `projects.markReady`); `pull_request_review` (changes requested) sets
+  `changes_requested`, only from `in_review`. Requires the instance admin to
+  subscribe the GitHub App to those two events in its GitHub settings.
 - Implementation reference: [`concepts/github-app.md`](concepts/github-app.md)
 
 ## Decided (Orchestrator compute)

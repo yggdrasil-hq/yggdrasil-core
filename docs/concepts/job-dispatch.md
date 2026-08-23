@@ -62,12 +62,22 @@ in the Orchestrator itself.
 
 ### `deploy`
 
-- Triggered when a PR merges to the primary repo's `main` branch.
+- Triggered when a PR merges to the primary repo's `main` branch (`push` webhook,
+  `handlePushEvent`), **and** once, guaranteed, the moment a project first goes
+  `ready` — from either the `pull_request` webhook or `POST
+  /:projectId/complete-init` (ADR 013 addendum) — since that transition and the
+  project's very first `main` push are usually the same merge, and `push`-driven
+  dispatch alone can't be relied on to catch it (delivery order between the two
+  webhooks for one merge isn't guaranteed).
 - Applies the project's Helm chart (maintained in the primary repo) to the
   project's namespace — `helm upgrade --install`, imperative, no GitOps.
 - Updates the project's **always-on primary deployment** (stateful — real
   database/volumes). No migration/rollback safety net yet (see ADR 003 open
   question #9).
+- Also dispatchable manually via `POST /:projectId/deploy` ("Deploy now"),
+  and its status (idle/in-progress/failed/completed) is shown on project
+  home via `GET /:projectId/deploy` (ADR 013 addendum) — previously there
+  was no frontend feedback for deploy at all.
 
 ## Job spec (common fields)
 

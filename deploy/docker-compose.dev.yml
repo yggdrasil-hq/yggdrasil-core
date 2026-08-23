@@ -153,6 +153,16 @@ services:
       - k3s_kubeconfig:/output
     ports:
       - "${DEV_K3S_PORT:-6443}:6443"
+      # k3s's bundled Traefik already listens on 80/443 inside the
+      # container (its default LoadBalancer Service, bound directly to the
+      # node via k3s's servicelb) for every project's primary-deployment
+      # Ingress (ADR 003 §15). Without publishing these, nothing on the
+      # host can ever reach a project's deployment even once DNS resolves
+      # its <slug>.apps.<domain> host — see docs/conventions/deploy.md.
+      # Non-standard host ports, same reasoning as DEV_HTTP_PORT above
+      # (avoid clobbering anything already on the host's real 80/443).
+      - "${DEV_APPS_HTTP_PORT:-8090}:80"
+      - "${DEV_APPS_HTTPS_PORT:-8443}:443"
     healthcheck:
       test: ["CMD", "kubectl", "get", "--raw=/healthz"]
       interval: 5s

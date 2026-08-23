@@ -12,6 +12,10 @@ GitHub app registration from the one described here).
 > Also resolves open question #2 from
 > [`../roadmap/open-questions.md`](../roadmap/open-questions.md) (installation
 > model + permissions).
+>
+> **PR-merge/review webhooks (ADR 013):**
+> [`../adr/013-pr-merge-webhooks.md`](../adr/013-pr-merge-webhooks.md) reverses
+> ADR 005 §19 for `merged`/`changes_requested` — see the Webhooks table below.
 
 ## Summary
 
@@ -24,7 +28,7 @@ GitHub app registration from the one described here).
 | Install sharing | One installation per (app, org) — shared across Yggdrasil projects |
 | Job credential | Installation access token (~1h), minted at dispatch |
 | Git authorship | GitHub App bot (`yggdrasil[bot]`) |
-| Webhooks | `installation`, `installation_repositories` only |
+| Webhooks | `installation`, `installation_repositories`, `pull_request` (merged), `pull_request_review` (changes requested) |
 | Broken access | `github_access_warning` flag + action queue item |
 
 ## Two separate GitHub integrations
@@ -61,6 +65,15 @@ Without at least Contents + Pull requests, GitHub's install/configure screen
 shows **"This App does not require access to your repositories"** and offers no
 repo picker at all — the installation succeeds but is useless. If you hit that
 screen, the fix is in the App's GitHub settings, not in Yggdrasil config.
+
+Under the same **Permissions & events** page, **Subscribe to events** must also
+have **Pull request** and **Pull request review** checked (ADR 013) — these
+options only appear once the Pull requests permission above is granted. This
+is required for merge/changes-requested auto-detection to work at all; the
+webhook code has no way to verify or enforce it, so a merged PR that never
+updates a feature's status is very likely this checkbox, not a bug. No
+reinstall needed — GitHub starts delivering the events immediately once the
+App registration is saved.
 
 - Webhook URL: `POST /api/webhooks/github`
 - Install callback: `GET /api/github/install/callback`
@@ -193,6 +206,9 @@ as the App bot.
 | `installation` (unsuspend) | Clear suspension; clear warnings if repos restored |
 | `installation_repositories` (added) | Add rows to `github_installation_repos` |
 | `installation_repositories` (removed) | Remove rows; if removed repo is linked to a project → set `github_access_warning` |
+| `pull_request` (closed, `merged: true`) | Feature matched by `pr_url` → `status = 'merged'`; if `project_init`, also `projects.markReady` if still `initializing` (ADR 013) |
+| `pull_request` (closed, `merged: false`) | No-op — no lifecycle state represents "closed without merging" yet |
+| `pull_request_review` (submitted, `state: "changes_requested"`) | Feature matched by `pr_url`, only if currently `in_review` → `status = 'changes_requested'` (ADR 013) |
 
 ## GitHub access warning
 

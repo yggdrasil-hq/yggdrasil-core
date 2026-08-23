@@ -44,8 +44,8 @@ draft → spec_ready → queued → running → in_review → merged
 | `queued` | Build approved; waiting for Orchestrator capacity. |
 | `running` | `feature_build` job active; events streaming. |
 | `in_review` | Build finished; draft PR ready for human review. |
-| `changes_requested` | Reviewer asked for changes; can re-run build. |
-| `merged` | PR merged. |
+| `changes_requested` | Reviewer asked for changes; can re-run build. Set by the `pull_request_review` webhook (ADR 013) when a review is submitted with `state: "changes_requested"` on the feature's tracked PR, only while still `in_review`. |
+| `merged` | PR merged. Set by the `pull_request` webhook (ADR 013) when the feature's tracked PR closes with `merged: true`. |
 | `failed` | Build job errored. |
 | `cancelled` | Spec or build was stopped. |
 
@@ -59,7 +59,11 @@ draft → spec_ready → queued → running → in_review → merged
 
 ## TODO
 
-- Define who/what triggers each transition (user action vs. Orchestrator event vs.
-  PR webhook) in API implementation.
+- ~~Define who/what triggers each transition (user action vs. Orchestrator event vs.
+  PR webhook) in API implementation.~~ Done for `in_review → merged` /
+  `in_review → changes_requested` (ADR 013, `pull_request` /
+  `pull_request_review` webhooks). All other transitions are Orchestrator
+  curated events or direct user action, both already implemented.
 - Re-grill / ADR revision workflow after `spec_ready`.
-- Relationship between feature state and PR state on GitHub.
+- A closed-without-merge PR has no lifecycle representation (ADR 013,
+  deliberately left open).

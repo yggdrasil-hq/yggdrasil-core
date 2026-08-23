@@ -11,6 +11,12 @@
 > account linking" and "password-only users" language below is historical; see
 > [ADR 009](009-github-only-authentication.md). Everything else in this ADR
 > (the OAuth App / GitHub App split itself) is unaffected.
+>
+> **ADR 013 reverses §19** ("No PR-merge webhooks in Phase 1") for the
+> `merged` and `changes_requested` feature-status transitions — see
+> [ADR 013](013-pr-merge-webhooks.md). The rest of this ADR (installation
+> model, job credentials, `installation`/`installation_repositories`
+> webhooks) is unaffected.
 
 ## Context
 
@@ -102,8 +108,9 @@ Both registrations are required at instance setup. See `docs/concepts/github-app
 18. On revoked access or removed repos → set **GitHub access warning** on affected
     projects. Jobs fail fast; action queue shows "Fix GitHub access" with
     re-install/configure link. Cleared when access is restored.
-19. **No PR-merge webhooks in Phase 1** — feature lifecycle advances manually in
-    Yggdrasil.
+19. ~~No PR-merge webhooks in Phase 1 — feature lifecycle advances manually in
+    Yggdrasil.~~ **Reversed by [ADR 013](013-pr-merge-webhooks.md):** `pull_request`
+    (merged) and `pull_request_review` (changes requested) are now handled.
 
 ### ADR 001 amendments
 
@@ -136,7 +143,7 @@ Implementation reference: `docs/concepts/github-app.md`.
 ### Follow-ups (out of scope)
 
 - User-to-server tokens for human attribution on commits/PRs.
-- PR-merge webhooks to auto-advance feature lifecycle.
+- ~~PR-merge webhooks to auto-advance feature lifecycle.~~ Done — [ADR 013](013-pr-merge-webhooks.md).
 - Cross-org sub-repos (install-per-repo model).
 - Pre-check org admin before install redirect (UX polish).
 

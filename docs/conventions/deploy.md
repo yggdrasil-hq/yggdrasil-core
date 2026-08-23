@@ -91,6 +91,18 @@ deployment) live in the target cluster, one **namespace per project**:
   `<project-slug>-<kind>-<id>.preview.<domain>`. This is a separate ingress
   layer from the nginx routing described above, which only handles
   Yggdrasil's own control-plane services.
+  - `<domain>` is `APPS_BASE_DOMAIN`, set **independently** on both the
+    Orchestrator (builds the real k8s Ingress host) and the API
+    (`config.appsBaseDomain`, hands the Web app a link to it via `GET
+    /:projectId/deploy`, ADR 013 addendum) — keep the two in sync by hand;
+    there's no runtime dependency between the two services for this.
+  - **Local dev:** neither the domain nor the ingress port is reachable out
+    of the box — `APPS_BASE_DOMAIN`'s placeholder default (`yggdrasil.local`)
+    resolves nowhere, and nothing publishes the bundled k3s cluster's
+    Traefik ingress to the host by default. See
+    `../../orchestrator/docs/overview/setup.md`'s "Reaching a project's
+    deployment locally" for the full recipe (nip.io wildcard DNS +
+    `DEV_APPS_HTTP_PORT`/`DEV_APPS_HTTPS_PORT`/`APPS_HTTPS_PORT`).
 - **Registry:** a bundled `registry:2`-style registry for self-hosted; a
   Yggdrasil-operated, per-project-namespaced registry for managed.
 - **Isolation:** namespace-per-project + a sandboxed RuntimeClass (gVisor/Kata)

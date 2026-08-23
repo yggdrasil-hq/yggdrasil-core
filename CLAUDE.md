@@ -55,7 +55,7 @@ requests and streaming progress back in real time. See
 | The landing / marketing site                            | `docs/components/landing.md` → `landing/CLAUDE.md`   |
 | The end-user docs site (Docusaurus)                     | `docs/components/docusaurus.md` → `docusaurus/CLAUDE.md` |
 | Authentication / login / sessions / GitHub OAuth (identity) | `docs/concepts/authentication.md` → ADR `docs/adr/009-github-only-authentication.md` (amends `docs/adr/001-authentication.md`) |
-| GitHub App / repo install / webhooks / permissions / repo sync / job tokens | `docs/concepts/github-app.md` → ADR `docs/adr/005-github-app-repository-access.md` |
+| GitHub App / repo install / webhooks / permissions / repo sync / job tokens | `docs/concepts/github-app.md` → ADR `docs/adr/005-github-app-repository-access.md` → ADR `docs/adr/013-pr-merge-webhooks.md` (PR merge / changes-requested webhook events) |
 | Projects / features / tests / project home / notifications | ADR `docs/adr/002-projects-features-tests.md` → `docs/concepts/feature-lifecycle.md`, `docs/concepts/job-dispatch.md` |
 | `project_init` grill workflow / child-project structure standard (setup.sh/run.sh/Helm/docs) / submodule sub-repos | ADR `docs/adr/008-project-init-grill-and-submodule-repos.md` |
 | The Pi agent (how the agent itself runs)                | `docs/concepts/pi-agent.md`            |
