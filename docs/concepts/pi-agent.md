@@ -47,13 +47,17 @@ Playwright CLI tool instead.
   `feature-grill` (every other feature, grill-with-docs-derived). The
   Orchestrator's initial prompt names exactly one per run. `feature_build` →
   an "implement" skill (unattended, no user interruption), `test_run` → a
-  "run-tests" skill (executes a markdown spec's `##` steps).
+  "run-tests" skill (executes a markdown spec's `##` steps), `design_grill` →
+  a "design-grill" skill (live, chat-driven HTML mockup sessions — reuses
+  `spec_grill`'s attach/RPC machinery but with a write-scoped token and a
+  design-specific contract tool; ADR 014).
 - A single shared Pi **extension**, `yggdrasil-contract`, is loaded in every
   image's common base layer. It exposes structured tool calls in place of
   prose-based turn/completion signaling: `ask_user`/`submit_adr` (`spec_grill`),
   `submit_build_result` (`feature_build`), `report_test_step`/
-  `submit_test_report` (`test_run`). Each image restricts which of these are
-  visible to its skill via `allowed-tools`.
+  `submit_test_report` (`test_run`), `update_design_preview`/`submit_design`
+  (`design_grill`, ADR 014). Each image restricts which of these are visible
+  to its skill via `allowed-tools`.
 - **Tool allowlist** — beyond scoping the contract extension's own tools per
   image, the broader "which packages/tools Pi may install inside the
   container" knob (below) is a separate, still-open question.

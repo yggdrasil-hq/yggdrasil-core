@@ -34,6 +34,8 @@ Each ADR is numbered sequentially: `NNN-short-title.md`.
 | [010](010-feature-build-rpc-wiring.md) | Extending Pi RPC wiring to `feature_build` | Accepted |
 | [011](011-feature-build-running-state.md) | Feature `running` state — closing the queued → running gap | Accepted |
 | [012](012-spec-grill-retry-state-reset.md) | `spec_grill` retry status reset and live retry feedback | Accepted |
+| [013](013-pr-merge-webhooks.md) | PR-merge and review-status webhook events | Accepted |
+| [014](014-design-grill-live-mockups.md) | `design_grill` — agent-authored live HTML mockup sessions | Accepted |
 
 When adding an ADR, update this index, add a routing row in root `CLAUDE.md`, and
 link from `docs/CONTEXT.md` if the decision affects suite-wide context.

@@ -17,6 +17,10 @@ Each build maps to a branch `yggdrasil/<feature-slug>-<id>` and a draft PR on th
 Special type **`project_init`** — auto-created on project setup; same lifecycle,
 templated grill prompt. Project stays `initializing` until this feature merges.
 
+Not a Feature: **Design sessions** (`design_grill`) are a separate, sibling job
+kind with their own single-phase flow — no ADR, no spec/build split. See
+[ADR 014](../adr/014-design-grill-live-mockups.md).
+
 ## Two job phases
 
 | Phase | Job kind | Feature states | Output |

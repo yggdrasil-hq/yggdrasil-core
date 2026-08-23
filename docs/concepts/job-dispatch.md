@@ -16,6 +16,7 @@ spec, the event stream back, or scheduled test runs.
 | User approves ADR and clicks Start build | `feature_build` |
 | Test cron schedule fires | `test_run` |
 | PR merged to primary repo's `main` | `deploy` |
+| Design session started (name + description) | `design_grill` |
 
 The API builds a **job spec** and dispatches it to the Orchestrator via a
 Postgres-backed durable queue (ADR 003). The Orchestrator's own process is
@@ -59,6 +60,25 @@ in the Orchestrator itself.
 - Runs as a **temporary deployment** in the project's namespace (ADR 003) —
   separate from the project's always-on primary deployment, so tests never
   interfere with live project data.
+
+### `design_grill`
+
+- Same attach/RPC machinery as `spec_grill` (ADR 006), reused wholesale — see
+  [ADR 014](../adr/014-design-grill-live-mockups.md).
+- Clone all linked repos (uniform with other job kinds); only the primary
+  repo is ever written to.
+- Input: a name/slug + initial description, seeding the first turn.
+- Agent iterates live, emitting a full file-snapshot event
+  (`update_design_preview`, non-terminal) on every turn that changes files —
+  no ephemeral deployment/preview tunnel; the Web app renders the latest
+  snapshot client-side in a sandboxed iframe.
+- On `submit_design` (terminal): commits `designs/<slug>/` to a branch and
+  opens a PR on the primary repo — single-phase, no separate build job.
+- **Write-scoped** installation token (`contents: write` +
+  `pull-requests: write`), like `feature_build` — a new precedent for a
+  second job kind (see `docs/CONTEXT.md`'s Container access tier entry).
+- Only offered when the project is `ready` and has a design surface
+  (`designs/` scaffolded by `project_init`, ADR 014 items 10-11).
 
 ### `deploy`
 
