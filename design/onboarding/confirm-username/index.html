@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Confirm username — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .auth-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 48px 16px; }
+    .auth-inner { width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; gap: 32px; }
+    .auth-heading { text-align: center; }
+    .auth-heading h1 { font-family: var(--font-display); font-size: 24px; margin-top: 16px; }
+    .auth-heading p { margin-top: 8px; font-size: 14px; }
+    .auth-card { width: 100%; }
+    .auth-card-head { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .auth-card-head .avatar { width: 64px; height: 64px; font-size: 22px; }
+    .auth-card-head h2 { font-size: 18px; margin-top: 4px; }
+    .auth-card-head p { font-size: 14px; }
+    .auth-card form { margin-top: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .auth-card .btn { width: 100%; }
+  </style>
+</head>
+<body>
+  <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/onboarding/confirm-username</span> (web/app/onboarding/confirm-username/page.tsx) · form is inert, always shows the post-GitHub-login "pick your username" state</div>
+
+  <div class="auth-wrap">
+    <div class="auth-inner">
+      <div class="auth-heading">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+        <h1>Confirm username</h1>
+        <p>Your username is permanent. Choose carefully.</p>
+      </div>
+
+      <div class="card auth-card">
+        <div class="auth-card-head">
+          <span class="avatar">OC</span>
+          <h2>Almost there</h2>
+          <p>Default from GitHub: <strong style="color: var(--frost);">octocat</strong></p>
+        </div>
+        <form>
+          <div class="field">
+            <label for="username">Username</label>
+            <input class="input" id="username" value="octocat" />
+          </div>
+          <div class="field">
+            <label for="displayName">Display name</label>
+            <input class="input" id="displayName" value="The Octocat" />
+          </div>
+          <button class="btn btn-primary" type="button">Confirm and continue</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

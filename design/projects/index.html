@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Projects — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .toolbar { display: flex; justify-content: flex-end; margin-bottom: 24px; }
+    .project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .project-card { display: block; }
+    .project-card .card { height: 100%; transition: border-color 0.15s, background 0.15s; }
+    .project-card:hover .card { border-color: var(--rime); background: var(--surface-02); }
+    .project-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .project-card-head h3 { font-size: 17px; }
+    .project-card p { font-size: 13px; margin-top: 8px; }
+    .pill { border-radius: var(--radius-pill); padding: 2px 10px; font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+  </style>
+</head>
+<body>
+  <header class="hub-header">
+    <div class="hub-header-inner">
+      <a href="/projects/index.html" class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></a>
+      <nav class="hub-nav">
+        <a href="/projects/index.html" class="active">Projects</a>
+        <a href="/notifications/index.html">Notifications</a>
+        <a href="/settings/account/index.html">Settings</a>
+      </nav>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="text-align:right;">
+          <div style="font-size:14px; font-weight:500; color:var(--frost);">Sarat Chandra</div>
+          <div style="font-size:12px; color:var(--shadow);">@saratc</div>
+        </div>
+        <span class="avatar">SC</span>
+        <button class="btn btn-ghost" type="button" aria-label="Log out">&#9211;</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="hub-main">
+    <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects</span> (web/app/projects/page.tsx) · shows the populated grid state; loading/error/empty states from the real component aren't mocked here</div>
+    <div class="hub-page-title">
+      <h1>Projects</h1>
+      <p>Connect GitHub repositories and manage agent work from one place.</p>
+    </div>
+
+    <div class="toolbar">
+      <a class="btn btn-primary" href="/projects/new/index.html">+ New project</a>
+    </div>
+
+    <ul class="project-grid" style="list-style:none; padding:0; margin:0;">
+      <li>
+        <a class="project-card" href="/projects/detail/index.html">
+          <div class="card">
+            <div class="project-card-head">
+              <h3>Acme Storefront</h3>
+              <span class="pill" style="background:#46c28522; color:#46c285;">Ready</span>
+            </div>
+            <p>Customer-facing storefront and checkout for Acme Retail.</p>
+            <p class="text-shadow">3 linked repositories</p>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a class="project-card" href="/projects/detail/index.html">
+          <div class="card">
+            <div class="project-card-head">
+              <h3>Internal Ops Console</h3>
+              <span class="pill" style="background:#e2a13c22; color:#e2a13c;">Initializing</span>
+            </div>
+            <p>Fulfillment and inventory dashboard for the ops team.</p>
+            <p class="text-shadow">1 linked repository</p>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a class="project-card" href="/projects/detail/index.html">
+          <div class="card">
+            <div class="project-card-head">
+              <h3>Marketing Site</h3>
+              <span class="pill" style="background:#46c28522; color:#46c285;">Ready</span>
+            </div>
+            <p>Public marketing pages, blog, and pricing.</p>
+            <p class="text-shadow">2 linked repositories</p>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a class="project-card" href="/projects/detail/index.html">
+          <div class="card">
+            <div class="project-card-head">
+              <h3>Data Pipeline</h3>
+              <span class="pill" style="background:#46c28522; color:#46c285;">Ready</span>
+            </div>
+            <p>Nightly ETL jobs and the internal analytics warehouse.</p>
+            <p class="text-shadow">1 linked repository</p>
+          </div>
+        </a>
+      </li>
+    </ul>
+  </div>
+</body>
+</html>

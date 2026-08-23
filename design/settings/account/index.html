@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Account settings — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .hub-main.narrow { max-width: 640px; }
+    .stack { display: flex; flex-direction: column; gap: 24px; }
+    .card-title { font-size: 16px; font-weight: 600; color: var(--frost); }
+    .card-desc { margin-top: 4px; font-size: 13px; }
+    .profile-row { display: flex; align-items: center; gap: 16px; margin-top: 16px; }
+    .profile-row .avatar { width: 56px; height: 56px; font-size: 18px; }
+    .profile-fields { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+    .card-footer { border-top: 1px solid var(--rime-soft); margin: 16px -20px -20px; padding: 16px 20px; }
+    .secret-field { border: 1px solid var(--rime); border-radius: var(--radius-sm); padding: 12px; display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+    .secret-field:first-of-type { margin-top: 16px; }
+    .secret-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .secret-head .label { font-size: 14px; font-weight: 500; color: var(--frost); }
+    .secret-head .desc { font-size: 13px; margin-top: 2px; }
+    .secret-actions { display: flex; gap: 8px; }
+  </style>
+</head>
+<body>
+  <header class="hub-header">
+    <div class="hub-header-inner">
+      <a href="/projects/index.html" class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></a>
+      <nav class="hub-nav">
+        <a href="/projects/index.html">Projects</a>
+        <a href="/notifications/index.html">Notifications</a>
+        <a href="/settings/account/index.html" class="active">Settings</a>
+      </nav>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="text-align:right;">
+          <div style="font-size:14px; font-weight:500; color:var(--frost);">Sarat Chandra</div>
+          <div style="font-size:12px; color:var(--shadow);">@saratc</div>
+        </div>
+        <span class="avatar">SC</span>
+        <button class="btn btn-ghost" type="button" aria-label="Log out">&#9211;</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="hub-main narrow">
+    <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/settings/account</span> (web/app/settings/account/page.tsx) · all three model secrets shown "Configured"; the editing/confirm-clear states aren't mocked here</div>
+    <div class="hub-page-title">
+      <h1>Account</h1>
+      <p>Profile and default model configuration.</p>
+    </div>
+
+    <div class="stack">
+      <div class="card">
+        <div class="card-title">Profile</div>
+        <p class="card-desc">Username <span style="color:var(--frost);">@saratc</span> is permanent &middot; signed in with GitHub as <span style="color:var(--frost);">@saratc</span></p>
+        <div class="profile-row">
+          <span class="avatar">SC</span>
+          <div class="profile-fields">
+            <div class="field">
+              <label for="displayName">Display name</label>
+              <input class="input" id="displayName" value="Sarat Chandra" />
+            </div>
+            <button class="btn btn-primary" type="button" style="align-self:flex-start;">Save profile</button>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-outline" type="button">Log out</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Default model configuration</div>
+        <p class="card-desc">Used by any project that doesn't configure its own model. New projects use this by default unless you set something different for them.</p>
+
+        <div class="secret-field">
+          <div class="secret-head">
+            <div>
+              <div class="label">Model base URL</div>
+              <div class="desc text-mist">OpenAI-chat-completions-compatible endpoint the agent sends requests to.</div>
+            </div>
+            <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Configured</span>
+          </div>
+          <div class="secret-actions">
+            <button class="btn btn-outline btn-sm" type="button">Update</button>
+            <button class="btn btn-ghost btn-sm" type="button">Clear</button>
+          </div>
+        </div>
+
+        <div class="secret-field">
+          <div class="secret-head">
+            <div>
+              <div class="label">Model API key</div>
+              <div class="desc text-mist">Sent as the bearer token on every request to the base URL above.</div>
+            </div>
+            <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Configured</span>
+          </div>
+          <div class="secret-actions">
+            <button class="btn btn-outline btn-sm" type="button">Update</button>
+            <button class="btn btn-ghost btn-sm" type="button">Clear</button>
+          </div>
+        </div>
+
+        <div class="secret-field">
+          <div class="secret-head">
+            <div>
+              <div class="label">Model ID</div>
+              <div class="desc text-mist">Model name passed in each request, e.g. gpt-4.1 or claude-sonnet-5.</div>
+            </div>
+            <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Configured</span>
+          </div>
+          <div class="secret-actions">
+            <button class="btn btn-outline btn-sm" type="button">Update</button>
+            <button class="btn btn-ghost btn-sm" type="button">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-mist" style="font-size:14px;"><a href="/projects/index.html" style="color:var(--bifrost);">Back to projects</a></p>
+    </div>
+  </div>
+</body>
+</html>

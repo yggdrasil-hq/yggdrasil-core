@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Sign in — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .auth-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 16px;
+    }
+    .auth-inner {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+    .auth-heading {
+      text-align: center;
+    }
+    .auth-heading h1 {
+      font-family: var(--font-display);
+      font-size: 24px;
+      margin-top: 16px;
+    }
+    .auth-heading p {
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    .auth-card {
+      width: 100%;
+    }
+    .auth-card .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--frost);
+    }
+    .auth-card .card-desc {
+      margin-top: 6px;
+      font-size: 14px;
+      color: var(--mist);
+    }
+    .auth-card .btn {
+      width: 100%;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/login</span> (web/app/login/page.tsx) · no live OAuth, button is inert</div>
+
+  <div class="auth-wrap">
+    <div class="auth-inner">
+      <div class="auth-heading">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+        <h1>Sign in</h1>
+        <p>Welcome to Yggdrasil</p>
+      </div>
+
+      <div class="card auth-card">
+        <div class="card-title">Sign in with GitHub</div>
+        <p class="card-desc">Your Yggdrasil account is your GitHub identity.</p>
+        <button class="btn btn-primary" type="button">Continue with GitHub</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

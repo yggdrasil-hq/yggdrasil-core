@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Checkout flow — Acme Storefront — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: var(--mist);
+      margin-bottom: 12px;
+    }
+    .back-link:hover {
+      color: var(--frost);
+    }
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      height: 20px;
+      padding: 0 8px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .pill-enabled {
+      background: rgba(70, 194, 133, 0.15);
+      color: var(--st-approved);
+    }
+    .form-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 720px;
+      margin-top: 24px;
+    }
+    .card h3 {
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+    .card .card-desc {
+      font-size: 13px;
+      color: var(--mist);
+      margin-top: 2px;
+    }
+    .card .card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--mist);
+    }
+    .checkbox-row input {
+      width: 16px;
+      height: 16px;
+    }
+    textarea.spec {
+      min-height: 260px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+    }
+    .saved-note {
+      font-size: 13px;
+      color: var(--st-approved);
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+      <a class="sidebar-project" href="/projects/index.html">
+        <span>Acme Storefront</span>
+        <span class="text-shadow">&#8964;</span>
+      </a>
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/projects/detail/index.html"><span class="icon">&#8962;</span> Home</a>
+        <a class="nav-link" href="/projects/detail/features/index.html"><span class="icon">&#9638;</span> Features</a>
+        <a class="nav-link active" href="/projects/detail/tests/index.html"><span class="icon">&#9879;</span> Tests</a>
+        <a class="nav-link" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
+      </nav>
+      <div class="sidebar-foot">
+        <a class="nav-link" href="/projects/detail/settings/index.html"><span class="icon">&#9881;</span> Settings</a>
+        <button class="btn btn-outline" type="button" style="justify-content:flex-start; width:100%;">Log out</button>
+        <a class="sidebar-user" href="/settings/account/index.html">
+          <span class="avatar">SC</span>
+          <span>
+            <div class="name">Sarat Chandra</div>
+            <div class="handle">@saratc</div>
+          </span>
+        </a>
+      </div>
+    </aside>
+    <div class="main">
+      <div class="main-inner">
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/tests/:testId</span> (web/app/projects/[projectId]/tests/[testId]/page.tsx) · the Test type only tracks schedule + last-run, no pass/fail history yet — "Changes saved" below is the post-save state, shown here for reference, not conditional</div>
+
+        <a class="back-link" href="/projects/detail/tests/index.html">&larr; Back to tests</a>
+        <div class="title-row">
+          <h1>Checkout flow</h1>
+          <span class="pill pill-enabled">Enabled</span>
+        </div>
+
+        <div class="card" style="margin-top: 20px; max-width: 720px;">
+          <h3>Run status</h3>
+          <p class="card-desc">Schedule: Daily at 9:00 AM</p>
+          <p class="card-desc">Last run 3 hours ago</p>
+        </div>
+
+        <form class="form-stack">
+          <div class="card">
+            <h3>Test details</h3>
+            <div class="card-body">
+              <div class="field">
+                <label for="test-name">Name</label>
+                <input class="input" id="test-name" type="text" value="Checkout flow" />
+              </div>
+              <label class="checkbox-row">
+                <input type="checkbox" checked />
+                Enabled — run on schedule when checked
+              </label>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Schedule</h3>
+            <p class="card-desc">Minimum interval is 1 hour.</p>
+            <div class="card-body">
+              <select class="input">
+                <option>Every hour</option>
+                <option>Every 6 hours</option>
+                <option selected>Daily at 9:00 AM</option>
+                <option>Weekly on Monday</option>
+                <option>Custom cron expression</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Markdown spec</h3>
+            <p class="card-desc">Use <span class="mono">##</span> headings for ordered subtasks.</p>
+            <div class="card-body">
+              <textarea class="input spec">## Sign in
+Visit /login and sign in with a seeded test account.
+
+## Add item to cart
+Open a product page and add it to the cart. Confirm the cart badge count updates.
+
+## Checkout
+Complete checkout with a test payment method and confirm the order
+confirmation page renders.</textarea>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:16px;">
+            <button class="btn btn-primary" type="button">Save changes</button>
+            <span class="saved-note">Changes saved.</span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Tests — Acme Storefront — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .test-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .test-card {
+      display: block;
+    }
+    .test-card:hover {
+      border-color: var(--rime);
+      background: var(--surface-02);
+    }
+    .test-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .test-card-top h3 {
+      font-size: 16px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      height: 20px;
+      padding: 0 8px;
+      border-radius: var(--radius-pill);
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      flex-shrink: 0;
+    }
+    .pill-enabled {
+      background: rgba(70, 194, 133, 0.15);
+      color: var(--st-approved);
+    }
+    .pill-paused {
+      background: var(--surface-03);
+      color: var(--shadow);
+    }
+    .test-meta {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--mist);
+    }
+    .test-meta + .test-meta {
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+      <a class="sidebar-project" href="/projects/index.html">
+        <span>Acme Storefront</span>
+        <span class="text-shadow">&#8964;</span>
+      </a>
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/projects/detail/index.html"><span class="icon">&#8962;</span> Home</a>
+        <a class="nav-link" href="/projects/detail/features/index.html"><span class="icon">&#9638;</span> Features</a>
+        <a class="nav-link active" href="/projects/detail/tests/index.html"><span class="icon">&#9879;</span> Tests</a>
+        <a class="nav-link" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
+      </nav>
+      <div class="sidebar-foot">
+        <a class="nav-link" href="/projects/detail/settings/index.html"><span class="icon">&#9881;</span> Settings</a>
+        <button class="btn btn-outline" type="button" style="justify-content:flex-start; width:100%;">Log out</button>
+        <a class="sidebar-user" href="/settings/account/index.html">
+          <span class="avatar">SC</span>
+          <span>
+            <div class="name">Sarat Chandra</div>
+            <div class="handle">@saratc</div>
+          </span>
+        </a>
+      </div>
+    </aside>
+    <div class="main">
+      <div class="main-inner">
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/tests</span> (web/app/projects/[projectId]/tests/page.tsx) · shows the "project ready" state; the unready state swaps the button for "Complete setup to add tests" and shows a setup banner</div>
+
+        <div class="page-header">
+          <div>
+            <h1>Tests</h1>
+            <p>Scheduled verification scenarios run against main on an interval.</p>
+          </div>
+          <a class="btn btn-primary" href="/projects/detail/tests/new/index.html">+ New test</a>
+        </div>
+
+        <ul class="test-list">
+          <li>
+            <a class="card test-card" href="/projects/detail/tests/detail/index.html">
+              <div class="test-card-top">
+                <h3>Checkout flow</h3>
+                <span class="pill pill-enabled">Enabled</span>
+              </div>
+              <p class="test-meta">Daily at 9:00 AM</p>
+              <p class="test-meta">Last run 3 hours ago</p>
+            </a>
+          </li>
+          <li>
+            <a class="card test-card" href="/projects/detail/tests/detail/index.html">
+              <div class="test-card-top">
+                <h3>Auth flow</h3>
+                <span class="pill pill-enabled">Enabled</span>
+              </div>
+              <p class="test-meta">Every 6 hours</p>
+              <p class="test-meta">Last run 41 minutes ago</p>
+            </a>
+          </li>
+          <li>
+            <a class="card test-card" href="/projects/detail/tests/detail/index.html">
+              <div class="test-card-top">
+                <h3>Cart &amp; discount codes</h3>
+                <span class="pill pill-paused">Paused</span>
+              </div>
+              <p class="test-meta">Weekly on Monday</p>
+              <p class="test-meta">No runs yet</p>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

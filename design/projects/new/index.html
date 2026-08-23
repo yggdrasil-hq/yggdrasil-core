@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Create project — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .stepper { display: flex; gap: 8px; margin-bottom: 24px; }
+    .stepper label { flex: 1; text-align: center; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--rime-soft); font-size: 13px; font-weight: 500; color: var(--shadow); cursor: pointer; }
+    .stepper label span { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--shadow); margin-bottom: 2px; }
+
+    input[name="step"] { position: absolute; opacity: 0; pointer-events: none; }
+    .step-panel { display: none; }
+    #step-details:checked ~ .stepper label[for="step-details"],
+    #step-repos:checked ~ .stepper label[for="step-repos"],
+    #step-agent:checked ~ .stepper label[for="step-agent"] {
+      border-color: var(--bifrost); color: var(--frost); background: var(--surface-02);
+    }
+    #step-details:checked ~ #panel-details,
+    #step-repos:checked ~ #panel-repos,
+    #step-agent:checked ~ #panel-agent {
+      display: block;
+    }
+
+    .card-title { font-size: 16px; font-weight: 600; color: var(--frost); }
+    .card-desc { margin-top: 4px; font-size: 13px; }
+    .card-body { margin-top: 16px; display: flex; flex-direction: column; gap: 16px; }
+    .actions { display: flex; gap: 12px; margin-top: 20px; }
+
+    .repo-toolbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+    .repo-toolbar-actions { display: flex; gap: 8px; }
+    .repo-list { display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; border: 1px solid var(--rime-soft); border-radius: var(--radius-sm); padding: 10px; }
+    .repo-row { display: flex; align-items: center; gap: 10px; font-size: 14px; padding: 4px 0; }
+    .repo-row .org { font-size: 12px; color: var(--shadow); }
+    .subrepo-block { border: 1px dashed var(--rime); border-radius: var(--radius-sm); padding: 12px; }
+    .subrepo-block .heading { font-size: 13px; font-weight: 500; color: var(--frost); margin-bottom: 8px; }
+
+    .radio-option { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--frost); }
+    .agent-custom { border: 1px dashed var(--rime); border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+    .checkbox-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <header class="hub-header">
+    <div class="hub-header-inner">
+      <a href="/projects/index.html" class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></a>
+      <nav class="hub-nav">
+        <a href="/projects/index.html" class="active">Projects</a>
+        <a href="/notifications/index.html">Notifications</a>
+        <a href="/settings/account/index.html">Settings</a>
+      </nav>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="text-align:right;">
+          <div style="font-size:14px; font-weight:500; color:var(--frost);">Sarat Chandra</div>
+          <div style="font-size:12px; color:var(--shadow);">@saratc</div>
+        </div>
+        <span class="avatar">SC</span>
+        <button class="btn btn-ghost" type="button" aria-label="Log out">&#9211;</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="hub-main">
+    <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/new</span> (web/components/projects/create-project-page-client.tsx) · the real page is a 3-step wizard rendered one step at a time — click a step pill below to preview it (CSS-only tabs, no JS)</div>
+    <div class="hub-page-title">
+      <h1>Create project</h1>
+      <p>Name your project, then pick a repository Yggdrasil already has access to.</p>
+    </div>
+
+    <input type="radio" name="step" id="step-details" checked />
+    <input type="radio" name="step" id="step-repos" />
+    <input type="radio" name="step" id="step-agent" />
+
+    <div class="stepper">
+      <label for="step-details"><span>Step 1</span>Details</label>
+      <label for="step-repos"><span>Step 2</span>Select repository</label>
+      <label for="step-agent"><span>Step 3</span>Agent configuration</label>
+    </div>
+
+    <div id="panel-details" class="step-panel">
+      <div class="card">
+        <div class="card-title">Project details</div>
+        <div class="card-body">
+          <div class="field">
+            <label for="project-name">Name</label>
+            <input class="input" id="project-name" placeholder="Yggdrasil Core" value="Acme Storefront" />
+          </div>
+          <div class="field">
+            <label for="project-description">Description</label>
+            <textarea class="input" id="project-description" rows="3" placeholder="What is this project?">Customer-facing storefront and checkout for Acme Retail.</textarea>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <label class="btn btn-primary" for="step-repos">Continue</label>
+        <a class="btn btn-ghost" href="/projects/index.html">Cancel</a>
+      </div>
+    </div>
+
+    <div id="panel-repos" class="step-panel">
+      <div class="card">
+        <div class="repo-toolbar">
+          <div>
+            <div class="card-title">Select a repository</div>
+            <p class="card-desc">Choose a primary repo from anywhere Yggdrasil already has access, and optionally add sub-repos from the same org.</p>
+          </div>
+          <div class="repo-toolbar-actions">
+            <button class="btn btn-outline btn-sm" type="button">Refresh</button>
+            <button class="btn btn-outline btn-sm" type="button">Add repository access</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <input class="input" placeholder="Search repositories&hellip;" value="storefront" />
+          <div class="repo-list">
+            <label class="repo-row"><input type="radio" name="primary-repo" checked /> acme/storefront-web <span class="org">(acme)</span></label>
+            <label class="repo-row"><input type="radio" name="primary-repo" /> acme/storefront-api <span class="org">(acme)</span></label>
+            <label class="repo-row"><input type="radio" name="primary-repo" /> acme/storefront-infra <span class="org">(acme)</span></label>
+            <label class="repo-row"><input type="radio" name="primary-repo" /> acme/marketing-site <span class="org">(acme)</span></label>
+          </div>
+          <div class="subrepo-block">
+            <div class="heading">Also include from acme</div>
+            <label class="repo-row"><input type="checkbox" checked /> acme/storefront-api</label>
+            <label class="repo-row"><input type="checkbox" /> acme/storefront-infra</label>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <label class="btn btn-primary" for="step-agent">Continue</label>
+        <label class="btn btn-ghost" for="step-details">Back</label>
+      </div>
+    </div>
+
+    <div id="panel-agent" class="step-panel">
+      <div class="card">
+        <div class="card-title">Model configuration</div>
+        <p class="card-desc">Choose the model backend the Pi agent uses for this project's jobs.</p>
+        <div class="card-body">
+          <label class="radio-option"><input type="radio" name="agent-mode" checked /> Use my default model configuration</label>
+          <label class="radio-option"><input type="radio" name="agent-mode" /> Configure a different agent for this project</label>
+
+          <div class="agent-custom">
+            <div class="field">
+              <label for="model-base-url">Model base URL</label>
+              <input class="input" id="model-base-url" placeholder="https://api.openai.com/v1" />
+            </div>
+            <div class="field">
+              <label for="model-api-key">Model API key</label>
+              <input class="input" id="model-api-key" type="password" placeholder="sk-&hellip;" />
+            </div>
+            <div class="field">
+              <label for="model-id">Model ID</label>
+              <input class="input" id="model-id" placeholder="gpt-4.1" />
+            </div>
+            <label class="checkbox-row"><input type="checkbox" checked /> Also save this as my account default</label>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" type="button">Create project</button>
+        <label class="btn btn-ghost" for="step-repos">Back</label>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

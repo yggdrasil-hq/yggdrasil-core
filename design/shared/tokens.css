@@ -1,0 +1,234 @@
+/*
+  Yggdrasil design tokens.
+  Source of truth: docs/conventions/theming.md — keep in sync by hand,
+  this file does not import anything at build time (there is no build step).
+*/
+
+:root {
+  /* Surfaces */
+  --niflheim: #080b11;
+  --surface-01: #0e131b;
+  --surface-02: #151c26;
+  --surface-03: #1c2531;
+  --rime: #2a3543;
+  --rime-soft: #1f2937;
+
+  /* Text */
+  --frost: #e8eef4;
+  --mist: #9fb0c0;
+  --shadow: #5e6e7e;
+
+  /* Brand */
+  --bifrost: #2fd4c6;
+  --aurora: #4f9bf0;
+  --frostfire: #bfe9ee;
+
+  /* Light surface (unused in-app, kept for parity with theming.md) */
+  --light-surface: #eef3f7;
+
+  /* Status (feature lifecycle) */
+  --st-draft: #6b7a8a;
+  --st-ready: #2fd4c6;
+  --st-progress: #4f9bf0;
+  --st-input: #e2a13c;
+  --st-review-agent: #9b8cf0;
+  --st-review: #5bc0e8;
+  --st-approved: #46c285;
+  --st-rejected: #e06c75;
+  --st-failed: #c84a52;
+
+  /* Layout */
+  --maxw: 1200px;
+  --gap: clamp(56px, 7vw, 104px);
+
+  /* Typography */
+  --font-display: "Cinzel", Georgia, serif;
+  --font-sans: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-card: 14px;
+  --radius-panel: 16px;
+  --radius-pill: 999px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--niflheim);
+  color: var(--frost);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--frost);
+  margin: 0;
+}
+
+h1 {
+  font-size: 34px;
+}
+
+h2 {
+  font-size: 24px;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+p {
+  margin: 0;
+  color: var(--mist);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.text-mist {
+  color: var(--mist);
+}
+
+.text-shadow {
+  color: var(--shadow);
+}
+
+.text-bifrost {
+  color: var(--bifrost);
+}
+
+/* Buttons */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--bifrost);
+  color: var(--niflheim);
+}
+
+.btn-outline {
+  background: var(--surface-02);
+  border-color: var(--rime);
+  color: var(--frost);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--mist);
+}
+
+.btn-sm {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+/* Cards */
+
+.card {
+  background: var(--surface-01);
+  border: 1px solid var(--rime-soft);
+  border-radius: var(--radius-card);
+  padding: 20px;
+}
+
+/* Badges */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* Inputs */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--frost);
+}
+
+.field .hint {
+  font-size: 12px;
+  color: var(--shadow);
+}
+
+.input,
+textarea.input {
+  background: var(--surface-02);
+  border: 1px solid var(--rime);
+  border-radius: var(--radius-sm);
+  color: var(--frost);
+  height: 38px;
+  padding: 0 12px;
+}
+
+textarea.input {
+  height: auto;
+  padding: 10px 12px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.input:focus,
+textarea.input:focus,
+.btn:focus-visible {
+  outline: 2px solid var(--bifrost);
+  outline-offset: 2px;
+}

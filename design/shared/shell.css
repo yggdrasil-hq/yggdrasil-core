@@ -1,0 +1,256 @@
+/*
+  Shared page-chrome styles: the project sidebar shell (used on
+  /projects/:id/**) and the hub header (used on hub-level pages like
+  /projects, /notifications, /settings/account).
+  Mirrors web/components/app-shell/* and web/components/app-shell/hub-layout.tsx.
+*/
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+.logo .mark {
+  font-family: var(--font-display);
+  font-size: 1.32em;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  color: var(--bifrost);
+  margin-right: -0.09em;
+}
+
+.logo .gg {
+  color: var(--bifrost);
+}
+
+.logo .drasil {
+  color: var(--frost);
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface-03);
+  color: var(--bifrost);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+
+/* Project shell: fixed sidebar + content column */
+
+.shell {
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 256px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--rime-soft);
+  background: var(--surface-01);
+}
+
+.sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  border-bottom: 1px solid var(--rime-soft);
+}
+
+.sidebar-project {
+  margin: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface-02);
+  border: 1px solid var(--rime);
+  border-radius: var(--radius-sm);
+  padding: 0 12px;
+  height: 38px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--mist);
+}
+
+.nav-link .icon {
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.nav-link.active {
+  background: var(--surface-03);
+  color: var(--frost);
+}
+
+.sidebar-foot {
+  border-top: 1px solid var(--rime-soft);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  margin-top: 8px;
+}
+
+.sidebar-user .name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--frost);
+}
+
+.sidebar-user .handle {
+  font-size: 12px;
+  color: var(--shadow);
+}
+
+.main {
+  margin-left: 256px;
+  min-height: 100vh;
+}
+
+.main-inner {
+  max-width: var(--maxw);
+  padding: 32px;
+}
+
+/* Hub layout: top bar, centered column, no sidebar */
+
+.hub-header {
+  border-bottom: 1px solid var(--rime-soft);
+  background: rgba(14, 19, 27, 0.95);
+}
+
+.hub-header-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.hub-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hub-nav a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--mist);
+}
+
+.hub-nav a.active,
+.hub-nav a:hover {
+  background: var(--surface-02);
+  color: var(--frost);
+}
+
+.hub-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.hub-page-title {
+  margin-bottom: 32px;
+}
+
+.hub-page-title h1 {
+  font-family: var(--font-display, var(--font-sans));
+}
+
+.hub-page-title p {
+  margin-top: 8px;
+  max-width: 640px;
+  font-size: 14px;
+}
+
+/* Page header used inside project shell content */
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.page-header h1 {
+  font-size: 28px;
+}
+
+.page-header p {
+  margin-top: 6px;
+  font-size: 14px;
+}
+
+.design-note {
+  max-width: var(--maxw);
+  margin: 0 auto 24px;
+  padding: 10px 16px;
+  border: 1px dashed var(--rime);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--shadow);
+}
+
+.design-note b {
+  color: var(--mist);
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    display: none;
+  }
+  .main {
+    margin-left: 0;
+  }
+}

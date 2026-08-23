@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Feature detail — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--mist); margin-bottom: 12px; }
+    .detail-title { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+    .detail-title h1 { font-size: 24px; }
+
+    .state-tabs {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--rime-soft);
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+    .state-tab {
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--mist);
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      cursor: pointer;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+    }
+    .state-tab.active {
+      color: var(--frost);
+      border-bottom-color: var(--bifrost);
+    }
+    .state-panel { display: none; }
+    .state-panel.active { display: block; }
+
+    section.block { border: 1px solid var(--rime); background: var(--surface-01); border-radius: var(--radius-card); padding: 24px; margin-bottom: 20px; }
+    section.block h2 { font-size: 16px; margin-bottom: 4px; }
+
+    /* Spec grill (chat) */
+    .grill-log { display: flex; flex-direction: column; gap: 12px; max-height: 380px; overflow-y: auto; margin-top: 16px; }
+    .bubble { width: 90%; border: 1px solid var(--rime-soft); background: var(--surface-02); border-radius: var(--radius-sm); padding: 12px; }
+    .bubble .who { font-size: 11px; color: var(--shadow); font-weight: 500; margin-bottom: 4px; }
+    .bubble.user { align-self: flex-end; background: var(--surface-03); border-color: var(--rime); }
+    .bubble p { color: var(--frost); font-size: 14px; line-height: 1.5; }
+    .grill-reply { display: flex; gap: 8px; margin-top: 16px; }
+    .grill-reply .input { flex: 1; }
+
+    /* ADR split view */
+    .adr-split { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--rime); border-radius: var(--radius-card); overflow: hidden; height: 420px; }
+    .adr-editor, .adr-preview { padding: 16px; overflow-y: auto; }
+    .adr-editor { background: var(--surface-02); border-right: 1px solid var(--rime-soft); font-family: var(--font-mono); font-size: 13px; color: var(--frost); white-space: pre-wrap; }
+    .adr-preview { background: var(--surface-02); color: var(--mist); font-size: 14px; line-height: 1.6; }
+    .adr-preview h3 { font-size: 15px; margin-bottom: 6px; margin-top: 16px; }
+    .adr-preview h3:first-child { margin-top: 0; }
+    .adr-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+
+    /* Build progress */
+    .build-status { display: flex; align-items: center; gap: 12px; border: 1px solid var(--rime-soft); background: var(--surface-02); border-radius: var(--radius-sm); padding: 16px; margin-top: 16px; }
+    .dots { display: inline-flex; gap: 4px; }
+    .dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--mist); }
+
+    /* Failed */
+    .failed-block { border-color: rgba(224,108,117,0.3); background: rgba(224,108,117,0.08); }
+    .failed-log { margin-top: 12px; background: var(--surface-02); border-radius: var(--radius-sm); padding: 12px; font-family: var(--font-mono); font-size: 12px; color: var(--st-rejected); }
+
+    /* PR link */
+    .pr-link { color: var(--bifrost); font-size: 14px; margin-top: 8px; display: inline-block; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+      <a class="sidebar-project" href="/projects/index.html">
+        <span>Acme Storefront</span>
+        <span class="text-shadow">&#8964;</span>
+      </a>
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/projects/detail/index.html"><span class="icon">&#8962;</span> Home</a>
+        <a class="nav-link active" href="/projects/detail/features/index.html"><span class="icon">&#9638;</span> Features</a>
+        <a class="nav-link" href="/projects/detail/tests/index.html"><span class="icon">&#9879;</span> Tests</a>
+        <a class="nav-link" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
+      </nav>
+      <div class="sidebar-foot">
+        <a class="nav-link" href="/projects/detail/settings/index.html"><span class="icon">&#9881;</span> Settings</a>
+        <button class="btn btn-outline" type="button" style="justify-content:flex-start; width:100%;">Log out</button>
+        <a class="sidebar-user" href="/settings/account/index.html">
+          <span class="avatar">SC</span>
+          <span>
+            <div class="name">Sarat Chandra</div>
+            <div class="handle">@saratc</div>
+          </span>
+        </a>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="main-inner">
+        <div class="design-note">
+          <b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/features/:featureId</span> (web/app/projects/[projectId]/features/[featureId]/page.tsx) ·
+          the real page only ever shows <b>one</b> of these sections at a time, driven by feature status — the tabs below are a
+          design-time convenience to review every state on one file. Save/Approve/Retry/Cancel/Send are all inert.
+        </div>
+
+        <a class="back-link" href="/projects/detail/features/index.html">&larr; Back to features</a>
+        <div class="detail-title">
+          <h1>Saved payment methods</h1>
+          <span class="badge" style="background:#4f9bf022; color:#4f9bf0;">In Progress</span>
+        </div>
+
+        <div class="state-tabs">
+          <button class="state-tab active" type="button" data-tab="draft">Draft — spec grill</button>
+          <button class="state-tab" type="button" data-tab="spec_ready">Spec Ready — ADR review</button>
+          <button class="state-tab" type="button" data-tab="building">Queued / Running — build</button>
+          <button class="state-tab" type="button" data-tab="failed">Failed</button>
+          <button class="state-tab" type="button" data-tab="done">Approved — pull request</button>
+        </div>
+
+        <div class="state-panel active" id="panel-draft">
+          <section class="block">
+            <div class="adr-toolbar">
+              <h2>Spec grill in progress</h2>
+              <button class="btn btn-outline btn-sm" type="button">Cancel</button>
+            </div>
+            <div class="grill-log">
+              <div class="bubble">
+                <div class="who">Agent</div>
+                <p>I'll spec out saved payment methods. First — should we support more than one saved card per customer, or just one?</p>
+              </div>
+              <div class="bubble user">
+                <div class="who">You</div>
+                <p>Multiple cards, with one marked default.</p>
+              </div>
+              <div class="bubble">
+                <div class="who">Agent</div>
+                <p>Got it. I'll use a Stripe SetupIntent to tokenize the card without touching raw PAN data, store only the Stripe payment_method id + last4/brand, and add a `default_payment_method_id` on the customer record. Should removing the default card auto-promote another saved card, or require the customer to pick a new default first?</p>
+              </div>
+            </div>
+            <div class="grill-reply">
+              <input class="input" placeholder="Type your reply…" />
+              <button class="btn btn-primary" type="button">Send</button>
+            </div>
+          </section>
+        </div>
+
+        <div class="state-panel" id="panel-spec_ready">
+          <section class="block">
+            <div class="adr-toolbar">
+              <h2>Feature ADR</h2>
+              <div style="display:flex; gap:8px;">
+                <button class="btn btn-outline btn-sm" type="button">Save edits</button>
+                <button class="btn btn-primary btn-sm" type="button">Approve ADR</button>
+              </div>
+            </div>
+            <div class="adr-split">
+              <div class="adr-editor"># ADR: Saved payment methods
+
+## Context
+Customers re-enter card details on every purchase.
+Repeat customers should be able to save a card.
+
+## Decision
+- Use Stripe SetupIntent to tokenize
+- Store payment_method id + last4/brand only
+- One card may be marked `default`
+</div>
+              <div class="adr-preview">
+                <h3>ADR: Saved payment methods</h3>
+                <p><b>Context</b><br/>Customers re-enter card details on every purchase. Repeat customers should be able to save a card.</p>
+                <h3>Decision</h3>
+                <p>Use Stripe SetupIntent to tokenize. Store payment_method id + last4/brand only. One card may be marked default.</p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="state-panel" id="panel-building">
+          <section class="block">
+            <h2>Build in progress</h2>
+            <div class="build-status">
+              <span class="dots"><span></span><span></span><span></span></span>
+              <p class="text-mist" style="font-size:14px;">Agent is building… (4m 12s elapsed)</p>
+            </div>
+            <p class="text-shadow" style="font-size:12px; margin-top:12px;">Detailed step-by-step agent output isn't relayed yet — you'll see the result (success, failure, or a pull request) as soon as the run ends.</p>
+          </section>
+        </div>
+
+        <div class="state-panel" id="panel-failed">
+          <section class="block failed-block">
+            <h2>This feature failed</h2>
+            <p style="color: var(--mist); margin-top:4px;">The build didn't complete successfully.</p>
+            <div class="failed-log">Error: pi container exited 137 (OOMKilled) after 11m32s during `npm run build`</div>
+            <button class="btn btn-primary btn-sm" style="margin-top:16px;" type="button">Retry build</button>
+          </section>
+        </div>
+
+        <div class="state-panel" id="panel-done">
+          <section class="block">
+            <h2>Feature ADR</h2>
+            <div class="adr-preview" style="margin-top:12px; border-radius: var(--radius-sm); padding:16px;">
+              <h3>ADR: Saved payment methods</h3>
+              <p>Use Stripe SetupIntent to tokenize. Store payment_method id + last4/brand only. One card may be marked default. Removing the default requires picking a new one first.</p>
+            </div>
+          </section>
+          <section class="block">
+            <h2>Pull request</h2>
+            <a class="pr-link" href="#">https://github.com/acme/storefront/pull/482</a>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll(".state-tab").forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        document.querySelectorAll(".state-tab").forEach(function (t) { t.classList.remove("active"); });
+        document.querySelectorAll(".state-panel").forEach(function (p) { p.classList.remove("active"); });
+        tab.classList.add("active");
+        document.getElementById("panel-" + tab.dataset.tab).classList.add("active");
+      });
+    });
+  </script>
+</body>
+</html>

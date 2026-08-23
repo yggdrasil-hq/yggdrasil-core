@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Features — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .toolbar {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .toolbar-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 220px;
+    }
+    .search-wrap .icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--shadow);
+      font-size: 13px;
+    }
+    .search-wrap .input {
+      width: 100%;
+      padding-left: 34px;
+    }
+    .sort-select {
+      min-width: 200px;
+    }
+    .status-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .pill {
+      border: 1px solid var(--rime);
+      background: var(--surface-01);
+      color: var(--mist);
+      border-radius: var(--radius-pill);
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: default;
+    }
+    .status-group {
+      margin-bottom: 32px;
+    }
+    .status-group-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .status-group-head h2 {
+      font-size: 15px;
+    }
+    .status-group-head .count {
+      font-size: 12px;
+      color: var(--shadow);
+    }
+    .status-group-head .chevron {
+      color: var(--shadow);
+      font-size: 12px;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .feature-card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      height: 100%;
+    }
+    .feature-card .title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--frost);
+    }
+    .feature-card .excerpt {
+      font-size: 13px;
+      color: var(--mist);
+      line-height: 1.5;
+    }
+    .feature-card .foot {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .feature-card .updated {
+      font-size: 11px;
+      color: var(--shadow);
+    }
+    .page-header .field.inline {
+      flex-direction: row;
+      gap: 8px;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+      <a class="sidebar-project" href="/projects/index.html">
+        <span>Acme Storefront</span>
+        <span class="text-shadow">&#8964;</span>
+      </a>
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/projects/detail/index.html"><span class="icon">&#8962;</span> Home</a>
+        <a class="nav-link active" href="/projects/detail/features/index.html"><span class="icon">&#9638;</span> Features</a>
+        <a class="nav-link" href="/projects/detail/tests/index.html"><span class="icon">&#9879;</span> Tests</a>
+        <a class="nav-link" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
+      </nav>
+      <div class="sidebar-foot">
+        <a class="nav-link" href="/projects/detail/settings/index.html"><span class="icon">&#9881;</span> Settings</a>
+        <button class="btn btn-outline" type="button" style="justify-content:flex-start; width:100%;">Log out</button>
+        <a class="sidebar-user" href="/settings/account/index.html">
+          <span class="avatar">SC</span>
+          <span>
+            <div class="name">Sarat Chandra</div>
+            <div class="handle">@saratc</div>
+          </span>
+        </a>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="main-inner">
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/features</span> (web/app/projects/[projectId]/features/page.tsx) · search/sort/filter/"New Feature" are inert</div>
+
+        <div class="page-header">
+          <div>
+            <p class="text-shadow" style="font-size:11px; text-transform:uppercase; letter-spacing:0.14em;">Project</p>
+            <h1>Features</h1>
+            <p>Storefront checkout revamp and supporting catalog work.</p>
+          </div>
+          <button class="btn btn-primary" type="button">+ New Feature</button>
+        </div>
+
+        <div class="toolbar">
+          <div class="toolbar-row">
+            <div class="search-wrap">
+              <span class="icon">&#128269;</span>
+              <input class="input" placeholder="Search features…" />
+            </div>
+            <button class="btn btn-outline sort-select" type="button">Updated (newest) &#9662;</button>
+          </div>
+          <div class="status-pills">
+            <button class="pill" type="button">Draft</button>
+            <button class="pill" type="button">Ready to Work On</button>
+            <button class="pill" type="button">In Progress</button>
+            <button class="pill" type="button">Needs Input</button>
+            <button class="pill" type="button">Agent Review</button>
+            <button class="pill" type="button">In Review</button>
+            <button class="pill" type="button">Approved</button>
+            <button class="pill" type="button">Rejected</button>
+            <button class="pill" type="button">Failed</button>
+          </div>
+        </div>
+
+        <section class="status-group">
+          <div class="status-group-head">
+            <span class="chevron">&#9660;</span>
+            <h2>Needs Input</h2>
+            <span class="badge" style="background:#e2a13c22; color:#e2a13c;">Needs Input</span>
+            <span class="count">1</span>
+          </div>
+          <div class="feature-grid">
+            <a class="card feature-card" href="/projects/detail/features/detail/index.html">
+              <div class="title">Guest checkout autofill</div>
+              <div class="excerpt">Prefill shipping/billing from a returning guest's last order via a signed cookie, no account required.</div>
+              <div class="foot">
+                <span class="updated">Updated 12 minutes ago</span>
+                <span class="badge" style="background:#e2a13c22; color:#e2a13c;">Needs Input</span>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        <section class="status-group">
+          <div class="status-group-head">
+            <span class="chevron">&#9660;</span>
+            <h2>In Progress</h2>
+            <span class="badge" style="background:#4f9bf022; color:#4f9bf0;">In Progress</span>
+            <span class="count">2</span>
+          </div>
+          <div class="feature-grid">
+            <a class="card feature-card" href="/projects/detail/features/detail/index.html">
+              <div class="title">Saved payment methods</div>
+              <div class="excerpt">Let a signed-in customer store a card via Stripe SetupIntent and pick it at checkout.</div>
+              <div class="foot">
+                <span class="updated">Updated 3 minutes ago</span>
+                <span class="badge" style="background:#4f9bf022; color:#4f9bf0;">In Progress</span>
+              </div>
+            </a>
+            <a class="card feature-card" href="/projects/detail/features/detail/index.html">
+              <div class="title">Cart abandonment email trigger</div>
+              <div class="excerpt">Fire a webhook to the email service 1h after a cart goes idle with items in it.</div>
+              <div class="foot">
+                <span class="updated">Updated 40 minutes ago</span>
+                <span class="badge" style="background:#4f9bf022; color:#4f9bf0;">In Progress</span>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        <section class="status-group">
+          <div class="status-group-head">
+            <span class="chevron">&#9660;</span>
+            <h2>Agent Review</h2>
+            <span class="badge" style="background:#9b8cf022; color:#9b8cf0;">Agent Review</span>
+            <span class="count">1</span>
+          </div>
+          <div class="feature-grid">
+            <a class="card feature-card" href="/projects/detail/features/detail/index.html">
+              <div class="title">Order history pagination</div>
+              <div class="excerpt">Cursor-paginate the account order history endpoint; current implementation loads all rows.</div>
+              <div class="foot">
+                <span class="updated">Updated 1 hour ago</span>
+                <span class="badge" style="background:#9b8cf022; color:#9b8cf0;">Agent Review</span>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        <section class="status-group">
+          <div class="status-group-head">
+            <span class="chevron">&#9660;</span>
+            <h2>Ready to Work On</h2>
+            <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Ready to Work On</span>
+            <span class="count">2</span>
+          </div>
+          <div class="feature-grid">
+            <a class="card feature-card" href="/projects/detail/features/detail/index.html">
+              <div class="title">Discount code stacking rules</div>
+              <div class="excerpt">Define which promo codes can combine with a site-wide sale banner and which can't.</div>
+              <div class="foot">
+                <span class="updated">Updated 2 hours ago</span>
+                <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Ready to Work On</span>
+              </div>
+            </a>
+            <a class="card feature-card" href="/projects/detail/features/detail/index.html">
+              <div class="title">Low-stock badge on PDP</div>
+              <div class="excerpt">Show "Only 3 left" on the product detail page when inventory drops below a configurable threshold.</div>
+              <div class="foot">
+                <span class="updated">Updated 5 hours ago</span>
+                <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Ready to Work On</span>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        <section class="status-group">
+          <div class="status-group-head">
+            <span class="chevron">&#9660;</span>
+            <h2>Approved</h2>
+            <span class="badge" style="background:#46c28522; color:#46c285;">Approved</span>
+            <span class="count">1</span>
+          </div>
+          <div class="feature-grid">
+            <a class="card feature-card" href="/projects/detail/features/detail/index.html">
+              <div class="title">Wishlist sync across devices</div>
+              <div class="excerpt">Move wishlist storage from localStorage to the account so it follows the customer across devices.</div>
+              <div class="foot">
+                <span class="updated">Updated yesterday</span>
+                <span class="badge" style="background:#46c28522; color:#46c285;">Approved</span>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        <section class="status-group">
+          <div class="status-group-head">
+            <span class="chevron">&#9660;</span>
+            <h2>Draft</h2>
+            <span class="badge" style="background:#6b7a8a22; color:#6b7a8a;">Draft</span>
+            <span class="count">1</span>
+          </div>
+          <div class="feature-grid">
+            <a class="card feature-card" href="/projects/detail/features/detail/index.html">
+              <div class="title">Bulk order CSV export</div>
+              <div class="excerpt">Let an admin export a date-ranged order report as CSV from the merchant dashboard.</div>
+              <div class="foot">
+                <span class="updated">Updated 2 days ago</span>
+                <span class="badge" style="background:#6b7a8a22; color:#6b7a8a;">Draft</span>
+              </div>
+            </a>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Project home — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .project-top { border-bottom: 1px solid var(--rime-soft); padding: 20px 32px; margin: -32px -32px 24px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .eyebrow { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em; color: var(--shadow); }
+    .project-top h1 { font-size: 22px; margin-top: 2px; }
+    .project-top p { margin-top: 4px; font-size: 14px; }
+    .content-stack { display: flex; flex-direction: column; gap: 24px; }
+    .deploy-panel { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .deploy-panel h2 { font-size: 16px; }
+    .deploy-status { margin-top: 16px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--rime-soft); border-radius: var(--radius-sm); background: var(--surface-02); padding: 14px; }
+    .counts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .counts-grid .card .num { font-size: 32px; font-weight: 600; color: var(--frost); margin: 4px 0; }
+    .queue-card .queue-head { padding-bottom: 8px; }
+    .queue-list { border-top: 1px solid var(--rime-soft); margin-top: 12px; }
+    .queue-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 4px; border-bottom: 1px solid var(--rime-soft); }
+    .queue-row .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--shadow); }
+    .queue-row .title { font-size: 14px; font-weight: 500; color: var(--frost); margin-top: 2px; }
+    .queue-row .waiting { font-size: 12px; color: var(--shadow); margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+      <a class="sidebar-project" href="/projects/index.html">
+        <span>Acme Storefront</span>
+        <span class="text-shadow">&#8964;</span>
+      </a>
+      <nav class="sidebar-nav">
+        <a class="nav-link active" href="/projects/detail/index.html"><span class="icon">&#8962;</span> Home</a>
+        <a class="nav-link" href="/projects/detail/features/index.html"><span class="icon">&#9638;</span> Features</a>
+        <a class="nav-link" href="/projects/detail/tests/index.html"><span class="icon">&#9879;</span> Tests</a>
+        <a class="nav-link" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
+      </nav>
+      <div class="sidebar-foot">
+        <a class="nav-link" href="/projects/detail/settings/index.html"><span class="icon">&#9881;</span> Settings</a>
+        <button class="btn btn-outline" type="button" style="justify-content:flex-start; width:100%;"><span class="icon">&#9211;</span> Log out</button>
+        <a class="sidebar-user" href="/settings/account/index.html">
+          <span class="avatar">SC</span>
+          <span>
+            <div class="name">Sarat Chandra</div>
+            <div class="handle">@saratc</div>
+          </span>
+        </a>
+      </div>
+    </aside>
+    <div class="main">
+      <div class="main-inner">
+        <div class="project-top">
+          <div>
+            <p class="eyebrow">Project home</p>
+            <h1>Acme Storefront</h1>
+            <p class="text-mist">Customer-facing storefront and checkout for Acme Retail.</p>
+          </div>
+          <a class="btn btn-outline" href="/projects/detail/features/index.html">View features</a>
+        </div>
+
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId</span> (web/components/projects/project-home-client.tsx) · shows the "ready" state (deploy panel visible); the "initializing" banner isn't mocked here</div>
+
+        <div class="content-stack">
+          <div class="card">
+            <div class="deploy-panel">
+              <h2>Deployment</h2>
+              <button class="btn btn-outline btn-sm" type="button">Deploy now</button>
+            </div>
+            <div class="deploy-status">
+              <span style="color:#46c285; font-size:14px;">Deployed 12m ago</span>
+              <a href="#" style="color:var(--bifrost); font-size:14px;">Open deployment &#8599;</a>
+            </div>
+          </div>
+
+          <div class="counts-grid">
+            <div class="card">
+              <p class="text-mist" style="font-size:13px;">Planned</p>
+              <div class="num">4</div>
+              <p class="text-shadow" style="font-size:12px;">Spec grill or ADR review</p>
+            </div>
+            <div class="card">
+              <p class="text-mist" style="font-size:13px;">Being worked on</p>
+              <div class="num">2</div>
+              <p class="text-shadow" style="font-size:12px;">Build dispatched or in review</p>
+            </div>
+            <div class="card">
+              <p class="text-mist" style="font-size:13px;">Completed</p>
+              <div class="num">17</div>
+              <p class="text-shadow" style="font-size:12px;">Merged or cancelled</p>
+            </div>
+          </div>
+
+          <div class="card queue-card">
+            <div class="queue-head">
+              <h2 style="font-size:16px;">Action queue</h2>
+              <p class="text-mist" style="font-size:13px; margin-top:2px;">Items blocking progress, oldest first.</p>
+            </div>
+            <div class="queue-list">
+              <a class="queue-row" href="/projects/detail/features/detail/index.html" style="text-decoration:none;">
+                <div>
+                  <div class="label">Needs your input</div>
+                  <div class="title">Guest checkout</div>
+                  <div class="waiting">Waiting 3 hours ago</div>
+                </div>
+                <span class="text-shadow">&#8594;</span>
+              </a>
+              <a class="queue-row" href="/projects/detail/features/detail/index.html" style="text-decoration:none;">
+                <div>
+                  <div class="label">Spec ready for review</div>
+                  <div class="title">Add saved payment methods</div>
+                  <div class="waiting">Waiting 1 day ago</div>
+                </div>
+                <span class="text-shadow">&#8594;</span>
+              </a>
+              <a class="queue-row" href="/projects/detail/tests/detail/index.html" style="text-decoration:none; border-bottom:none;">
+                <div>
+                  <div class="label">Test failed</div>
+                  <div class="title">Checkout regression suite</div>
+                  <div class="waiting">Waiting 1 hour ago</div>
+                </div>
+                <span class="text-shadow">&#8594;</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

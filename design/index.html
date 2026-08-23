@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Yggdrasil — Design Index</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .wrap { max-width: 720px; margin: 0 auto; padding: 64px 24px; }
+    .wrap > .logo { margin-bottom: 8px; }
+    .wrap h1 { margin-top: 16px; font-size: 28px; }
+    .wrap > p { margin-top: 10px; max-width: 520px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 32px; font-size: 14px; }
+    th { text-align: left; color: var(--shadow); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; padding: 8px 12px; border-bottom: 1px solid var(--rime-soft); }
+    td { padding: 10px 12px; border-bottom: 1px solid var(--rime-soft); }
+    td a { color: var(--bifrost); }
+    td.route { color: var(--mist); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+    <h1>Design wireframes</h1>
+    <p>Static HTML/CSS mockups of every page in <span class="mono">web/</span>, one file per route, no app logic. See <span class="mono">design/README.md</span> for the mapping and how to use these with an agent.</p>
+    <p style="margin-top: 12px;">The real <span class="mono">/</span> route renders nothing client-side — middleware redirects signed-out visitors to <a href="/login/index.html" style="color: var(--bifrost);">/login</a> and signed-in visitors to <a href="/projects/index.html" style="color: var(--bifrost);">/projects</a>.</p>
+
+    <table>
+      <thead>
+        <tr><th>Page</th><th>Route</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><a href="/login/index.html">Sign in</a></td><td class="route">/login</td></tr>
+        <tr><td><a href="/projects/index.html">Projects (hub)</a></td><td class="route">/projects</td></tr>
+        <tr><td><a href="/projects/new/index.html">New project</a></td><td class="route">/projects/new</td></tr>
+        <tr><td><a href="/projects/detail/index.html">Project home</a></td><td class="route">/projects/:projectId</td></tr>
+        <tr><td><a href="/projects/detail/features/index.html">Features list</a></td><td class="route">/projects/:projectId/features</td></tr>
+        <tr><td><a href="/projects/detail/features/detail/index.html">Feature detail</a></td><td class="route">/projects/:projectId/features/:featureId</td></tr>
+        <tr><td><a href="/projects/detail/tests/index.html">Tests list</a></td><td class="route">/projects/:projectId/tests</td></tr>
+        <tr><td><a href="/projects/detail/tests/new/index.html">New test</a></td><td class="route">/projects/:projectId/tests/new</td></tr>
+        <tr><td><a href="/projects/detail/tests/detail/index.html">Test detail</a></td><td class="route">/projects/:projectId/tests/:testId</td></tr>
+        <tr><td><a href="/projects/detail/settings/index.html">Project settings</a></td><td class="route">/projects/:projectId/settings</td></tr>
+        <tr><td><a href="/notifications/index.html">Notifications</a></td><td class="route">/notifications</td></tr>
+        <tr><td><a href="/settings/account/index.html">Account settings</a></td><td class="route">/settings/account</td></tr>
+        <tr><td><a href="/onboarding/confirm-username/index.html">Confirm username</a></td><td class="route">/onboarding/confirm-username</td></tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
