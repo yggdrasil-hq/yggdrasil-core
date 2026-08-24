@@ -56,6 +56,15 @@ trusts `X-Forwarded-*` headers.
 docker compose -f deploy/docker-compose.prod.yml up --build -d
 ```
 
+## Self-hosting without cloning submodules
+
+`docker-compose.prod.yml` above builds each service from a checked-out
+submodule. If you'd rather pull prebuilt images (published to `ghcr.io` by
+each service's CI on every push to `main`) instead of building from source,
+see the "Self-hosting from published images" section in
+[`../docs/conventions/deploy.md`](../docs/conventions/deploy.md#self-hosting-from-published-images-ghcrio)
+for image names, required env vars, ports, and a starter compose snippet.
+
 ## Docs
 
 Full conventions: [`../docs/conventions/deploy.md`](../docs/conventions/deploy.md)

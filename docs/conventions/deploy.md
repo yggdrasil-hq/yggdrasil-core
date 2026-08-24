@@ -122,9 +122,120 @@ Run `./setup.sh` from the meta repo root to copy each `.env.example` → `.env`
 - **Submodules:** `.env` — app-specific vars; root compose passes infra URLs via
   `env_file` and `environment`
 
+## Self-hosting from published images (ghcr.io)
+
+Every control-plane service's CI (`.github/workflows/build-and-push.yml`,
+per-repo) builds `deploy/Dockerfile.prod` and pushes it to GHCR on every push
+to `main`. A self-hoster can run these images directly instead of cloning the
+submodules and building `docker-compose.prod.yml` from source.
+
+| Service | Image | Container port | Notes |
+|---------|-------|-----------------|-------|
+| web | `ghcr.io/yggdrasil-hq/yggdrasil-web` | `3000` | Next.js standalone server |
+| api | `ghcr.io/yggdrasil-hq/yggdrasil-api` | `3000` | needs Postgres + S3-compatible storage |
+| orchestrator | `ghcr.io/yggdrasil-hq/yggdrasil-orchestrator` | `8080` | needs a `KUBECONFIG` for its target cluster (ADR 003) |
+| landing | `ghcr.io/yggdrasil-hq/yggdrasil-landing` | `3000` | no app-specific config |
+| docusaurus | `ghcr.io/yggdrasil-hq/yggdrasil-docusaurus` | `3000` | static docs site behind `serve` |
+
+Tags: `latest` (most recent `main` build) or `sha-<8-char-commit-sha>` (pin to
+a specific build). No `vX.Y.Z` release tags exist yet.
+
+**GHCR packages default to private.** Until the images are made public,
+pulling them needs a GitHub PAT with `read:packages` scope:
+
+```bash
+echo "$GHCR_PAT" | docker login ghcr.io -u <github-username> --password-stdin
+```
+
+### Required configuration per image
+
+Env vars below are the ones each service actually reads at runtime (see each
+submodule's `.env.example` for the full, commented list):
+
+- **api** — `PORT`, `DATABASE_URL` (Postgres), `S3_ENDPOINT`/`S3_ACCESS_KEY`/`S3_SECRET_KEY`/`S3_BUCKET`/`S3_REGION`, `SESSION_SECRET`,
+  `APP_PUBLIC_URL`/`API_PUBLIC_URL`, `GITHUB_CLIENT_ID`/`GITHUB_CLIENT_SECRET` (sign-in, ADR 009 — required),
+  `SECRETS_ENCRYPTION_KEY` (32-byte base64, `openssl rand -base64 32`), `INTERNAL_API_TOKEN` (shared with orchestrator),
+  `APPS_BASE_DOMAIN` (must match the orchestrator's value exactly).
+- **web** — `NEXT_PUBLIC_API_BASE_URL` (browser-facing API path/URL), `API_INTERNAL_URL` (server-side, reaches `api` directly), `NEXT_PUBLIC_BASE_PATH` (empty for a subdomain deploy).
+- **orchestrator** — `PORT`, `DATABASE_URL` (same Postgres as api, shared `jobs` table), `KUBECONFIG` (unset to use in-cluster config), `API_INTERNAL_URL`/`INTERNAL_API_TOKEN` (shared with api), `APPS_BASE_DOMAIN`/`INGRESS_CLASS_NAME`/`CERT_ISSUER_NAME`, and the per-job-kind images (`SPEC_GRILL_IMAGE`/`FEATURE_BUILD_IMAGE`/`TEST_RUN_IMAGE`, from `ghcr.io/yggdrasil-hq/yggdrasil-agent-images` — also private by default, so the target cluster needs an `imagePullSecret` too).
+- **landing** — none.
+- **docusaurus** — `DOCS_BASE_URL` (`/` for a subdomain deploy), `DOCS_SITE_URL`.
+
+### Minimal compose snippet (images only, no build context)
+
+```yaml
+services:
+  api:
+    image: ghcr.io/yggdrasil-hq/yggdrasil-api:latest
+    environment:
+      PORT: "3000"
+      DATABASE_URL: postgresql://user:pass@postgres:5432/yggdrasil
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: change-me
+      S3_BUCKET: yggdrasil
+      S3_REGION: us-east-1
+      SESSION_SECRET: change-me
+      APP_PUBLIC_URL: https://app.example.com
+      API_PUBLIC_URL: https://api.example.com
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      SECRETS_ENCRYPTION_KEY: ${SECRETS_ENCRYPTION_KEY}
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN}
+      APPS_BASE_DOMAIN: apps.example.com
+    ports:
+      - "3001:3000"
+
+  web:
+    image: ghcr.io/yggdrasil-hq/yggdrasil-web:latest
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: https://api.example.com
+      API_INTERNAL_URL: http://api:3000
+      NEXT_PUBLIC_BASE_PATH: ""
+    ports:
+      - "3000:3000"
+
+  landing:
+    image: ghcr.io/yggdrasil-hq/yggdrasil-landing:latest
+    ports:
+      - "3002:3000"
+
+  docusaurus:
+    image: ghcr.io/yggdrasil-hq/yggdrasil-docusaurus:latest
+    environment:
+      DOCS_BASE_URL: "/"
+      DOCS_SITE_URL: https://docs.example.com
+    ports:
+      - "3003:3000"
+
+  orchestrator:
+    image: ghcr.io/yggdrasil-hq/yggdrasil-orchestrator:latest
+    environment:
+      DATABASE_URL: postgresql://user:pass@postgres:5432/yggdrasil
+      API_INTERNAL_URL: http://api:3000
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN}
+      APPS_BASE_DOMAIN: apps.example.com
+    volumes:
+      - ~/.kube/config:/root/.kube/config:ro
+    ports:
+      - "8080:8080"
+```
+
+This is a starting point, not a drop-in replacement for
+`docker-compose.prod.yml` — it omits nginx/TLS termination, Postgres/MinIO
+themselves, and the bundled/target Kubernetes cluster the orchestrator needs
+(see "Kubernetes cluster" above). Front it with your own reverse proxy/TLS and
+point `*_PUBLIC_URL` at the real public hostnames.
+
 ## Dev hot reload
 
-Bind-mount source; named volumes for `node_modules` (Node) and Go module cache.
+Bind-mount source; named volumes for `node_modules` (Node), Go module cache,
+and each app's framework build-output dir (`.next` for web/landing,
+`.docusaurus`/`build` for docusaurus). The build-output dirs need their own
+volumes too, not just `node_modules` — dev containers run as root, and
+without a volume there the framework's dev/build process writes those dirs
+straight onto the bind-mounted host source tree, leaving them root-owned and
+breaking host-side builds/`rm` until manually chowned.
 
 ## Open / TODO
 

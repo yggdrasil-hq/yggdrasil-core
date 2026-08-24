@@ -78,6 +78,7 @@ services:
     volumes:
       - ../web:/app
       - web_node_modules:/app/node_modules
+      - web_next:/app/.next
     depends_on:
       - api
 
@@ -90,6 +91,7 @@ services:
     volumes:
       - ../landing:/app
       - landing_node_modules:/app/node_modules
+      - landing_next:/app/.next
 
   docusaurus:
     build:
@@ -102,6 +104,8 @@ services:
     volumes:
       - ../docusaurus:/app
       - docusaurus_node_modules:/app/node_modules
+      - docusaurus_cache:/app/.docusaurus
+      - docusaurus_build:/app/build
 
   orchestrator:
     build:
@@ -219,8 +223,12 @@ volumes:
   minio_data:
   api_node_modules:
   web_node_modules:
+  web_next:
   landing_node_modules:
+  landing_next:
   docusaurus_node_modules:
+  docusaurus_cache:
+  docusaurus_build:
   orchestrator_go_pkg:
   k3s_data:
   k3s_kubeconfig:
