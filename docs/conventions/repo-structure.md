@@ -17,6 +17,8 @@ yggdrasil-core/            (meta repo — GitHub: yggdrasil-hq/yggdrasil-core)
 ├── AGENTS.md              pointer → CLAUDE.md
 ├── docs/                  suite-wide agent/developer docs
 │   ├── overview/  components/  concepts/  roadmap/  conventions/
+├── design/                static wireframes of the Web app's own pages
+│   └── ...                (docs/conventions/design-wireframes.md)
 ├── templates/child-repo/  scaffold to drop into each new submodule
 ├── web/           → submodule (web/CLAUDE.md, web/docs/…)
 ├── api/           → submodule

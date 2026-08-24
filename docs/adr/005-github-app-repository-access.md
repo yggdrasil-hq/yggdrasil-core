@@ -59,6 +59,16 @@ Both registrations are required at instance setup. See `docs/concepts/github-app
    - **Metadata:** Read
    - **Contents:** Read & write
    - **Pull requests:** Read & write
+   - **Workflows:** Read & write. **Amended 2026-08-24:** added after a real
+     `feature_build` push failure — GitHub enforces Workflows as a permission
+     separate from Contents for any create/update under `.github/workflows/`,
+     rejecting the push server-side even with Contents write granted. Existing
+     installations need an org admin to re-accept the updated permission set
+     (GitHub prompts for this; no reinstall). `feature_build`'s installation
+     token must also request `workflows: "write"` explicitly
+     (`api/src/features/internal-routes.ts`) since it mints a scoped-down
+     token rather than inheriting the App's full permission set — see
+     `docs/concepts/github-app.md`.
 4. Credentials: app ID, private key (PEM), webhook secret. Env vars on the API.
 5. Webhook URL: `POST /api/webhooks/github`. Callback URL for install flow.
 

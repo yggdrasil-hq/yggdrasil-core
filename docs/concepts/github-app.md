@@ -59,12 +59,19 @@ The GitHub App (Settings → Developer settings → GitHub Apps → your app →
 |---|---|---|
 | **Contents** | Read and write | Clone repos, create branches, commit (see `job-dispatch.md`) |
 | **Pull requests** | Read and write | Open draft PRs |
+| **Workflows** | Read and write | Create/update files under `.github/workflows/` — GitHub enforces this as a *separate* permission from Contents; Contents write alone is not enough and the push is rejected server-side (ADR 005 §3 amendment) |
 | **Metadata** | Read-only | Required by GitHub for every App install |
 
 Without at least Contents + Pull requests, GitHub's install/configure screen
 shows **"This App does not require access to your repositories"** and offers no
 repo picker at all — the installation succeeds but is useless. If you hit that
 screen, the fix is in the App's GitHub settings, not in Yggdrasil config.
+
+If a `feature_build` fails to push because GitHub rejects a `.github/workflows/*`
+file specifically (while other files in the same push succeed), the App
+registration is missing the Workflows permission above — add it, then each
+existing installation's org admin must **re-accept the updated permissions**
+(GitHub shows a "review requested permissions" prompt; no reinstall needed).
 
 Under the same **Permissions & events** page, **Subscribe to events** must also
 have **Pull request** and **Pull request review** checked (ADR 013) — these

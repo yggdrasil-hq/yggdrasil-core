@@ -61,6 +61,7 @@ requests and streaming progress back in real time. See
 | The Pi agent (how the agent itself runs)                | `docs/concepts/pi-agent.md`            |
 | Pi RPC transport / how the Orchestrator drives Pi (attach, event relay, mid-run replies) | ADR `docs/adr/006-pi-rpc-orchestrator-integration.md` (spec_grill) → ADR `docs/adr/010-feature-build-rpc-wiring.md` (feature_build) → ADR `docs/adr/011-feature-build-running-state.md` (queued→running) → ADR `docs/adr/012-spec-grill-retry-state-reset.md` (retry status reset, live retry feedback) |
 | Design sessions / live HTML mockups / `designs/` directory / `design_grill` | ADR `docs/adr/014-design-grill-live-mockups.md` |
+| Wireframing a Yggdrasil web page before building it / the meta-repo `design/` directory | `docs/conventions/design-wireframes.md` |
 | Base container images / skills / MCP-vs-Playwright / model config | `docs/components/agent-images.md` → ADR `docs/adr/004-agent-base-containers.md` → `agent-images/CLAUDE.md` |
 | Feature states / lifecycle                              | `docs/concepts/feature-lifecycle.md`   |
 | Architecture decisions (why we chose X)                 | `docs/adr/` → start at `docs/CONTEXT.md` |
