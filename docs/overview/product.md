@@ -48,6 +48,11 @@ See `overview/architecture.md` for how they talk to each other.
 
 ## Current phase
 
-Early implementation — Web UI shell exists; **Phase 1 auth design is accepted**
-(see `docs/adr/001-authentication.md`). See `roadmap/phases.md` for build order
-and `roadmap/open-questions.md` for undecided design points.
+**Phase 1 is complete** and parts of Phase 2 are built: GitHub-only auth,
+GitHub App repo access, project/feature CRUD, the two-phase feature workflow
+(`spec_grill` → ADR review → `feature_build` → PR) with live Pi RPC
+integration, and webhook-driven merge/deploy automation are all implemented
+end to end. `design_grill` (live design-session mockups, ADR 014) is decided
+but not yet built. Testing (Phase 3), RBAC/team invitations, and live preview
+tunnels remain unbuilt. See `roadmap/phases.md` for the current build-order
+snapshot and `roadmap/open-questions.md` for undecided design points.

@@ -8,10 +8,11 @@ keep short, link, don't duplicate.
 - **Submodule path:** `agent-images/`
 - **GitHub repo:** `yggdrasil-hq/yggdrasil-agent-images`
 - **Status:** Dockerfiles, skills, and the shared extension are scaffolded and
-  build cleanly. CI builds and pushes all four images to GitHub Container
-  Registry on every push to `main` — registry pull-secret provisioning for
-  self-hosted installs is an open follow-up (GHCR packages default to
-  private)
+  build cleanly. CI builds and pushes all four images (common base + the
+  three per-job-kind images below — `design_grill` has no image yet, see
+  below) to GitHub Container Registry on every push to `main`. Registry
+  pull-secret provisioning for self-hosted installs (GHCR packages default to
+  private) is documented in `docs/conventions/deploy.md`.
 - **Design rationale:** ADR 004 (`docs/adr/004-agent-base-containers.md`)
 
 ## Responsibility
@@ -33,6 +34,10 @@ calls this repo directly.
      per run, never left to model inference.
    - `feature_build` → unattended "implement" skill + Playwright CLI.
    - `test_run` → "run-tests" skill + Playwright CLI.
+   - `design_grill` (ADR 014) is **decided but not yet built here** — no
+     `design_grill/` Dockerfile, skill, or contract-extension tools
+     (`update_design_preview`/`submit_design`) exist in this repo yet, and
+     the CI workflow's image matrix doesn't include it.
 3. A `models.json` template reading `MODEL_BASE_URL` / `MODEL_API_KEY` /
    `MODEL_ID` from the environment — populated per-project by the Orchestrator
    at job-pod creation time (see `concepts/pi-agent.md`).

@@ -206,9 +206,12 @@ Constraints:
   one shared, suite-maintained artifact instead, so CI publishes to
   `ghcr.io/yggdrasil-hq/yggdrasil-agent-images/*`, and every Orchestrator
   (self-hosted or managed) pulls directly from there. See
-  `agent-images/docs/concepts/images.md`. New open follow-up this raised:
+  `agent-images/docs/concepts/images.md`. ~~New open follow-up this raised:
   GHCR packages default to private, so self-hosted installs need a
-  `read:packages` pull secret provisioned — not yet designed.
+  `read:packages` pull secret provisioned — not yet designed.~~ **Resolved:**
+  documented in `docs/conventions/deploy.md`'s GHCR self-hosting section — a
+  `read:packages`-scoped PAT, `docker login`, and an `imagePullSecret` for the
+  Orchestrator's target cluster.
 - Whether `feature_build`'s Playwright self-verification should gate PR
   creation (fail the build) or stay advisory — left to implementation.
 

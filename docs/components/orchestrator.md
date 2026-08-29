@@ -29,9 +29,11 @@ namespace:
 4. Create a feature branch `yggdrasil/<feature-slug>-<id>` (for `feature_build`).
 5. Open a draft PR immediately (for `feature_build`).
 6. Run Pi in RPC/SDK mode, streaming all events back to the API.
-7. Optionally stand up a **temporary deployment** with a preview URL.
-8. Tear down the Pod/Job (and temporary deployment, if any) and archive
-   artefacts when done.
+7. Optionally stand up a **temporary deployment** with a preview URL — designed
+   by ADR 003 but **not yet implemented**: no preview/temporary-deployment
+   code exists in `orchestrator/` today. Only ephemeral Jobs and the one
+   always-on primary Deployment exist.
+8. Tear down the Pod/Job and archive artefacts when done.
 
 **Primary deployment hosting** (ADR 003):
 

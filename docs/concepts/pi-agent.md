@@ -47,16 +47,20 @@ Playwright CLI tool instead.
   `feature-grill` (every other feature, grill-with-docs-derived). The
   Orchestrator's initial prompt names exactly one per run. `feature_build` →
   an "implement" skill (unattended, no user interruption), `test_run` → a
-  "run-tests" skill (executes a markdown spec's `##` steps), `design_grill` →
-  a "design-grill" skill (live, chat-driven HTML mockup sessions — reuses
-  `spec_grill`'s attach/RPC machinery but with a write-scoped token and a
-  design-specific contract tool; ADR 014).
+  "run-tests" skill (executes a markdown spec's `##` steps). `design_grill`
+  (ADR 014, decided) would similarly get a "design-grill" skill reusing
+  `spec_grill`'s attach/RPC machinery with a write-scoped token and a
+  design-specific contract tool — **but this is not yet built**: no
+  `design_grill` image/skill exists in `agent-images/`, and the Orchestrator
+  has no `design_grill` job kind, contract-tool decoding, or routing at all
+  (see `job-dispatch.md`).
 - A single shared Pi **extension**, `yggdrasil-contract`, is loaded in every
   image's common base layer. It exposes structured tool calls in place of
   prose-based turn/completion signaling: `ask_user`/`submit_adr` (`spec_grill`),
   `submit_build_result` (`feature_build`), `report_test_step`/
-  `submit_test_report` (`test_run`), `update_design_preview`/`submit_design`
-  (`design_grill`, ADR 014). Each image restricts which of these are visible
+  `submit_test_report` (`test_run`). `update_design_preview`/`submit_design`
+  (`design_grill`, ADR 014) are designed but not yet implemented in the
+  extension. Each image restricts which of these are visible
   to its skill via `allowed-tools`.
 - **Tool allowlist** — beyond scoping the contract extension's own tools per
   image, the broader "which packages/tools Pi may install inside the
@@ -88,11 +92,19 @@ Playwright CLI tool instead.
   attaches to the pod's stdin/stdout and drives Pi's RPC protocol directly,
   translating the raw event stream into a small curated vocabulary
   (`agent_text`/`ask_user`/`submit_adr`/`run_failed`) before relaying to the
-  API. Not yet extended to `feature_build`/`test_run`.
+  API — `agent_text` (live-typing) is implemented, not deferred. **Extended
+  to `feature_build` by ADR 010** (`submit_build_result`, `run_started` by
+  ADR 011). Not yet extended to `test_run` or `design_grill` (ADR 014,
+  decided but unbuilt at the Orchestrator level).
 - Tool allowlist and timeout/token-budget enforcement mechanism — still
   open; ADR 006 explicitly defers this (a stuck `ask_user` wait has no
   automatic timeout yet).
 - Failure/retry semantics when Pi errors or exceeds budget.
 - Crash recovery: if the Orchestrator restarts mid-run, the job's pod is
   orphaned with no reattachment — deferred by ADR 006.
-- CI/release process for `agent-images` (build, tag, push) — not yet designed.
+- ~~CI/release process for `agent-images` (build, tag, push) — not yet
+  designed.~~ **Resolved:** `agent-images/.github/workflows/build-images.yml`
+  builds and pushes the base + 3 per-job-kind images to GHCR on every push to
+  `main` (ADR 004).
+- `design_grill` (ADR 014): skill, image, and contract tools not yet built in
+  `agent-images/`; no job kind/routing in the Orchestrator either.

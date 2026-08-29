@@ -4,7 +4,7 @@
 before diving into code or docs. For details, follow the links — do not treat this
 file as the full spec.
 
-Last updated: 2026-08-23 (ADR 014)
+Last updated: 2026-08-30 (implementation-status audit against ADRs 001-014)
 
 ## Glossary
 
@@ -30,8 +30,14 @@ Last updated: 2026-08-23 (ADR 014)
 ## Product
 
 AI-orchestrated dev suite for small teams (2–10). Self-hosted; Web + API +
-Orchestrator. Phase 1 in progress — UI shell exists; auth is the current build
-focus.
+Orchestrator. Phase 1 is built end to end (auth, GitHub App repo access,
+project/feature CRUD, `spec_grill`→`feature_build` with Pi RPC integration,
+webhook-driven merge/changes-requested/deploy automation). Parts of Phase 2
+are also built (live agent chat/steering for `spec_grill`, build-progress UI,
+per-user/per-project model configuration) and `design_grill` (ADR 014) is
+decided but not yet implemented. `test_run` (Phase 3), RBAC, team
+invitations, and live preview tunnels remain unbuilt. See
+`roadmap/phases.md` for the current build-order snapshot.
 
 → [`overview/product.md`](overview/product.md)
 
@@ -244,8 +250,9 @@ sub-repos** ([`adr/008-project-init-grill-and-submodule-repos.md`](adr/008-proje
 - Also fixes an adjacent silent-failure gap: if `WaitForJobPod` itself
   errors, a `run_failed` event is now synthesized there too, instead of the
   feature being left stuck in `queued` forever with no event ever posted.
-- Deferred: Web UI actually distinguishing `queued` from `running` visually
-  (still just a shared placeholder), `test_run`'s equivalent gap.
+- Web UI now distinguishes `queued` from `running` (`BuildProgressPanel`,
+  added after this ADR shipped — see ADR 011's item 8 amendment). Still
+  deferred: `test_run`'s equivalent running-state gap.
 
 ## Decided (`spec_grill` retry state reset)
 
@@ -290,6 +297,12 @@ sub-repos** ([`adr/008-project-init-grill-and-submodule-repos.md`](adr/008-proje
   implicit discovery, no structured link.
 - **Left open:** whether a Design becomes a persisted DB entity or stays a
   pure repo convention (`roadmap/open-questions.md` #12).
+- **Implementation status:** decided/accepted, but **not yet built**. As of
+  2026-08-30, `orchestrator/` has no `design_grill` job kind or curated-event
+  handling, `agent-images/` has no `design_grill` image/skill/contract
+  tools, and `web/` has no design-session UI. Everything in this ADR is the
+  design, not shipped behavior — see `concepts/job-dispatch.md` and
+  `concepts/pi-agent.md`.
 
 ## Still open
 

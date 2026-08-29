@@ -63,6 +63,13 @@ in the Orchestrator itself.
 
 ### `design_grill`
 
+> **Not yet implemented.** ADR 014 decided this design, but as of this
+> writing there is no `design_grill` job kind in the Orchestrator's
+> `JobKind` enum, no `update_design_preview`/`submit_design` curated-event
+> handling, no routing in `driveAgentSession`, and no `design_grill` image or
+> skill in `agent-images/`. The description below is the design, not the
+> current behavior.
+
 - Same attach/RPC machinery as `spec_grill` (ADR 006), reused wholesale — see
   [ADR 014](../adr/014-design-grill-live-mockups.md).
 - Clone all linked repos (uniform with other job kinds); only the primary
@@ -101,7 +108,8 @@ in the Orchestrator itself.
 
 ## Job spec (common fields)
 
-- Job kind: `spec_grill` | `feature_build` | `test_run`.
+- Job kind: `spec_grill` | `feature_build` | `test_run` | `deploy` (implemented);
+  `design_grill` (ADR 014, decided but not yet implemented — see above).
 - Container image: resolved by the Orchestrator from one env var per job kind
   (`SPEC_GRILL_IMAGE` / `FEATURE_BUILD_IMAGE` / `TEST_RUN_IMAGE`), pointing at
   an image built by `agent-images/` (ADR 004) — replaces the placeholder

@@ -174,12 +174,17 @@ Constraints:
    `tool_execution_end`'s `result.details.kind` — the
    `yggdrasil-contract` extension's own shape, decodable with full
    confidence since it's this suite's own code.
-   - **Scope cut from the original plan:** `agent_text` (plain assistant
+   - ~~**Scope cut from the original plan:** `agent_text` (plain assistant
      message content, for live-typing the grill) is **not implemented**.
      Pi's own message-event shapes (`message_update`/`message_end`) aren't
      confirmed against a real integration, and guessing at them risked a
      curated event with the wrong fields. Deferred until agent-images
-     produces real events to build this against.
+     produces real events to build this against.~~ **Resolved:** `agent_text`
+     is implemented — `EventAgentText` (`orchestrator/internal/rpc/curated.go`),
+     decoded via `translateMessageEnd` and forwarded live in `runTurn`
+     (`specgrill.go`), rendered as a chat bubble in
+     `web/components/features/spec-grill-panel.tsx`. See `job-dispatch.md`
+     and `pi-agent.md`, which already reflect this as current.
    - Completion detection deliberately does **not** key off any event's own
      `terminate: true` — both `ask_user` and `submit_adr` set that flag (it
      tells Pi to end the *turn*, not the run); only the tool's identity

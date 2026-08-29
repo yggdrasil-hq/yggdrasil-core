@@ -119,11 +119,15 @@ visible failure anywhere in the Web app.
 
 ### Explicitly deferred
 
-8. **Any Web app surface that visually distinguishes `queued` from `running`
-   beyond the label.** `feature-detail-client.tsx:242` still shows the same
-   "Build job dispatched" placeholder for both — ADR 010 item 12 already
-   deferred "Web app surface for `feature_build`'s live state" and this ADR
-   doesn't resolve it either, only makes the underlying data correct.
+8. ~~**Any Web app surface that visually distinguishes `queued` from
+   `running` beyond the label.** `feature-detail-client.tsx:242` still shows
+   the same "Build job dispatched" placeholder for both — ADR 010 item 12
+   already deferred "Web app surface for `feature_build`'s live state" and
+   this ADR doesn't resolve it either, only makes the underlying data
+   correct.~~ **Resolved:** `web/components/features/build-progress-panel.tsx`
+   (added alongside the retry-build flow) now reads `jobStatus` and renders
+   distinct copy — "Waiting for the build to start…" for `queued` vs. "Agent
+   is building… (Xm Ys elapsed)" with a live ticker for `running`.
 9. **`test_run`'s equivalent gap.** `test_run` has no dispatch implementation
    yet (ADR 007's model-config gating already notes this); its own
    running-state signal is a later pass, same as ADR 010 deferred it for the
@@ -164,8 +168,8 @@ Implementation reference: `docs/concepts/feature-lifecycle.md`,
 
 ### Follow-ups (out of scope for this ADR)
 
-- Web app surface distinguishing `queued`/`running` visually (ADR 010 item
-  12, still open).
+- ~~Web app surface distinguishing `queued`/`running` visually (ADR 010 item
+  12, still open).~~ **Resolved** — see item 8 above.
 - `test_run` dispatch and its own running-state wiring.
 - Retrofitting `setInReview`/`run_failed`/`run_cancelled` to the guarded
   pattern this ADR introduces for `setRunning`, if the inconsistency proves

@@ -28,7 +28,7 @@ GitHub app registration from the one described here).
 | Install sharing | One installation per (app, org) — shared across Yggdrasil projects |
 | Job credential | Installation access token (~1h), minted at dispatch |
 | Git authorship | GitHub App bot (`yggdrasil[bot]`) |
-| Webhooks | `installation`, `installation_repositories`, `pull_request` (merged), `pull_request_review` (changes requested) |
+| Webhooks | `installation`, `installation_repositories`, `pull_request` (merged), `pull_request_review` (changes requested), `push` (dispatches `deploy` on push to primary's `main`) |
 | Broken access | `github_access_warning` flag + action queue item |
 
 ## Two separate GitHub integrations
@@ -48,7 +48,7 @@ Each self-hosted deployment registers **two** GitHub integrations:
 
 - Scopes: `read:user` only
 - Callback: `GET /api/auth/github/callback`
-- Env: `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET`
+- Env: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` (`api/src/config.ts`)
 
 ### GitHub App (repository access)
 
@@ -130,14 +130,38 @@ projects
   github_access_warning    -- boolean, set by webhooks
   ...
 
-project_linked_repos
-  project_id
-  repo_full_name
-  role                     -- primary | sub
+project_repositories       -- actual table name (migration 002_projects.sql);
+  project_id                  differs from the sketch above
+  github_owner
+  github_repo
+  is_primary               -- boolean, not a `role` enum
+  sort_order
+
+user_installation_access   -- per-user installation-reconciliation cache
+  user_id
+  installation_id
+  repos                    -- synced repo list for this user+installation
+  reauth_required          -- boolean
+  stale                    -- boolean
+  ...
+
+user_github_sync_state     -- tracks last reconciliation per user
+  user_id
+  ...
 ```
 
 Projects reference one installation. Linked repos must be a subset of
 `github_installation_repos` for that installation.
+
+**Per-user installation reconciliation (implemented, not previously
+documented here):** `GET /api/github/installations` is **per-user**, not
+instance-wide — it calls `reconcileUserInstallations(userId)`
+(`api/src/github/reconcile-user-installations.ts`), which hits GitHub's
+`GET /user/installations` with the user's own OAuth token (refreshing via
+`refresh_token` if expired) and upserts `user_installation_access` /
+`user_github_sync_state`. The response includes `repos`, `reauthRequired`,
+and `stale` flags reflecting that reconciliation, none of which are
+API-surface-table concepts elsewhere in this doc.
 
 ## Project creation flow
 
@@ -216,6 +240,7 @@ as the App bot.
 | `pull_request` (closed, `merged: true`) | Feature matched by `pr_url` → `status = 'merged'`; if `project_init`, also `projects.markReady` if still `initializing` (ADR 013) |
 | `pull_request` (closed, `merged: false`) | No-op — no lifecycle state represents "closed without merging" yet |
 | `pull_request_review` (submitted, `state: "changes_requested"`) | Feature matched by `pr_url`, only if currently `in_review` → `status = 'changes_requested'` (ADR 013) |
+| `push` (to primary repo's default branch) | `handlePushEvent` dispatches a `deploy` job (see `job-dispatch.md`) |
 
 ## GitHub access warning
 
@@ -234,8 +259,10 @@ Add to action queue types in ADR 002.
 |--------|------|------|---------|
 | GET | `/api/github/install` | session | Start install (`project_draft_id`, `account`) |
 | GET | `/api/github/install/callback` | — | Install callback from GitHub |
-| GET | `/api/github/installations` | session | List installations visible to instance |
+| GET | `/api/github/installations` | session | List installations for the **current user** (`listForUser`), reconciled live against GitHub — see per-user reconciliation above |
 | GET | `/api/github/installations/:id/repos` | session | Repos granted on an installation |
+| GET | `/api/github/installations/:id/configure-url` | session | GitHub "Configure installation" deep link |
+| POST | `/api/github/installations/:id/sync` | session | Force a repo/permission re-sync for an installation |
 | POST | `/api/webhooks/github` | signature | Installation lifecycle webhooks |
 
 Project CRUD endpoints accept `installation_id` + repo selection — see project API when
