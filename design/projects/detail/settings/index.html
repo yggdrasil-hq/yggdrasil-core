@@ -105,24 +105,38 @@
         <a class="nav-link" href="/projects/detail/index.html"><span class="icon">&#8962;</span> Home</a>
         <a class="nav-link" href="/projects/detail/features/index.html"><span class="icon">&#9638;</span> Features</a>
         <a class="nav-link" href="/projects/detail/tests/index.html"><span class="icon">&#9879;</span> Tests</a>
-        <a class="nav-link" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
-      </nav>
-      <div class="sidebar-foot">
         <a class="nav-link active" href="/projects/detail/settings/index.html"><span class="icon">&#9881;</span> Settings</a>
-        <button class="btn btn-outline" type="button" style="justify-content:flex-start; width:100%;">Log out</button>
-        <a class="sidebar-user" href="/settings/account/index.html">
-          <span class="avatar">SC</span>
-          <span>
-            <div class="name">Sarat Chandra</div>
-            <div class="handle">@saratc</div>
-          </span>
-        </a>
-      </div>
+      </nav>
     </aside>
 
     <div class="main">
+      <div class="shell-topbar">
+        <div class="crumbs">
+          <a href="/projects/detail/index.html">Acme Storefront</a>
+          <span class="sep">/</span>
+          <span class="current">Settings</span>
+        </div>
+        <div class="shell-topbar-actions">
+          <a class="notif-bell" href="/notifications/index.html" aria-label="Notifications"><span class="dot"></span>&#128276;</a>
+          <div class="user-menu">
+            <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+            <label for="user-menu-toggle" class="user-menu-trigger">
+              <span class="avatar">SC</span>
+              <span class="chevron">&#9662;</span>
+            </label>
+            <div class="user-menu-panel">
+              <div class="user-menu-head">
+                <div class="name">Sarat Chandra</div>
+                <div class="handle">@saratc</div>
+              </div>
+              <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+              <button class="user-menu-item" type="button">Log out</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="main-inner">
-        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/settings</span> (web/components/settings/project-settings-client.tsx, model-secret-field.tsx) · repo/secret data faked, all form controls inert</div>
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/settings</span> (web/components/settings/project-settings-client.tsx, model-secret-field.tsx) · repo/secret data faked, all form controls inert · <b>proposed IA rework</b>: sidebar/topbar per /projects/:projectId (Settings promoted from a footer link to a first-class sidebar item) · <b>model card reworked</b> to match the multi-provider/multi-model account settings redesign — not yet in ADR 007 or web/, see /settings/account</div>
 
         <div class="page-header">
           <div>
@@ -169,48 +183,71 @@
 
           <div class="card">
             <p class="card-title">Model configuration</p>
-            <p class="card-desc">Values used by the Pi coding agent for every job in this project. Once saved, values are encrypted and never shown again — only whether a value is set.</p>
+            <p class="card-desc">Which models the Pi agent uses for this project's jobs. Pulls from the providers and models connected in <a href="/settings/account/index.html" style="color:var(--bifrost);">Account settings</a>.</p>
             <div class="card-body">
-              <p style="font-size:13px; margin-bottom:12px;">Custom configuration for this project.</p>
+              <label class="radio-option" style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:var(--frost);"><input type="radio" name="model-mode" /> Use my account defaults</label>
+              <label class="radio-option" style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:var(--frost); margin-top:10px;"><input type="radio" name="model-mode" checked /> Override models for this project</label>
 
-              <div class="secret-field">
-                <div class="secret-field-head">
-                  <div>
-                    <p>Model base URL</p>
-                    <p>OpenAI-chat-completions-compatible endpoint the agent sends requests to.</p>
+              <div class="dashed-block" style="margin-top:12px;">
+                <div class="secret-field">
+                  <div class="secret-field-head">
+                    <div>
+                      <p>Design session</p>
+                      <p class="mono" style="font-size:11px; color:var(--shadow);">design_grill</p>
+                    </div>
                   </div>
-                  <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Configured</span>
+                  <select class="input" style="margin-top:10px;">
+                    <option>Claude Sonnet 5 — Anthropic</option>
+                    <option>Claude Opus 5 — Anthropic</option>
+                    <option>GPT-5.1 — OpenAI</option>
+                    <option>DeepSeek V3 — OpenRouter</option>
+                    <option>Kimi K2 — Together AI</option>
+                  </select>
                 </div>
-                <div class="secret-actions">
-                  <button class="btn btn-outline btn-sm" type="button">Update</button>
-                  <button class="btn btn-ghost btn-sm" type="button">Clear</button>
-                </div>
-              </div>
-
-              <div class="secret-field">
-                <div class="secret-field-head">
-                  <div>
-                    <p>Model API key</p>
-                    <p>Sent as the bearer token on every request to the base URL above.</p>
+                <div class="secret-field">
+                  <div class="secret-field-head">
+                    <div>
+                      <p>Feature spec</p>
+                      <p class="mono" style="font-size:11px; color:var(--shadow);">spec_grill</p>
+                    </div>
                   </div>
-                  <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Configured</span>
+                  <select class="input" style="margin-top:10px;">
+                    <option>Claude Opus 5 — Anthropic</option>
+                    <option>Claude Sonnet 5 — Anthropic</option>
+                    <option>GPT-5.1 — OpenAI</option>
+                    <option>DeepSeek V3 — OpenRouter</option>
+                    <option>Kimi K2 — Together AI</option>
+                  </select>
                 </div>
-                <div class="secret-actions">
-                  <button class="btn btn-outline btn-sm" type="button">Update</button>
-                  <button class="btn btn-ghost btn-sm" type="button">Clear</button>
-                </div>
-              </div>
-
-              <div class="secret-field">
-                <div class="secret-field-head">
-                  <div>
-                    <p>Model ID</p>
-                    <p>Model name passed in each request, e.g. gpt-4.1 or claude-sonnet-5.</p>
+                <div class="secret-field">
+                  <div class="secret-field-head">
+                    <div>
+                      <p>Feature build</p>
+                      <p class="mono" style="font-size:11px; color:var(--shadow);">feature_build</p>
+                    </div>
                   </div>
-                  <span class="badge" style="background:#5e6e7e22; color:var(--shadow);">Not set</span>
+                  <select class="input" style="margin-top:10px;">
+                    <option>Claude Sonnet 5 — Anthropic</option>
+                    <option>Claude Opus 5 — Anthropic</option>
+                    <option>GPT-5.1 — OpenAI</option>
+                    <option>DeepSeek V3 — OpenRouter</option>
+                    <option>Kimi K2 — Together AI</option>
+                  </select>
                 </div>
-                <div class="secret-actions">
-                  <button class="btn btn-outline btn-sm" type="button">Set value</button>
+                <div class="secret-field">
+                  <div class="secret-field-head">
+                    <div>
+                      <p>Tests</p>
+                      <p class="mono" style="font-size:11px; color:var(--shadow);">test_run</p>
+                    </div>
+                  </div>
+                  <select class="input" style="margin-top:10px;">
+                    <option>DeepSeek V3 — OpenRouter</option>
+                    <option>Claude Sonnet 5 — Anthropic</option>
+                    <option>Claude Opus 5 — Anthropic</option>
+                    <option>GPT-5.1 — OpenAI</option>
+                    <option>Kimi K2 — Together AI</option>
+                  </select>
                 </div>
               </div>
             </div>

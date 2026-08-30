@@ -115,34 +115,6 @@
   color: var(--frost);
 }
 
-.sidebar-foot {
-  border-top: 1px solid var(--rime-soft);
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.sidebar-user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  margin-top: 8px;
-}
-
-.sidebar-user .name {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--frost);
-}
-
-.sidebar-user .handle {
-  font-size: 12px;
-  color: var(--shadow);
-}
-
 .main {
   margin-left: 256px;
   min-height: 100vh;
@@ -151,6 +123,167 @@
 .main-inner {
   max-width: var(--maxw);
   padding: 32px;
+}
+
+/* Persistent chrome shared by the hub header and the project shell topbar:
+   breadcrumbs/nav on the left, notifications + user menu on the right. Kept
+   identical in both places on purpose (Nielsen "consistency and standards") —
+   see docs/conventions/design-wireframes.md for the "proposed rework" note. */
+
+.shell-topbar {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 32px;
+  border-bottom: 1px solid var(--rime-soft);
+}
+
+.shell-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--mist);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.crumbs a:hover {
+  color: var(--frost);
+}
+
+.crumbs .sep {
+  color: var(--shadow);
+}
+
+.crumbs .current {
+  color: var(--frost);
+  font-weight: 500;
+}
+
+.notif-bell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  color: var(--mist);
+  font-size: 15px;
+}
+
+.notif-bell:hover {
+  background: var(--surface-02);
+  color: var(--frost);
+}
+
+.notif-bell .dot {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--aurora);
+  border: 2px solid var(--niflheim);
+}
+
+/* Zero-JS dropdown: checkbox-toggle technique, same pattern as the
+   projects/new step tabs. */
+
+.user-menu {
+  position: relative;
+}
+
+.user-menu-toggle {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.user-menu-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px 4px 4px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.user-menu-trigger:hover {
+  background: var(--surface-02);
+}
+
+.user-menu-trigger .chevron {
+  font-size: 10px;
+  color: var(--shadow);
+}
+
+.user-menu-panel {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 208px;
+  background: var(--surface-02);
+  border: 1px solid var(--rime);
+  border-radius: var(--radius-sm);
+  padding: 6px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  z-index: 30;
+}
+
+.user-menu-toggle:checked ~ .user-menu-panel {
+  display: block;
+}
+
+.user-menu-head {
+  padding: 8px 10px 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--rime-soft);
+}
+
+.user-menu-head .name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--frost);
+}
+
+.user-menu-head .handle {
+  font-size: 12px;
+  color: var(--shadow);
+  margin-top: 1px;
+}
+
+.user-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--mist);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.user-menu-item:hover {
+  background: var(--surface-03);
+  color: var(--frost);
 }
 
 /* Hub layout: top bar, centered column, no sidebar */
@@ -232,7 +365,12 @@
   font-size: 14px;
 }
 
+/* Editorial scaffolding, not real UI (docs/conventions/design-wireframes.md) —
+   hidden by default so a page previews like the live app. The note text stays
+   in every page's HTML; delete this rule (or override display for one page)
+   to see it again while iterating. */
 .design-note {
+  display: none;
   max-width: var(--maxw);
   margin: 0 auto 24px;
   padding: 10px 16px;

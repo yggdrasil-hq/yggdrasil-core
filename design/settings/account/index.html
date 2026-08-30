@@ -10,20 +10,68 @@
   <link rel="stylesheet" href="/shared/tokens.css" />
   <link rel="stylesheet" href="/shared/shell.css" />
   <style>
-    .hub-main.narrow { max-width: 640px; }
-    .stack { display: flex; flex-direction: column; gap: 24px; }
-    .card-title { font-size: 16px; font-weight: 600; color: var(--frost); }
-    .card-desc { margin-top: 4px; font-size: 13px; }
-    .profile-row { display: flex; align-items: center; gap: 16px; margin-top: 16px; }
-    .profile-row .avatar { width: 56px; height: 56px; font-size: 18px; }
-    .profile-fields { flex: 1; display: flex; flex-direction: column; gap: 12px; }
-    .card-footer { border-top: 1px solid var(--rime-soft); margin: 16px -20px -20px; padding: 16px 20px; }
+    .hub-main.narrow { max-width: 880px; }
+
+    .section-toggle { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+
+    .account-layout { display: flex; align-items: flex-start; gap: 32px; }
+    .account-nav { width: 188px; flex-shrink: 0; display: flex; flex-direction: column; gap: 2px; position: sticky; top: 24px; }
+    .account-nav label { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 12px; border-radius: var(--radius-sm); font-size: 14px; color: var(--mist); cursor: pointer; }
+    .account-nav label:hover { color: var(--frost); }
+    .account-nav label .count { font-size: 12px; color: var(--shadow); }
+    .account-content { flex: 1; min-width: 0; }
+    .account-panel { display: none; }
+
+    #section-profile:checked ~ .account-layout .account-nav label[for="section-profile"],
+    #section-providers:checked ~ .account-layout .account-nav label[for="section-providers"],
+    #section-models:checked ~ .account-layout .account-nav label[for="section-models"],
+    #section-jobs:checked ~ .account-layout .account-nav label[for="section-jobs"] {
+      background: var(--surface-02);
+      color: var(--frost);
+    }
+    #section-profile:checked ~ .account-layout #panel-profile,
+    #section-providers:checked ~ .account-layout #panel-providers,
+    #section-models:checked ~ .account-layout #panel-models,
+    #section-jobs:checked ~ .account-layout #panel-jobs {
+      display: block;
+    }
+
+    @media (max-width: 720px) {
+      .account-layout { flex-direction: column; gap: 20px; }
+      .account-nav { position: static; width: 100%; flex-direction: row; flex-wrap: wrap; }
+    }
+
+    .card-title { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--frost); }
+    .card-desc { margin-top: 6px; font-size: 13px; max-width: 480px; }
+    .profile-row { display: flex; align-items: flex-start; gap: 16px; margin-top: 28px; }
+    .profile-row .avatar { width: 56px; height: 56px; font-size: 18px; margin-top: 22px; }
+    .profile-fields { flex: 1; max-width: 420px; display: flex; flex-direction: column; gap: 12px; }
+    .card-footer { border-top: 1px solid var(--rime-soft); margin-top: 24px; padding-top: 20px; }
     .secret-field { border: 1px solid var(--rime); border-radius: var(--radius-sm); padding: 12px; display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
     .secret-field:first-of-type { margin-top: 16px; }
     .secret-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
     .secret-head .label { font-size: 14px; font-weight: 500; color: var(--frost); }
     .secret-head .desc { font-size: 13px; margin-top: 2px; }
     .secret-actions { display: flex; gap: 8px; }
+
+    .card-head-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .subdivider { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--rime-soft); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--shadow); }
+    .provider-base-url { font-size: 12px; margin-top: 2px; }
+    .add-row { margin-top: 16px; }
+
+    .model-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; border: 1px solid var(--rime); border-radius: var(--radius-sm); margin-top: 12px; }
+    .model-row:first-of-type { margin-top: 16px; }
+    .model-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .model-name { font-size: 14px; font-weight: 500; color: var(--frost); }
+    .model-id { margin-top: 2px; }
+    .provider-tag { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 500; }
+
+    .job-row { border: 1px solid var(--rime); border-radius: var(--radius-sm); padding: 12px; margin-top: 12px; }
+    .job-row:first-of-type { margin-top: 16px; }
+    .job-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .job-title { font-size: 14px; font-weight: 500; color: var(--frost); }
+    .job-desc { margin-top: 2px; font-size: 13px; }
+    .job-row select.input { margin-top: 12px; width: 100%; }
   </style>
 </head>
 <body>
@@ -32,29 +80,50 @@
       <a href="/projects/index.html" class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></a>
       <nav class="hub-nav">
         <a href="/projects/index.html">Projects</a>
-        <a href="/notifications/index.html">Notifications</a>
-        <a href="/settings/account/index.html" class="active">Settings</a>
       </nav>
-      <div style="display:flex; align-items:center; gap:12px;">
-        <div style="text-align:right;">
-          <div style="font-size:14px; font-weight:500; color:var(--frost);">Sarat Chandra</div>
-          <div style="font-size:12px; color:var(--shadow);">@saratc</div>
+      <div class="shell-topbar-actions">
+        <a class="notif-bell" href="/notifications/index.html" aria-label="Notifications">&#128276;<span class="dot"></span></a>
+        <div class="user-menu">
+          <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+          <label for="user-menu-toggle" class="user-menu-trigger">
+            <span class="avatar">SC</span>
+            <span class="chevron">&#9662;</span>
+          </label>
+          <div class="user-menu-panel">
+            <div class="user-menu-head">
+              <div class="name">Sarat Chandra</div>
+              <div class="handle">@saratc</div>
+            </div>
+            <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+            <button class="user-menu-item" type="button">Log out</button>
+          </div>
         </div>
-        <span class="avatar">SC</span>
-        <button class="btn btn-ghost" type="button" aria-label="Log out">&#9211;</button>
       </div>
     </div>
   </header>
 
   <div class="hub-main narrow">
-    <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/settings/account</span> (web/app/settings/account/page.tsx) · all three model secrets shown "Configured"; the editing/confirm-clear states aren't mocked here</div>
+    <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/settings/account</span> (web/app/settings/account/page.tsx) · <b>proposed rework</b>, not yet reflected in ADR 007 or the api/web model-secrets code: replaces the single account-wide <span class="mono">MODEL_BASE_URL</span>/<span class="mono">MODEL_API_KEY</span>/<span class="mono">MODEL_ID</span> bundle with multi-provider, multi-model config and a default per job kind · needs an ADR 007 amendment once this settles, and a matching pass on the project-settings model card (<span class="mono">/projects/:projectId/settings</span>), which still shows the old triplet · <span class="mono">design_grill</span> row included for completeness though the job kind itself isn't implemented yet (ADR 014) · connected/idle states shown throughout; editing forms ("Add custom provider", "Add model", "Update" on a field) aren't mocked here · header rework, see /projects — this page is now reached via the user-menu dropdown rather than a persistent "Settings" text nav item · <b>relaid out</b> from one long scroll into a sectioned settings page (Profile / Providers / Models / Job defaults) — CSS-only radio-toggle tabs, same technique as the /projects/new stepper, so section switching works without JS; on narrow viewports the side nav collapses to a horizontal row above the content</div>
     <div class="hub-page-title">
       <h1>Account</h1>
       <p>Profile and default model configuration.</p>
     </div>
 
-    <div class="stack">
-      <div class="card">
+    <input type="radio" name="account-section" id="section-profile" class="section-toggle" checked />
+    <input type="radio" name="account-section" id="section-providers" class="section-toggle" />
+    <input type="radio" name="account-section" id="section-models" class="section-toggle" />
+    <input type="radio" name="account-section" id="section-jobs" class="section-toggle" />
+
+    <div class="account-layout">
+      <nav class="account-nav">
+        <label for="section-profile">Profile</label>
+        <label for="section-providers">Providers <span class="count">4</span></label>
+        <label for="section-models">Models <span class="count">5</span></label>
+        <label for="section-jobs">Job defaults <span class="count">4</span></label>
+      </nav>
+
+      <div class="account-content">
+        <section class="account-panel" id="panel-profile">
         <div class="card-title">Profile</div>
         <p class="card-desc">Username <span style="color:var(--frost);">@saratc</span> is permanent &middot; signed in with GitHub as <span style="color:var(--frost);">@saratc</span></p>
         <div class="profile-row">
@@ -70,56 +139,205 @@
         <div class="card-footer">
           <button class="btn btn-outline" type="button">Log out</button>
         </div>
+        </section>
+
+        <section class="account-panel" id="panel-providers">
+        <div class="card-title">Providers</div>
+        <p class="card-desc">Connect the providers you want to pull models from. Known providers only need an API key; custom providers also need a base URL.</p>
+
+        <div class="secret-field">
+          <div class="secret-head">
+            <div>
+              <div class="label">OpenRouter</div>
+              <div class="desc text-mist">Access hundreds of models through one API key.</div>
+            </div>
+            <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Connected</span>
+          </div>
+          <div class="secret-actions">
+            <button class="btn btn-outline btn-sm" type="button">Update</button>
+            <button class="btn btn-ghost btn-sm" type="button">Clear</button>
+          </div>
+        </div>
+
+        <div class="secret-field">
+          <div class="secret-head">
+            <div>
+              <div class="label">Anthropic</div>
+              <div class="desc text-mist">Claude models, called directly.</div>
+            </div>
+            <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Connected</span>
+          </div>
+          <div class="secret-actions">
+            <button class="btn btn-outline btn-sm" type="button">Update</button>
+            <button class="btn btn-ghost btn-sm" type="button">Clear</button>
+          </div>
+        </div>
+
+        <div class="secret-field">
+          <div class="secret-head">
+            <div>
+              <div class="label">OpenAI</div>
+              <div class="desc text-mist">GPT models, called directly.</div>
+            </div>
+            <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Connected</span>
+          </div>
+          <div class="secret-actions">
+            <button class="btn btn-outline btn-sm" type="button">Update</button>
+            <button class="btn btn-ghost btn-sm" type="button">Clear</button>
+          </div>
+        </div>
+
+        <div class="subdivider">Custom providers</div>
+
+        <div class="secret-field">
+          <div class="secret-head">
+            <div>
+              <div class="label">Together AI</div>
+              <div class="desc mono provider-base-url text-mist">https://api.together.xyz/v1</div>
+            </div>
+            <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Connected</span>
+          </div>
+          <div class="secret-actions">
+            <button class="btn btn-outline btn-sm" type="button">Update</button>
+            <button class="btn btn-ghost btn-sm" type="button">Remove</button>
+          </div>
+        </div>
+
+        <div class="add-row">
+          <button class="btn btn-outline btn-sm" type="button">+ Add custom provider</button>
+        </div>
+        </section>
+
+        <section class="account-panel" id="panel-models">
+        <div class="card-head-row">
+          <div>
+            <div class="card-title">Models</div>
+            <p class="card-desc">Models available to use across your projects and the job defaults below. Each is tied to one connected provider.</p>
+          </div>
+          <button class="btn btn-outline btn-sm" type="button" style="flex-shrink:0;">+ Add model</button>
+        </div>
+
+        <div class="model-row">
+          <div class="model-info">
+            <div class="model-name-row">
+              <span class="model-name">Claude Opus 5</span>
+              <span class="provider-tag" style="background:#2fd4c622; color:#2fd4c6;">Anthropic</span>
+            </div>
+            <div class="mono model-id text-mist">claude-opus-5</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" type="button" aria-label="Remove model">&#128465;</button>
+        </div>
+
+        <div class="model-row">
+          <div class="model-info">
+            <div class="model-name-row">
+              <span class="model-name">Claude Sonnet 5</span>
+              <span class="provider-tag" style="background:#2fd4c622; color:#2fd4c6;">Anthropic</span>
+            </div>
+            <div class="mono model-id text-mist">claude-sonnet-5</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" type="button" aria-label="Remove model">&#128465;</button>
+        </div>
+
+        <div class="model-row">
+          <div class="model-info">
+            <div class="model-name-row">
+              <span class="model-name">GPT-5.1</span>
+              <span class="provider-tag" style="background:#4f9bf022; color:#4f9bf0;">OpenAI</span>
+            </div>
+            <div class="mono model-id text-mist">gpt-5.1</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" type="button" aria-label="Remove model">&#128465;</button>
+        </div>
+
+        <div class="model-row">
+          <div class="model-info">
+            <div class="model-name-row">
+              <span class="model-name">DeepSeek V3</span>
+              <span class="provider-tag" style="background:#9b8cf022; color:#9b8cf0;">OpenRouter</span>
+            </div>
+            <div class="mono model-id text-mist">deepseek/deepseek-chat</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" type="button" aria-label="Remove model">&#128465;</button>
+        </div>
+
+        <div class="model-row">
+          <div class="model-info">
+            <div class="model-name-row">
+              <span class="model-name">Kimi K2</span>
+              <span class="provider-tag" style="background:#e2a13c22; color:#e2a13c;">Together AI</span>
+            </div>
+            <div class="mono model-id text-mist">moonshotai/Kimi-K2-Instruct</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" type="button" aria-label="Remove model">&#128465;</button>
+        </div>
+        </section>
+
+        <section class="account-panel" id="panel-jobs">
+        <div class="card-title">Default models per job</div>
+        <p class="card-desc">Used by any project that doesn't set its own model for a job. New projects use these by default unless you set something different for them.</p>
+
+        <div class="job-row">
+          <div class="job-head">
+            <span class="job-title">Design session</span>
+            <span class="mono text-shadow" style="font-size:11px;">design_grill</span>
+          </div>
+          <p class="job-desc text-mist">Live HTML mockups during a design session.</p>
+          <select class="input">
+            <option>Claude Sonnet 5 — Anthropic</option>
+            <option>Claude Opus 5 — Anthropic</option>
+            <option>GPT-5.1 — OpenAI</option>
+            <option>DeepSeek V3 — OpenRouter</option>
+            <option>Kimi K2 — Together AI</option>
+          </select>
+        </div>
+
+        <div class="job-row">
+          <div class="job-head">
+            <span class="job-title">Feature spec</span>
+            <span class="mono text-shadow" style="font-size:11px;">spec_grill</span>
+          </div>
+          <p class="job-desc text-mist">Interviews scope and produces the feature's ADR.</p>
+          <select class="input">
+            <option>Claude Opus 5 — Anthropic</option>
+            <option>Claude Sonnet 5 — Anthropic</option>
+            <option>GPT-5.1 — OpenAI</option>
+            <option>DeepSeek V3 — OpenRouter</option>
+            <option>Kimi K2 — Together AI</option>
+          </select>
+        </div>
+
+        <div class="job-row">
+          <div class="job-head">
+            <span class="job-title">Feature build</span>
+            <span class="mono text-shadow" style="font-size:11px;">feature_build</span>
+          </div>
+          <p class="job-desc text-mist">Implements the approved ADR unattended.</p>
+          <select class="input">
+            <option>Claude Sonnet 5 — Anthropic</option>
+            <option>Claude Opus 5 — Anthropic</option>
+            <option>GPT-5.1 — OpenAI</option>
+            <option>DeepSeek V3 — OpenRouter</option>
+            <option>Kimi K2 — Together AI</option>
+          </select>
+        </div>
+
+        <div class="job-row">
+          <div class="job-head">
+            <span class="job-title">Tests</span>
+            <span class="mono text-shadow" style="font-size:11px;">test_run</span>
+          </div>
+          <p class="job-desc text-mist">Runs a test suite's steps against the deployed preview.</p>
+          <select class="input">
+            <option>DeepSeek V3 — OpenRouter</option>
+            <option>Claude Sonnet 5 — Anthropic</option>
+            <option>Claude Opus 5 — Anthropic</option>
+            <option>GPT-5.1 — OpenAI</option>
+            <option>Kimi K2 — Together AI</option>
+          </select>
+        </div>
+        </section>
       </div>
-
-      <div class="card">
-        <div class="card-title">Default model configuration</div>
-        <p class="card-desc">Used by any project that doesn't configure its own model. New projects use this by default unless you set something different for them.</p>
-
-        <div class="secret-field">
-          <div class="secret-head">
-            <div>
-              <div class="label">Model base URL</div>
-              <div class="desc text-mist">OpenAI-chat-completions-compatible endpoint the agent sends requests to.</div>
-            </div>
-            <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Configured</span>
-          </div>
-          <div class="secret-actions">
-            <button class="btn btn-outline btn-sm" type="button">Update</button>
-            <button class="btn btn-ghost btn-sm" type="button">Clear</button>
-          </div>
-        </div>
-
-        <div class="secret-field">
-          <div class="secret-head">
-            <div>
-              <div class="label">Model API key</div>
-              <div class="desc text-mist">Sent as the bearer token on every request to the base URL above.</div>
-            </div>
-            <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Configured</span>
-          </div>
-          <div class="secret-actions">
-            <button class="btn btn-outline btn-sm" type="button">Update</button>
-            <button class="btn btn-ghost btn-sm" type="button">Clear</button>
-          </div>
-        </div>
-
-        <div class="secret-field">
-          <div class="secret-head">
-            <div>
-              <div class="label">Model ID</div>
-              <div class="desc text-mist">Model name passed in each request, e.g. gpt-4.1 or claude-sonnet-5.</div>
-            </div>
-            <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Configured</span>
-          </div>
-          <div class="secret-actions">
-            <button class="btn btn-outline btn-sm" type="button">Update</button>
-            <button class="btn btn-ghost btn-sm" type="button">Clear</button>
-          </div>
-        </div>
-      </div>
-
-      <p class="text-mist" style="font-size:14px;"><a href="/projects/index.html" style="color:var(--bifrost);">Back to projects</a></p>
     </div>
   </div>
 </body>

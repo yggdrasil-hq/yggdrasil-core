@@ -113,6 +113,16 @@
       gap: 8px;
       align-items: center;
     }
+    #new-feature-toggle {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+    #new-feature-toggle:checked ~ #new-feature-panel {
+      display: block !important;
+    }
   </style>
 </head>
 <body>
@@ -129,32 +139,56 @@
         <a class="nav-link" href="/projects/detail/index.html"><span class="icon">&#8962;</span> Home</a>
         <a class="nav-link active" href="/projects/detail/features/index.html"><span class="icon">&#9638;</span> Features</a>
         <a class="nav-link" href="/projects/detail/tests/index.html"><span class="icon">&#9879;</span> Tests</a>
-        <a class="nav-link" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
-      </nav>
-      <div class="sidebar-foot">
         <a class="nav-link" href="/projects/detail/settings/index.html"><span class="icon">&#9881;</span> Settings</a>
-        <button class="btn btn-outline" type="button" style="justify-content:flex-start; width:100%;">Log out</button>
-        <a class="sidebar-user" href="/settings/account/index.html">
-          <span class="avatar">SC</span>
-          <span>
-            <div class="name">Sarat Chandra</div>
-            <div class="handle">@saratc</div>
-          </span>
-        </a>
-      </div>
+      </nav>
     </aside>
 
     <div class="main">
+      <div class="shell-topbar">
+        <div class="crumbs">
+          <a href="/projects/detail/index.html">Acme Storefront</a>
+          <span class="sep">/</span>
+          <span class="current">Features</span>
+        </div>
+        <div class="shell-topbar-actions">
+          <a class="notif-bell" href="/notifications/index.html" aria-label="Notifications"><span class="dot"></span>&#128276;</a>
+          <div class="user-menu">
+            <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+            <label for="user-menu-toggle" class="user-menu-trigger">
+              <span class="avatar">SC</span>
+              <span class="chevron">&#9662;</span>
+            </label>
+            <div class="user-menu-panel">
+              <div class="user-menu-head">
+                <div class="name">Sarat Chandra</div>
+                <div class="handle">@saratc</div>
+              </div>
+              <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+              <button class="user-menu-item" type="button">Log out</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="main-inner">
-        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/features</span> (web/app/projects/[projectId]/features/page.tsx) · search/sort/filter/"New Feature" are inert</div>
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/features</span> (web/app/projects/[projectId]/features/page.tsx) · search/sort/filter are inert · <b>proposed IA rework</b>: sidebar/topbar per /projects/:projectId · "+ New Feature" now expands the real component's inline title-only create row (web/components/features/features-page-client.tsx's showCreate/newTitle state) instead of doing nothing — CSS-only reveal, not wired up</div>
 
         <div class="page-header">
           <div>
-            <p class="text-shadow" style="font-size:11px; text-transform:uppercase; letter-spacing:0.14em;">Project</p>
             <h1>Features</h1>
             <p>Storefront checkout revamp and supporting catalog work.</p>
           </div>
-          <button class="btn btn-primary" type="button">+ New Feature</button>
+          <label class="btn btn-primary" for="new-feature-toggle">+ New Feature</label>
+        </div>
+
+        <input type="checkbox" id="new-feature-toggle" />
+        <div class="card" id="new-feature-panel" style="display:none; margin-bottom:24px;">
+          <div class="card-title" style="font-size:14px;">New feature</div>
+          <p class="card-desc">Just a title — the agent interviews you for the rest during spec grill.</p>
+          <div style="display:flex; gap:10px; margin-top:12px;">
+            <input class="input" style="flex:1;" placeholder="Feature title" value="" />
+            <button class="btn btn-primary" type="button">Create</button>
+            <label class="btn btn-ghost" for="new-feature-toggle">Cancel</label>
+          </div>
         </div>
 
         <div class="toolbar">

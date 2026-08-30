@@ -11,8 +11,7 @@
   <link rel="stylesheet" href="/shared/shell.css" />
   <style>
     .project-top { border-bottom: 1px solid var(--rime-soft); padding: 20px 32px; margin: -32px -32px 24px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-    .eyebrow { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em; color: var(--shadow); }
-    .project-top h1 { font-size: 22px; margin-top: 2px; }
+    .project-top h1 { font-size: 22px; }
     .project-top p { margin-top: 4px; font-size: 14px; }
     .content-stack { display: flex; flex-direction: column; gap: 24px; }
     .deploy-panel { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
@@ -42,32 +41,43 @@
         <a class="nav-link active" href="/projects/detail/index.html"><span class="icon">&#8962;</span> Home</a>
         <a class="nav-link" href="/projects/detail/features/index.html"><span class="icon">&#9638;</span> Features</a>
         <a class="nav-link" href="/projects/detail/tests/index.html"><span class="icon">&#9879;</span> Tests</a>
-        <a class="nav-link" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
-      </nav>
-      <div class="sidebar-foot">
         <a class="nav-link" href="/projects/detail/settings/index.html"><span class="icon">&#9881;</span> Settings</a>
-        <button class="btn btn-outline" type="button" style="justify-content:flex-start; width:100%;"><span class="icon">&#9211;</span> Log out</button>
-        <a class="sidebar-user" href="/settings/account/index.html">
-          <span class="avatar">SC</span>
-          <span>
-            <div class="name">Sarat Chandra</div>
-            <div class="handle">@saratc</div>
-          </span>
-        </a>
-      </div>
+      </nav>
     </aside>
     <div class="main">
+      <div class="shell-topbar">
+        <div class="crumbs">
+          <span class="current">Acme Storefront</span>
+        </div>
+        <div class="shell-topbar-actions">
+          <a class="notif-bell" href="/notifications/index.html" aria-label="Notifications"><span class="dot"></span>&#128276;</a>
+          <div class="user-menu">
+            <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+            <label for="user-menu-toggle" class="user-menu-trigger">
+              <span class="avatar">SC</span>
+              <span class="chevron">&#9662;</span>
+            </label>
+            <div class="user-menu-panel">
+              <div class="user-menu-head">
+                <div class="name">Sarat Chandra</div>
+                <div class="handle">@saratc</div>
+              </div>
+              <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+              <button class="user-menu-item" type="button">Log out</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="main-inner">
         <div class="project-top">
           <div>
-            <p class="eyebrow">Project home</p>
             <h1>Acme Storefront</h1>
             <p class="text-mist">Customer-facing storefront and checkout for Acme Retail.</p>
           </div>
           <a class="btn btn-outline" href="/projects/detail/features/index.html">View features</a>
         </div>
 
-        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId</span> (web/components/projects/project-home-client.tsx) · shows the "ready" state (deploy panel visible); the "initializing" banner isn't mocked here</div>
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId</span> (web/components/projects/project-home-client.tsx) · shows the "ready" state (deploy panel visible); the "initializing" banner isn't mocked here · <b>proposed IA rework</b>: sidebar gains Settings as a primary link and drops Notifications (it's cross-project, not project-scoped); a new topbar (breadcrumb + bell + user-menu) replaces the old sidebar-footer profile block/Log out button, shared with every other project page — see design/README.md</div>
 
         <div class="content-stack">
           <div class="card">

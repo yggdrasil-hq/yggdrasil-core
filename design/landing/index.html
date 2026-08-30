@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Yggdrasil — Secure, self-hosted AI development</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    body { overflow-x: hidden; }
+    .mktw { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+    /* Nav */
+    .mkt-nav { position: sticky; top: 0; z-index: 40; border-bottom: 1px solid var(--rime-soft); background: rgba(8, 11, 17, 0.82); backdrop-filter: blur(10px); }
+    .mkt-nav-inner { max-width: 1200px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .mkt-nav-links { display: flex; align-items: center; gap: 28px; }
+    .mkt-nav-links a { font-size: 14px; color: var(--mist); }
+    .mkt-nav-links a:hover { color: var(--frost); }
+    .mkt-nav-actions { display: flex; align-items: center; gap: 10px; }
+
+    @media (max-width: 720px) {
+      .mkt-nav-links { display: none; }
+    }
+
+    /* Hero */
+    .mkt-hero { padding: clamp(64px, 10vw, 120px) 24px clamp(48px, 8vw, 96px); text-align: center; }
+    .mkt-eyebrow { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 14px; border-radius: var(--radius-pill); border: 1px solid var(--rime); background: var(--surface-01); font-size: 12px; color: var(--mist); }
+    .mkt-eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--bifrost); box-shadow: 0 0 0 3px rgba(47, 212, 198, 0.18); }
+    .mkt-hero h1 { margin: 24px auto 0; max-width: 20ch; font-family: var(--font-sans); font-size: clamp(38px, 6.4vw, 68px); font-weight: 600; letter-spacing: -0.035em; line-height: 1.04; color: var(--frost); }
+    .mkt-hero h1 .accent { color: var(--bifrost); }
+    .mkt-hero .sub { margin: 20px auto 0; max-width: 620px; font-size: clamp(15px, 1.6vw, 18px); line-height: 1.55; color: var(--mist); }
+    .mkt-cta-row { margin-top: 32px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .btn-lg { height: 48px; padding: 0 24px; font-size: 15px; border-radius: var(--radius-sm); }
+
+    /* Hero mockup */
+    .mkt-mockup-wrap { position: relative; margin: clamp(48px, 8vw, 88px) auto 0; max-width: 760px; }
+    .mkt-mockup-glow { position: absolute; inset: -60px; background: radial-gradient(closest-side, rgba(47, 212, 198, 0.16), transparent 70%); filter: blur(10px); z-index: 0; pointer-events: none; }
+    .mkt-mockup { position: relative; z-index: 1; border-radius: var(--radius-panel); border: 1px solid var(--rime); background: var(--surface-01); overflow: hidden; text-align: left; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(191, 233, 238, 0.06); }
+    .mkt-chrome { display: flex; align-items: center; gap: 16px; padding: 12px 16px; border-bottom: 1px solid var(--rime-soft); background: var(--surface-02); }
+    .mkt-chrome .dots { display: flex; gap: 6px; flex-shrink: 0; }
+    .mkt-chrome .dots span { width: 9px; height: 9px; border-radius: 50%; background: var(--rime); }
+    .mkt-chrome .url { flex: 1; height: 24px; border-radius: var(--radius-pill); background: var(--surface-01); border: 1px solid var(--rime-soft); display: flex; align-items: center; padding: 0 12px; font-family: var(--font-mono); font-size: 11px; color: var(--shadow); }
+    .mkt-mockup-body { padding: 20px; }
+    .mkt-mockup-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .mkt-mockup-title-row h3 { font-size: 15px; color: var(--frost); }
+    .mkt-mockup-body .bubble { width: 88%; border: 1px solid var(--rime-soft); background: var(--surface-02); border-radius: var(--radius-sm); padding: 12px; margin-top: 10px; }
+    .mkt-mockup-body .bubble:first-of-type { margin-top: 0; }
+    .mkt-mockup-body .bubble .who { font-size: 10px; color: var(--shadow); font-weight: 500; margin-bottom: 4px; }
+    .mkt-mockup-body .bubble.user { margin-left: auto; background: var(--surface-03); border-color: var(--rime); }
+    .mkt-mockup-body .bubble p { color: var(--mist); font-size: 13px; line-height: 1.5; margin: 0; }
+    .mkt-mockup-body .bubble p b { color: var(--frost); font-weight: 500; }
+
+    /* Section shell */
+    .mkt-section { padding: clamp(56px, 8vw, 96px) 24px; border-top: 1px solid var(--rime-soft); }
+    .mkt-section-head { max-width: 620px; margin: 0 auto 48px; text-align: center; }
+    .mkt-section-head .kicker { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--bifrost); }
+    .mkt-section-head h2 { margin-top: 10px; font-size: clamp(26px, 3.4vw, 38px); font-weight: 600; letter-spacing: -0.02em; color: var(--frost); }
+    .mkt-section-head p { margin-top: 12px; font-size: 15px; color: var(--mist); line-height: 1.55; }
+
+    /* Steps */
+    .mkt-steps { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .mkt-step { border: 1px solid var(--rime-soft); border-radius: var(--radius-card); padding: 24px; background: var(--surface-01); }
+    .mkt-step .n { font-family: var(--font-mono); font-size: 13px; color: var(--bifrost); }
+    .mkt-step h3 { margin-top: 14px; font-size: 16px; color: var(--frost); }
+    .mkt-step p { margin-top: 8px; font-size: 13px; line-height: 1.55; color: var(--mist); }
+    @media (max-width: 900px) {
+      .mkt-steps { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 560px) {
+      .mkt-steps { grid-template-columns: 1fr; }
+    }
+
+    /* Features */
+    .mkt-features { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .mkt-feature { border: 1px solid var(--rime-soft); border-radius: var(--radius-card); padding: 24px; }
+    .mkt-feature .icon { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--surface-02); border: 1px solid var(--rime); color: var(--bifrost); font-family: var(--font-mono); font-size: 14px; }
+    .mkt-feature .icon.live { position: relative; }
+    .mkt-feature .icon.live .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--bifrost); animation: mkt-pulse 1.8s ease-in-out infinite; }
+    @keyframes mkt-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(47, 212, 198, 0.35); } 50% { box-shadow: 0 0 0 6px rgba(47, 212, 198, 0); } }
+    .mkt-feature h3 { margin-top: 16px; font-size: 16px; color: var(--frost); }
+    .mkt-feature p { margin-top: 8px; font-size: 13px; line-height: 1.55; color: var(--mist); }
+    @media (max-width: 900px) {
+      .mkt-features { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 560px) {
+      .mkt-features { grid-template-columns: 1fr; }
+    }
+
+    /* Not-a-PM-tool */
+    .mkt-compare { max-width: 880px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .mkt-compare-col { border-radius: var(--radius-card); padding: 24px; }
+    .mkt-compare-col.no { border: 1px solid var(--rime-soft); }
+    .mkt-compare-col.yes { border: 1px solid var(--rime); background: var(--surface-01); }
+    .mkt-compare-col .label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+    .mkt-compare-col.no .label { color: var(--shadow); }
+    .mkt-compare-col.yes .label { color: var(--bifrost); }
+    .mkt-compare-col ul { margin: 14px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .mkt-compare-col li { font-size: 14px; line-height: 1.5; padding-left: 20px; position: relative; }
+    .mkt-compare-col.no li { color: var(--shadow); }
+    .mkt-compare-col.yes li { color: var(--mist); }
+    .mkt-compare-col.no li::before { content: "–"; position: absolute; left: 0; color: var(--shadow); }
+    .mkt-compare-col.yes li::before { content: "+"; position: absolute; left: 0; color: var(--bifrost); }
+    @media (max-width: 640px) {
+      .mkt-compare { grid-template-columns: 1fr; }
+    }
+
+    /* Final CTA band */
+    .mkt-cta-band { text-align: center; padding: clamp(64px, 9vw, 100px) 24px; border-top: 1px solid var(--rime-soft); }
+    .mkt-cta-band h2 { font-size: clamp(28px, 4vw, 44px); font-weight: 600; letter-spacing: -0.025em; color: var(--frost); max-width: 18ch; margin: 0 auto; }
+    .mkt-cta-band p { margin-top: 12px; font-size: 15px; color: var(--mist); }
+
+    /* Footer */
+    .mkt-footer { border-top: 1px solid var(--rime-soft); padding: 40px 24px; }
+    .mkt-footer-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
+    .mkt-footer-brand p { margin-top: 10px; max-width: 32ch; font-size: 13px; color: var(--shadow); }
+    .mkt-footer-cols { display: flex; gap: 56px; flex-wrap: wrap; }
+    .mkt-footer-col .heading { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--shadow); }
+    .mkt-footer-col ul { margin: 12px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .mkt-footer-col a { font-size: 13px; color: var(--mist); }
+    .mkt-footer-col a:hover { color: var(--frost); }
+    .mkt-footer-bottom { max-width: 1200px; margin: 32px auto 0; padding-top: 20px; border-top: 1px solid var(--rime-soft); font-size: 12px; color: var(--shadow); }
+  </style>
+</head>
+<body>
+  <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/</span> (landing/app/page.tsx) — a different child repo (<span class="mono">landing/</span>, Next.js) from the <span class="mono">web/</span> app wireframes elsewhere in this directory, kept in <span class="mono">design/landing/</span> on purpose (see design/README.md) · the real page today is just a logo + one-line tagline splash — this is a full proposed redesign, not yet built · nav anchors ("How it works", "Features") scroll within this page for real; "Continue with GitHub" and "Sign in" link into the actual /login wireframe; no pricing/signup claims are made since none is decided yet (see docs/roadmap/open-questions.md) · <b>positioning rework #2</b>: dropped "grilled" from public copy (kept internally as spec_grill, just not user-facing); reframed around safety/security — "not AI slop" — instead of "opinionated." Claims grounded in what's real today: isolated per-job containers, scoped/short-lived GitHub App tokens (ADR 005), secrets encrypted at rest and decrypted only server-side (ADR 003 §16/007), real temporary preview deployments + Helm-managed always-on deploys (ADR 003), self-hosting (conventions/deploy.md). <b>Not yet real</b> — presented here as the intended flow, not a current claim: the standalone "Agent review" step (today build finishes straight into human-reviewable `in_review`, feature-lifecycle.md, no separate agent-self-review phase); team/RBAC permissions (product.md: "RBAC/team invitations... remain unbuilt," so "permission-scoped" here refers only to the real GitHub App/job-token scoping, not a user-facing permissions UI). The user's further stated direction — grill sessions recursively breaking a feature into sub-tasks, each independently grilled/designed/built/reviewed/previewed/merged — isn't reflected on the page at all yet; no such recursive/sub-task model exists in ADR 002's feature model today. Also <b>not yet real</b>: per-environment secret tiering (prod/staging/preview/dev each getting only the secrets that tier needs) — today there's one project-level secret set injected wherever a deployment runs (ADR 003 §16), no tiering by environment; "staging" is explicitly named as a deferred concept in ADR 003 itself. Pod-level isolation itself is accurate (Orchestrator provisions one ephemeral Kubernetes pod per job, ADR 003/pi-agent.md) — only the per-environment secret split is aspirational. Revisit this note against docs/overview/product.md, docs/roadmap/open-questions.md, ADR 003, and project-settings.md before any of these claims go live. <b>Pass #3</b>: trimmed the hero subhead and two section intros (were trying to enumerate every pillar in one sentence); swapped the "Purpose-built skills per job" card for "Automated test suites" — testing (`test_run`, markdown specs, cron schedule, job-dispatch.md) is real and was dropped by accident in pass #2's security-grid rewrite. <b>Pass #4</b>: "isolated pod" → "isolated environment" everywhere in public copy (still technically a Kubernetes pod underneath — kept in the "Isolated environments" card's body as supporting detail, ADR 003/pi-agent.md); "reviewed twice" → "reviewed and tested" throughout, since testing is now a named pillar and "twice" undersold it as repetition rather than two different kinds of check. The one PR-review-specific card keeps describing agent-then-human review without claiming "tested" itself, since that's what the separate test-suites card is for. <b>Pass #5</b>: reordered the 6 steps — collapsed the separate "Agent review"/"Your review" steps into one "Agent &amp; user review" step, and gave the freed slot to "Automated tests" as step 04, before review. <b>Not yet real</b>: today `test_run` fires on its own cron schedule against whatever's currently deployed (job-dispatch.md: "Test cron schedule fires → test_run") — it isn't triggered per-feature as a gate between build and review the way this step now implies. Treat this step as the intended future pipeline, not current behavior, until test_run is wired into the per-feature flow. <b>Pass #6</b>: added the "No lock-in" section (BYOK/BYOI/BYOG) between Security &amp; control and Safe by default. Reworked the requested "BYOT / bring your own team" into "BYOG / bring your own GitHub" instead — "bring your own team" doesn't hold up as a claim (a team isn't a resource you plug into the product the way keys/infra are; it's just who's using it), whereas GitHub identity/repo access genuinely is bring-your-own (GitHub-only auth, ADR 001/009; GitHub App repo access, ADR 005) and echoes the existing "no separate account to create" CTA copy. BYOK and BYOI restate points already made elsewhere (the model-provider feature, and the self-hosted card/bullet) — intentional here, framed as a "no lock-in" summary rather than new claims, but worth watching for repetition fatigue if the page keeps growing.</div>
+
+  <header class="mkt-nav">
+    <div class="mkt-nav-inner">
+      <a href="/landing/index.html" class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></a>
+      <nav class="mkt-nav-links">
+        <a href="#how-it-works">How it works</a>
+        <a href="#features">Features</a>
+      </nav>
+      <div class="mkt-nav-actions">
+        <a class="btn btn-ghost" href="/login/index.html">Sign in</a>
+        <a class="btn btn-primary" href="/login/index.html">Get started</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="mkt-hero">
+    <span class="mkt-eyebrow"><span class="dot"></span> Secure AI development — not AI slop</span>
+    <h1>AI-built code you can actually <span class="accent">trust</span>.</h1>
+    <p class="sub">No unreviewed AI slop. Every feature is planned, built in an isolated environment, reviewed and tested before it merges — self-hosted, on your own infrastructure.</p>
+    <div class="mkt-cta-row">
+      <a class="btn btn-primary btn-lg" href="/login/index.html">Continue with GitHub</a>
+      <a class="btn btn-outline btn-lg" href="#how-it-works">See how it works</a>
+    </div>
+
+    <div class="mkt-mockup-wrap">
+      <div class="mkt-mockup-glow"></div>
+      <div class="mkt-mockup">
+        <div class="mkt-chrome">
+          <span class="dots"><span></span><span></span><span></span></span>
+          <span class="url">app.yggdrasil.dev/projects/acme-storefront/features/saved-payment-methods</span>
+        </div>
+        <div class="mkt-mockup-body">
+          <div class="mkt-mockup-title-row">
+            <h3>Saved payment methods</h3>
+            <span class="badge" style="background:#4f9bf022; color:#4f9bf0;">Plan review</span>
+          </div>
+          <div class="bubble">
+            <div class="who">Agent</div>
+            <p>I'll spec out saved payment methods. First — should we support more than one saved card per customer, or just one?</p>
+          </div>
+          <div class="bubble user">
+            <div class="who">You</div>
+            <p>Multiple cards, with one marked default.</p>
+          </div>
+          <div class="bubble">
+            <div class="who">Agent</div>
+            <p>Got it. I'll use a Stripe <b>SetupIntent</b> to tokenize the card and store only the payment method id + last4/brand. Writing the ADR now.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mkt-section" id="how-it-works">
+    <div class="mkt-section-head">
+      <div class="kicker">How it works</div>
+      <h2>Six checkpoints between a description and production</h2>
+      <p>Nothing skips a step. Nothing merges unreviewed or untested.</p>
+    </div>
+    <div class="mkt-steps">
+      <div class="mkt-step">
+        <div class="n">01</div>
+        <h3>Describe</h3>
+        <p>Give the feature a title and any context. That's the entire ask.</p>
+      </div>
+      <div class="mkt-step">
+        <div class="n">02</div>
+        <h3>Plan &amp; design review</h3>
+        <p>You lead the planning. Scope, edge cases, and constraints get written up as a decision record before a single line of code is touched.</p>
+      </div>
+      <div class="mkt-step">
+        <div class="n">03</div>
+        <h3>Agent builds</h3>
+        <p>Approved plans get built unattended, inside an isolated environment with no access beyond what that job needs.</p>
+      </div>
+      <div class="mkt-step">
+        <div class="n">04</div>
+        <h3>Automated tests</h3>
+        <p>Test scenarios run against the build automatically, catching regressions before anyone has to go looking for them.</p>
+      </div>
+      <div class="mkt-step">
+        <div class="n">05</div>
+        <h3>Agent &amp; user review</h3>
+        <p>The agent checks its diff against the approved plan first. Then everything lands as a real pull request against a live preview — your team reviews it, requests changes, or sends it back.</p>
+      </div>
+      <div class="mkt-step">
+        <div class="n">06</div>
+        <h3>Merge</h3>
+        <p>Merge when it's ready. Deployment to your target environment is automated from there.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="mkt-section" id="features">
+    <div class="mkt-section-head">
+      <div class="kicker">Security &amp; control</div>
+      <h2>Built to keep unsafe changes out</h2>
+      <p>Every job is isolated, every credential is scoped, every change reviewed and tested.</p>
+    </div>
+    <div class="mkt-features">
+      <div class="mkt-feature">
+        <span class="icon">&#10697;</span>
+        <h3>Isolated environments, every run</h3>
+        <p>Each job runs in its own ephemeral Kubernetes pod, torn down when it finishes. Nothing persists, nothing leaks between runs, projects, or teams.</p>
+      </div>
+      <div class="mkt-feature">
+        <span class="icon">&#128272;</span>
+        <h3>Scoped, short-lived permissions</h3>
+        <p>Repo access is granted per installation. Jobs get short-lived tokens scoped to exactly what they're doing — never a standing, all-access credential.</p>
+      </div>
+      <div class="mkt-feature">
+        <span class="icon">&#128273;</span>
+        <h3>Secrets, permissioned per environment</h3>
+        <p>Encrypted at rest, decrypted only server-side. Production credentials stay out of preview and dev runs — each environment gets exactly the access it needs.</p>
+      </div>
+      <div class="mkt-feature">
+        <span class="icon mono" style="font-size:11px;">ADR</span>
+        <h3>A decision record for every feature</h3>
+        <p>Every design review ends in a written ADR, committed alongside the code it justifies. Nothing ships without a paper trail.</p>
+      </div>
+      <div class="mkt-feature">
+        <span class="icon mono" style="font-size:11px;">PR</span>
+        <h3>Reviewed by the agent, then by you</h3>
+        <p>The agent checks its own diff against the plan. Then every change lands as a draft PR your team reads, comments on, and approves.</p>
+      </div>
+      <div class="mkt-feature">
+        <span class="icon">&#9648;</span>
+        <h3>Preview environments, automatically</h3>
+        <p>Every run gets its own temporary deployment, so you can see the change working before you approve it — not just read a diff.</p>
+      </div>
+      <div class="mkt-feature">
+        <span class="icon">&#9650;</span>
+        <h3>Automated deployments</h3>
+        <p>Approved changes deploy through the same pipeline every time — no manual steps, no drift between environments.</p>
+      </div>
+      <div class="mkt-feature">
+        <span class="icon">&#8962;</span>
+        <h3>Self-hosted, top to bottom</h3>
+        <p>Run it on your own Kubernetes cluster, or a bundled dev environment. Your code, your containers, your infrastructure.</p>
+      </div>
+      <div class="mkt-feature">
+        <span class="icon">&#9201;</span>
+        <h3>Automated test suites</h3>
+        <p>Markdown test scenarios run against your deployment on a schedule, catching regressions before your team does.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="mkt-section">
+    <div class="mkt-section-head">
+      <div class="kicker">No lock-in</div>
+      <h2>Your keys. Your infra. Your GitHub.</h2>
+      <p>Nothing here runs on an account, a cluster, or a model provider you don't already control.</p>
+    </div>
+    <div class="mkt-features" style="grid-template-columns: repeat(3, 1fr); max-width: 960px;">
+      <div class="mkt-feature">
+        <span class="icon mono" style="font-size:10px;">BYOK</span>
+        <h3>Bring your own keys</h3>
+        <p>Connect OpenRouter, Anthropic, OpenAI, or a custom endpoint. Your API keys, your model choices, per job.</p>
+      </div>
+      <div class="mkt-feature">
+        <span class="icon mono" style="font-size:10px;">BYOI</span>
+        <h3>Bring your own infra</h3>
+        <p>Run it on your own Kubernetes cluster, or a bundled dev environment. Nothing lives on infrastructure you don't control.</p>
+      </div>
+      <div class="mkt-feature">
+        <span class="icon mono" style="font-size:10px;">BYOG</span>
+        <h3>Bring your own GitHub</h3>
+        <p>Sign in with the GitHub identity and repos you already have. No new account, no new access model to manage.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="mkt-section">
+    <div class="mkt-section-head">
+      <div class="kicker">Safe by default</div>
+      <h2>No unreviewed code. No standing access. No surprises.</h2>
+      <p>Isolated, reviewed and tested, merged on your terms — without dictating your stack.</p>
+    </div>
+    <div class="mkt-compare">
+      <div class="mkt-compare-col no">
+        <div class="label">Yggdrasil is not</div>
+        <ul>
+          <li>A code editor or IDE replacement</li>
+          <li>A CI/CD pipeline — it complements the one you have</li>
+          <li>A Jira/Linear-style project tracker</li>
+          <li>Opinionated about your tech stack</li>
+        </ul>
+      </div>
+      <div class="mkt-compare-col yes">
+        <div class="label">Yggdrasil is</div>
+        <ul>
+          <li>A quality enforcement system for AI-built code</li>
+          <li>Isolated and permission-scoped, run by run</li>
+          <li>Strict about process, with zero opinion on your tech stack</li>
+          <li>Self-hosted on your own infrastructure, top to bottom</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="mkt-cta-band">
+    <h2>Ready to ship AI-built code you can trust?</h2>
+    <p>Sign in with GitHub — no separate account to create.</p>
+    <div class="mkt-cta-row">
+      <a class="btn btn-primary btn-lg" href="/login/index.html">Continue with GitHub</a>
+    </div>
+  </section>
+
+  <footer class="mkt-footer">
+    <div class="mkt-footer-inner">
+      <div class="mkt-footer-brand">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+        <p>Secure, self-hosted AI development for small teams. Every change is isolated, scoped, reviewed, and tested before it ships.</p>
+      </div>
+      <div class="mkt-footer-cols">
+        <div class="mkt-footer-col">
+          <div class="heading">Product</div>
+          <ul>
+            <li><a href="#how-it-works">How it works</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="/login/index.html">Sign in</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <p class="mkt-footer-bottom mktw" style="padding:0;">&copy; 2026 Yggdrasil.</p>
+  </footer>
+</body>
+</html>

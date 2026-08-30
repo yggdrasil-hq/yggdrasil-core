@@ -27,22 +27,30 @@
       <a href="/projects/index.html" class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></a>
       <nav class="hub-nav">
         <a href="/projects/index.html" class="active">Projects</a>
-        <a href="/notifications/index.html">Notifications</a>
-        <a href="/settings/account/index.html">Settings</a>
       </nav>
-      <div style="display:flex; align-items:center; gap:12px;">
-        <div style="text-align:right;">
-          <div style="font-size:14px; font-weight:500; color:var(--frost);">Sarat Chandra</div>
-          <div style="font-size:12px; color:var(--shadow);">@saratc</div>
+      <div class="shell-topbar-actions">
+        <a class="notif-bell" href="/notifications/index.html" aria-label="Notifications">&#128276;<span class="dot"></span></a>
+        <div class="user-menu">
+          <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+          <label for="user-menu-toggle" class="user-menu-trigger">
+            <span class="avatar">SC</span>
+            <span class="chevron">&#9662;</span>
+          </label>
+          <div class="user-menu-panel">
+            <div class="user-menu-head">
+              <div class="name">Sarat Chandra</div>
+              <div class="handle">@saratc</div>
+            </div>
+            <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+            <button class="user-menu-item" type="button">Log out</button>
+          </div>
         </div>
-        <span class="avatar">SC</span>
-        <button class="btn btn-ghost" type="button" aria-label="Log out">&#9211;</button>
       </div>
     </div>
   </header>
 
   <div class="hub-main">
-    <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects</span> (web/app/projects/page.tsx) · shows the populated grid state; loading/error/empty states from the real component aren't mocked here</div>
+    <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects</span> (web/app/projects/page.tsx) · shows the populated grid state; loading/error/empty states from the real component aren't mocked here · <b>proposed IA rework</b>: header collapses to a single "Projects" nav item + notification bell + user-menu dropdown (was a 3-item text nav plus an always-expanded profile block) — not yet in web/app-shell, see design/README.md</div>
     <div class="hub-page-title">
       <h1>Projects</h1>
       <p>Connect GitHub repositories and manage agent work from one place.</p>

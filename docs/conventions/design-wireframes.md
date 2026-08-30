@@ -7,10 +7,23 @@ wireframe of a `web/` page, or deciding whether new UI work should start from
 ## What this is
 
 `design/` (singular), at the meta repo root, holds hand-built, self-contained
-HTML/CSS wireframes of every page in the `web/` Next.js app — one file per
-route, matching one-to-one, with all app logic stripped out. It exists so a
-human can iterate on layout, copy, and information architecture with an agent,
-in a browser, before a Feature is actually built.
+HTML/CSS wireframes — one file per route, matching one-to-one, with all app
+logic stripped out. It exists so a human can iterate on layout, copy, and
+information architecture with an agent, in a browser, before a Feature is
+actually built.
+
+Two products live under `design/`, kept in **separate directories** because
+they map to two different child repos with two different navigation shells —
+not because they share one app:
+
+- **`design/landing/`** — the public marketing site, maps to the `landing/`
+  repo. Its own nav/hero/footer, no app shell.
+- Everything else at the top level (`design/login/`, `design/projects/`, …) —
+  the authenticated app, maps to the `web/` repo, uses `shared/shell.css`'s
+  hub-header/sidebar chrome.
+
+Both share `shared/tokens.css` (and `shared/shell.css`'s `.logo`/`.design-note`
+primitives) so they read as one product despite the different navigation.
 
 ## How this differs from ADR 014's `designs/`
 
@@ -37,10 +50,13 @@ directory belongs in ADR 014, not here.
 - `design/shared/tokens.css` — design tokens (colors, type, spacing), copied
   from [`theming.md`](theming.md). Keep the two in sync by hand.
 - `design/shared/shell.css` — shared sidebar / hub-header / layout chrome
-  classes, mirroring `web/components/app-shell/*`.
-- One directory per route, with `index.html` inside. A dynamic route segment
-  (`[projectId]`, `[featureId]`, …) becomes a literal `detail/` directory
-  standing in for one sample record.
+  classes, mirroring `web/components/app-shell/*`. The landing page reuses
+  only its `.logo`/`.design-note` primitives, not the app-shell components.
+- `design/landing/index.html` — the marketing home page, maps to `landing/`.
+  Defines its own nav/hero/section/footer components locally.
+- One directory per **app** route, with `index.html` inside. A dynamic route
+  segment (`[projectId]`, `[featureId]`, …) becomes a literal `detail/`
+  directory standing in for one sample record.
 
 Full route → file map: `design/README.md`.
 
@@ -52,7 +68,10 @@ Full route → file map: `design/README.md`.
   accordion) — never for anything that talks to a server. Mirrors ADR 014
   item 7's "no logic" boundary.
 - Every page opens with a `.design-note` div stating which real route and
-  `web/` component it maps to, and what's faked or inert.
+  component it maps to (`web/` for app pages, `landing/` for the marketing
+  page), and what's faked, inert, or still just proposed. Hidden by default
+  (`display: none` in `shared/shell.css`) so a page previews like the live
+  site — the note text stays in the HTML for whoever's editing.
 - Links between pages are **root-absolute** (`/projects/index.html`, not
   `../projects/index.html`) — see `design/README.md` for why (serve the
   directory locally; don't open files via `file://`).

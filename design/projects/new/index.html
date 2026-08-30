@@ -43,6 +43,12 @@
     .radio-option { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--frost); }
     .agent-custom { border: 1px dashed var(--rime); border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
     .checkbox-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+
+    .job-row { border: 1px solid var(--rime); border-radius: var(--radius-sm); padding: 12px; }
+    .job-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .job-title { font-size: 13px; font-weight: 500; color: var(--frost); }
+    .job-desc { margin-top: 2px; font-size: 12px; }
+    .job-row select.input { margin-top: 10px; width: 100%; }
   </style>
 </head>
 <body>
@@ -51,22 +57,30 @@
       <a href="/projects/index.html" class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></a>
       <nav class="hub-nav">
         <a href="/projects/index.html" class="active">Projects</a>
-        <a href="/notifications/index.html">Notifications</a>
-        <a href="/settings/account/index.html">Settings</a>
       </nav>
-      <div style="display:flex; align-items:center; gap:12px;">
-        <div style="text-align:right;">
-          <div style="font-size:14px; font-weight:500; color:var(--frost);">Sarat Chandra</div>
-          <div style="font-size:12px; color:var(--shadow);">@saratc</div>
+      <div class="shell-topbar-actions">
+        <a class="notif-bell" href="/notifications/index.html" aria-label="Notifications">&#128276;<span class="dot"></span></a>
+        <div class="user-menu">
+          <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+          <label for="user-menu-toggle" class="user-menu-trigger">
+            <span class="avatar">SC</span>
+            <span class="chevron">&#9662;</span>
+          </label>
+          <div class="user-menu-panel">
+            <div class="user-menu-head">
+              <div class="name">Sarat Chandra</div>
+              <div class="handle">@saratc</div>
+            </div>
+            <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+            <button class="user-menu-item" type="button">Log out</button>
+          </div>
         </div>
-        <span class="avatar">SC</span>
-        <button class="btn btn-ghost" type="button" aria-label="Log out">&#9211;</button>
       </div>
     </div>
   </header>
 
   <div class="hub-main">
-    <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/new</span> (web/components/projects/create-project-page-client.tsx) · the real page is a 3-step wizard rendered one step at a time — click a step pill below to preview it (CSS-only tabs, no JS)</div>
+    <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/new</span> (web/components/projects/create-project-page-client.tsx) · the real page is a 3-step wizard rendered one step at a time — click a step pill below to preview it (CSS-only tabs, no JS) · header rework, see /projects · step 3 also reworked to match the multi-provider/multi-model account settings redesign (per-job-kind pickers instead of the old base-URL/API-key/model-ID triplet) — proposed, not yet in ADR 007 or web/</div>
     <div class="hub-page-title">
       <h1>Create project</h1>
       <p>Name your project, then pick a repository Yggdrasil already has access to.</p>
@@ -79,7 +93,7 @@
     <div class="stepper">
       <label for="step-details"><span>Step 1</span>Details</label>
       <label for="step-repos"><span>Step 2</span>Select repository</label>
-      <label for="step-agent"><span>Step 3</span>Agent configuration</label>
+      <label for="step-agent"><span>Step 3</span>Model configuration</label>
     </div>
 
     <div id="panel-details" class="step-panel">
@@ -138,25 +152,70 @@
     <div id="panel-agent" class="step-panel">
       <div class="card">
         <div class="card-title">Model configuration</div>
-        <p class="card-desc">Choose the model backend the Pi agent uses for this project's jobs.</p>
+        <p class="card-desc">Choose which models the Pi agent uses for this project's jobs.</p>
         <div class="card-body">
-          <label class="radio-option"><input type="radio" name="agent-mode" checked /> Use my default model configuration</label>
-          <label class="radio-option"><input type="radio" name="agent-mode" /> Configure a different agent for this project</label>
+          <label class="radio-option"><input type="radio" name="agent-mode" checked /> Use my account defaults</label>
+          <label class="radio-option"><input type="radio" name="agent-mode" /> Override models for this project</label>
 
           <div class="agent-custom">
-            <div class="field">
-              <label for="model-base-url">Model base URL</label>
-              <input class="input" id="model-base-url" placeholder="https://api.openai.com/v1" />
+            <p class="text-mist" style="font-size:13px;">Choices below pull from the providers and models connected in <a href="/settings/account/index.html" style="color:var(--bifrost);">Account settings</a>.</p>
+
+            <div class="job-row">
+              <div class="job-head">
+                <span class="job-title">Design session</span>
+                <span class="mono text-shadow" style="font-size:11px;">design_grill</span>
+              </div>
+              <p class="job-desc text-mist">Live HTML mockups during a design session.</p>
+              <select class="input">
+                <option>Claude Sonnet 5 — Anthropic</option>
+                <option>Claude Opus 5 — Anthropic</option>
+                <option>GPT-5.1 — OpenAI</option>
+                <option>DeepSeek V3 — OpenRouter</option>
+                <option>Kimi K2 — Together AI</option>
+              </select>
             </div>
-            <div class="field">
-              <label for="model-api-key">Model API key</label>
-              <input class="input" id="model-api-key" type="password" placeholder="sk-&hellip;" />
+            <div class="job-row">
+              <div class="job-head">
+                <span class="job-title">Feature spec</span>
+                <span class="mono text-shadow" style="font-size:11px;">spec_grill</span>
+              </div>
+              <p class="job-desc text-mist">Interviews scope and produces the feature's ADR.</p>
+              <select class="input">
+                <option>Claude Opus 5 — Anthropic</option>
+                <option>Claude Sonnet 5 — Anthropic</option>
+                <option>GPT-5.1 — OpenAI</option>
+                <option>DeepSeek V3 — OpenRouter</option>
+                <option>Kimi K2 — Together AI</option>
+              </select>
             </div>
-            <div class="field">
-              <label for="model-id">Model ID</label>
-              <input class="input" id="model-id" placeholder="gpt-4.1" />
+            <div class="job-row">
+              <div class="job-head">
+                <span class="job-title">Feature build</span>
+                <span class="mono text-shadow" style="font-size:11px;">feature_build</span>
+              </div>
+              <p class="job-desc text-mist">Implements the approved ADR unattended.</p>
+              <select class="input">
+                <option>Claude Sonnet 5 — Anthropic</option>
+                <option>Claude Opus 5 — Anthropic</option>
+                <option>GPT-5.1 — OpenAI</option>
+                <option>DeepSeek V3 — OpenRouter</option>
+                <option>Kimi K2 — Together AI</option>
+              </select>
             </div>
-            <label class="checkbox-row"><input type="checkbox" checked /> Also save this as my account default</label>
+            <div class="job-row">
+              <div class="job-head">
+                <span class="job-title">Tests</span>
+                <span class="mono text-shadow" style="font-size:11px;">test_run</span>
+              </div>
+              <p class="job-desc text-mist">Runs a test suite's steps against the deployed preview.</p>
+              <select class="input">
+                <option>DeepSeek V3 — OpenRouter</option>
+                <option>Claude Sonnet 5 — Anthropic</option>
+                <option>Claude Opus 5 — Anthropic</option>
+                <option>GPT-5.1 — OpenAI</option>
+                <option>Kimi K2 — Together AI</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>

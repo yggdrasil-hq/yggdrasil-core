@@ -14,7 +14,9 @@
     .wrap > .logo { margin-bottom: 8px; }
     .wrap h1 { margin-top: 16px; font-size: 28px; }
     .wrap > p { margin-top: 10px; max-width: 520px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 32px; font-size: 14px; }
+    .group-heading { margin-top: 40px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--shadow); }
+    .group-desc { margin-top: 4px; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14px; }
     th { text-align: left; color: var(--shadow); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; padding: 8px 12px; border-bottom: 1px solid var(--rime-soft); }
     td { padding: 10px 12px; border-bottom: 1px solid var(--rime-soft); }
     td a { color: var(--bifrost); }
@@ -25,9 +27,22 @@
   <div class="wrap">
     <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
     <h1>Design wireframes</h1>
-    <p>Static HTML/CSS mockups of every page in <span class="mono">web/</span>, one file per route, no app logic. See <span class="mono">design/README.md</span> for the mapping and how to use these with an agent.</p>
-    <p style="margin-top: 12px;">The real <span class="mono">/</span> route renders nothing client-side — middleware redirects signed-out visitors to <a href="/login/index.html" style="color: var(--bifrost);">/login</a> and signed-in visitors to <a href="/projects/index.html" style="color: var(--bifrost);">/projects</a>.</p>
+    <p>Static HTML/CSS mockups, one file per route, no app logic. See <span class="mono">design/README.md</span> for the mapping and how to use these with an agent.</p>
+    <p style="margin-top: 12px;">Two separate products live here, in two separate child repos — kept in their own directories below rather than mixed together (see <span class="mono">design/README.md</span>).</p>
 
+    <div class="group-heading">Landing (public marketing site)</div>
+    <p class="group-desc">Maps to the <span class="mono">landing/</span> repo. Signed-out visitors land here first.</p>
+    <table>
+      <thead>
+        <tr><th>Page</th><th>Route</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><a href="/landing/index.html">Marketing home</a></td><td class="route">/</td></tr>
+      </tbody>
+    </table>
+
+    <div class="group-heading">App (authenticated product)</div>
+    <p class="group-desc">Maps to the <span class="mono">web/</span> repo. The real <span class="mono">/</span> route there renders nothing client-side — middleware redirects signed-out visitors to <a href="/login/index.html" style="color: var(--bifrost);">/login</a> and signed-in visitors to <a href="/projects/index.html" style="color: var(--bifrost);">/projects</a>.</p>
     <table>
       <thead>
         <tr><th>Page</th><th>Route</th></tr>
