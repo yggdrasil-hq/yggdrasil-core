@@ -115,13 +115,108 @@
   color: var(--frost);
 }
 
+.nav-divider {
+  padding: 14px 12px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--shadow);
+}
+
+.nav-link .nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--aurora);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Sidebar account cell — bottom-of-sidebar profile row that opens the
+   existing .user-menu dropdown, but upward (there's no room below it). Used
+   by the hub sidebar; the project sidebar keeps identity out of its own
+   footer on purpose (see shell.css history / design notes). */
+
+.sidebar-foot {
+  border-top: 1px solid var(--rime-soft);
+  padding: 12px;
+}
+
+.sidebar-account-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  width: 100%;
+}
+
+.sidebar-account-trigger:hover {
+  background: var(--surface-02);
+}
+
+.sidebar-account-trigger .info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar-account-trigger .name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--frost);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-account-trigger .handle {
+  font-size: 12px;
+  color: var(--shadow);
+}
+
+.sidebar-account-trigger .chevron {
+  color: var(--shadow);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.sidebar-account .user-menu-panel {
+  bottom: calc(100% + 8px);
+  top: auto;
+  left: 0;
+  right: auto;
+  width: calc(256px - 24px);
+}
+
+/* Org switcher pinned in the hub sidebar (below the logo, above the nav) —
+   same component as the project-shell's .sidebar-project link, just backed
+   by the real checkbox-toggle dropdown instead of a plain link. */
+
+.sidebar-org-switcher {
+  position: relative;
+  margin: 16px;
+}
+
+.sidebar-org-switcher .sidebar-project {
+  margin: 0;
+  width: 100%;
+  cursor: pointer;
+}
+
+.sidebar-org-switcher .user-menu-panel {
+  left: 0;
+  right: 0;
+  width: auto;
+}
+
 .main {
   margin-left: 256px;
   min-height: 100vh;
 }
 
 .main-inner {
-  max-width: var(--maxw);
   padding: 32px;
 }
 
@@ -286,50 +381,97 @@
   color: var(--frost);
 }
 
-/* Hub layout: top bar, centered column, no sidebar */
+/* Org switcher — same checkbox-toggle dropdown mechanic as .user-menu, styled
+   for picking an organization instead of a person. Reuses .user-menu-panel/
+   .user-menu-item for the panel chrome. */
 
-.hub-header {
-  border-bottom: 1px solid var(--rime-soft);
-  background: rgba(14, 19, 27, 0.95);
+.org-switcher {
+  position: relative;
 }
 
-.hub-header-inner {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 16px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.hub-nav {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.hub-nav a {
+.org-switcher-trigger {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 6px 10px 6px 6px;
   border-radius: var(--radius-sm);
-  font-size: 14px;
-  color: var(--mist);
+  cursor: pointer;
 }
 
-.hub-nav a.active,
-.hub-nav a:hover {
+.org-switcher-trigger:hover {
   background: var(--surface-02);
+}
+
+.org-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: var(--surface-03);
+  color: var(--bifrost);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+
+.org-avatar.sm {
+  width: 20px;
+  height: 20px;
+  font-size: 10px;
+  border-radius: 5px;
+}
+
+.org-switcher .org-name {
+  font-size: 14px;
+  font-weight: 500;
   color: var(--frost);
 }
 
-.hub-main {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 32px 24px;
+.org-switcher-panel {
+  width: 240px;
 }
+
+.org-switcher-label {
+  padding: 6px 10px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--shadow);
+}
+
+.org-switcher-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.org-switcher-item.active {
+  color: var(--frost);
+}
+
+.org-switcher-item.active::after {
+  content: "\2713";
+  margin-left: auto;
+  color: var(--bifrost);
+}
+
+.org-switcher-divider {
+  border-top: 1px solid var(--rime-soft);
+  margin-top: 6px;
+  padding-top: 6px;
+}
+
+/* Hub-level pages (Projects/Notifications/Account/Organization settings, New
+   project) now share the exact same shell as project pages — .shell/.sidebar/
+   .main/.main-inner above — rather than a separate top-bar-only layout. See
+   design/README.md and the design-note on design/projects/index.html for the
+   "why" (Vercel-style persistent sidebar, at the user's request). The old
+   .hub-header/.hub-header-inner/.hub-nav/.hub-main rules that used to back
+   that separate layout are gone — don't reintroduce a page using them. */
 
 .hub-page-title {
   margin-bottom: 32px;

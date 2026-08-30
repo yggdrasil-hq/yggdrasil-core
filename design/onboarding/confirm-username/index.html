@@ -25,7 +25,7 @@
   </style>
 </head>
 <body>
-  <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/onboarding/confirm-username</span> (web/app/onboarding/confirm-username/page.tsx) · form is inert, always shows the post-GitHub-login "pick your username" state</div>
+  <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/onboarding/confirm-username</span> (web/app/onboarding/confirm-username/page.tsx) · form fields are inert (always shows the post-GitHub-login "pick your username" state), but "Confirm and continue" links to <span class="mono">/projects</span> to complete the click-through flow for a first-time user</div>
 
   <div class="auth-wrap">
     <div class="auth-inner">
@@ -50,7 +50,7 @@
             <label for="displayName">Display name</label>
             <input class="input" id="displayName" value="The Octocat" />
           </div>
-          <button class="btn btn-primary" type="button">Confirm and continue</button>
+          <a class="btn btn-primary" href="/projects/index.html">Confirm and continue</a>
         </form>
       </div>
     </div>

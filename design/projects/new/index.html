@@ -52,38 +52,68 @@
   </style>
 </head>
 <body>
-  <header class="hub-header">
-    <div class="hub-header-inner">
-      <a href="/projects/index.html" class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></a>
-      <nav class="hub-nav">
-        <a href="/projects/index.html" class="active">Projects</a>
-      </nav>
-      <div class="shell-topbar-actions">
-        <a class="notif-bell" href="/notifications/index.html" aria-label="Notifications">&#128276;<span class="dot"></span></a>
-        <div class="user-menu">
-          <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
-          <label for="user-menu-toggle" class="user-menu-trigger">
-            <span class="avatar">SC</span>
-            <span class="chevron">&#9662;</span>
-          </label>
-          <div class="user-menu-panel">
-            <div class="user-menu-head">
-              <div class="name">Sarat Chandra</div>
-              <div class="handle">@saratc</div>
-            </div>
-            <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
-            <button class="user-menu-item" type="button">Log out</button>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+
+      <div class="org-switcher sidebar-org-switcher">
+        <input type="checkbox" id="org-switcher-toggle" class="user-menu-toggle" />
+        <label for="org-switcher-toggle" class="sidebar-project">
+          <span style="display:flex; align-items:center; gap:8px; min-width:0;">
+            <span class="org-avatar sm">A</span>
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Acme Retail</span>
+          </span>
+          <span class="text-shadow">&#8964;</span>
+        </label>
+        <div class="user-menu-panel org-switcher-panel">
+          <div class="org-switcher-label">Organizations</div>
+          <a class="user-menu-item org-switcher-item active" href="/projects/index.html"><span class="org-avatar sm">A</span> Acme Retail</a>
+          <a class="user-menu-item org-switcher-item" href="/projects/index.html"><span class="org-avatar sm">N</span> Northwind Labs</a>
+          <div class="org-switcher-divider">
+            <a class="user-menu-item" href="/settings/organization/index.html">Organization settings</a>
+            <button class="user-menu-item" type="button">+ Create organization</button>
           </div>
         </div>
       </div>
-    </div>
-  </header>
 
-  <div class="hub-main">
-    <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/new</span> (web/components/projects/create-project-page-client.tsx) · the real page is a 3-step wizard rendered one step at a time — click a step pill below to preview it (CSS-only tabs, no JS) · header rework, see /projects · step 3 also reworked to match the multi-provider/multi-model account settings redesign (per-job-kind pickers instead of the old base-URL/API-key/model-ID triplet) — proposed, not yet in ADR 007 or web/</div>
+      <nav class="sidebar-nav">
+        <a class="nav-link active" href="/projects/index.html"><span class="icon">&#9638;</span> Projects</a>
+        <a class="nav-link" href="/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+        <div class="nav-divider">Monitoring</div>
+        <a class="nav-link" href="/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+        <a class="nav-link" href="/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
+        <a class="nav-link" href="/infrastructure/index.html"><span class="icon">&#128421;</span> Infrastructure</a>
+        <a class="nav-link" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="user-menu sidebar-account">
+          <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+          <label for="user-menu-toggle" class="sidebar-account-trigger">
+            <span class="avatar">SC</span>
+            <span class="info">
+              <div class="name">Sarat Chandra</div>
+              <div class="handle">@saratc</div>
+            </span>
+            <span class="chevron">&#9662;</span>
+          </label>
+          <div class="user-menu-panel">
+            <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+            <a class="user-menu-item" href="/settings/organization/index.html">Organization settings</a>
+            <a class="user-menu-item" href="/login/index.html">Log out</a>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="main-inner">
+    <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/new</span> (web/components/projects/create-project-page-client.tsx) · the real page is a 3-step wizard rendered one step at a time — click a step pill below to preview it (CSS-only tabs, no JS) · <b>IA rework round 3</b>: top hub-header replaced by the same persistent sidebar as every other page (see /projects's design-note for the full rationale) · step 3 also reworked to match the multi-provider/multi-model account settings redesign (per-job-kind pickers instead of the old base-URL/API-key/model-ID triplet) — proposed, not yet in ADR 007 or web/ · <b>updated again</b>: step 3 now sources from the current organization's models (org switcher sets the org this project is created in — no separate org-picker field, same as GitHub's "create repo in this org" pattern) instead of personal account defaults, since /settings/organization now owns provider/model config; see that page's design-note for the full rationale · <b>"Create project" now links</b> to /projects/detail/index.html to close the click-through loop — that page mocks the project's "ready" state, not the "initializing" state a real freshly-created project would actually be in (project_init hasn't merged yet, per ADR 002 §4) — closest available approximation, not a claim about real post-creation behavior</div>
     <div class="hub-page-title">
       <h1>Create project</h1>
-      <p>Name your project, then pick a repository Yggdrasil already has access to.</p>
+      <p>Name your project, then pick a repository Yggdrasil already has access to. Creating in <span class="text-bifrost">Acme Retail</span>.</p>
     </div>
 
     <input type="radio" name="step" id="step-details" checked />
@@ -152,13 +182,13 @@
     <div id="panel-agent" class="step-panel">
       <div class="card">
         <div class="card-title">Model configuration</div>
-        <p class="card-desc">Choose which models the Pi agent uses for this project's jobs.</p>
+        <p class="card-desc">Choose which models the Pi agent uses for this project's jobs, or use Acme Retail's defaults.</p>
         <div class="card-body">
-          <label class="radio-option"><input type="radio" name="agent-mode" checked /> Use my account defaults</label>
+          <label class="radio-option"><input type="radio" name="agent-mode" checked /> Use Acme Retail's defaults</label>
           <label class="radio-option"><input type="radio" name="agent-mode" /> Override models for this project</label>
 
           <div class="agent-custom">
-            <p class="text-mist" style="font-size:13px;">Choices below pull from the providers and models connected in <a href="/settings/account/index.html" style="color:var(--bifrost);">Account settings</a>.</p>
+            <p class="text-mist" style="font-size:13px;">Choices below pull from the providers and models connected in <a href="/settings/organization/index.html" style="color:var(--bifrost);">Organization settings</a>.</p>
 
             <div class="job-row">
               <div class="job-head">
@@ -220,8 +250,10 @@
         </div>
       </div>
       <div class="actions">
-        <button class="btn btn-primary" type="button">Create project</button>
+        <a class="btn btn-primary" href="/projects/detail/index.html">Create project</a>
         <label class="btn btn-ghost" for="step-repos">Back</label>
+      </div>
+    </div>
       </div>
     </div>
   </div>

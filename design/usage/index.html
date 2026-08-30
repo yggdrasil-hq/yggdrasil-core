@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Usage — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card .label { font-size: 13px; color: var(--mist); }
+    .stat-card .value { font-size: 28px; font-weight: 600; color: var(--frost); margin-top: 6px; font-family: var(--font-mono); }
+    .stat-card .sub { font-size: 12px; color: var(--shadow); margin-top: 4px; }
+
+    .usage-card { margin-top: 12px; }
+    .usage-card:first-of-type { margin-top: 0; }
+    .usage-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .usage-head .label { font-size: 15px; font-weight: 500; color: var(--frost); }
+    .usage-head .desc { font-size: 12px; color: var(--shadow); margin-top: 2px; }
+    .usage-numbers { font-family: var(--font-mono); font-size: 13px; color: var(--mist); text-align: right; flex-shrink: 0; }
+    .usage-numbers .pct { color: var(--frost); font-weight: 500; }
+
+    .usage-bar-track { margin-top: 14px; height: 8px; border-radius: 999px; background: var(--surface-02); overflow: hidden; }
+    .usage-bar-fill { height: 100%; border-radius: 999px; background: var(--bifrost); }
+    .usage-bar-fill.warn { background: var(--st-input); }
+
+    .usage-foot { margin-top: 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 12px; color: var(--shadow); }
+    .usage-foot a { color: var(--bifrost); }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+
+      <div class="org-switcher sidebar-org-switcher">
+        <input type="checkbox" id="org-switcher-toggle" class="user-menu-toggle" />
+        <label for="org-switcher-toggle" class="sidebar-project">
+          <span style="display:flex; align-items:center; gap:8px; min-width:0;">
+            <span class="org-avatar sm">A</span>
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Acme Retail</span>
+          </span>
+          <span class="text-shadow">&#8964;</span>
+        </label>
+        <div class="user-menu-panel org-switcher-panel">
+          <div class="org-switcher-label">Organizations</div>
+          <a class="user-menu-item org-switcher-item active" href="/projects/index.html"><span class="org-avatar sm">A</span> Acme Retail</a>
+          <a class="user-menu-item org-switcher-item" href="/projects/index.html"><span class="org-avatar sm">N</span> Northwind Labs</a>
+          <div class="org-switcher-divider">
+            <a class="user-menu-item" href="/settings/organization/index.html">Organization settings</a>
+            <button class="user-menu-item" type="button">+ Create organization</button>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/projects/index.html"><span class="icon">&#9638;</span> Projects</a>
+        <a class="nav-link" href="/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+        <div class="nav-divider">Monitoring</div>
+        <a class="nav-link active" href="/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+        <a class="nav-link" href="/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
+        <a class="nav-link" href="/infrastructure/index.html"><span class="icon">&#128421;</span> Infrastructure</a>
+        <a class="nav-link" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="user-menu sidebar-account">
+          <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+          <label for="user-menu-toggle" class="sidebar-account-trigger">
+            <span class="avatar">SC</span>
+            <span class="info">
+              <div class="name">Sarat Chandra</div>
+              <div class="handle">@saratc</div>
+            </span>
+            <span class="chevron">&#9662;</span>
+          </label>
+          <div class="user-menu-panel">
+            <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+            <a class="user-menu-item" href="/settings/organization/index.html">Organization settings</a>
+            <a class="user-menu-item" href="/login/index.html">Log out</a>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="main-inner">
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/usage</span> — a <b>new</b> route/page, no equivalent exists in web/ today. <b>More speculative than Deployments was</b>: there is no token-usage tracking concept anywhere in the current system — not in any ADR, not in job-dispatch.md, nothing. <span class="mono">roadmap/phases.md</span> Phase 4 lists "token budgets" as unbuilt, and that's a spending <i>cap</i>, not consumption reporting — a different feature. This whole page assumes the API/Orchestrator logs a token count per job and exposes it somewhere, which doesn't exist yet. Also worth being precise about: providers are bring-your-own-key and <b>org-managed</b> (per /settings/organization) — Yggdrasil doesn't bill or own a quota system, so any "resets in N days" shown here is the <i>provider's own</i> billing-cycle reset (e.g. OpenRouter's), only as good as whatever the provider's API reports back, not something Yggdrasil controls. Numbers, percentages, and reset dates below are entirely invented for the mockup. Project-level and account-level (user) versions of this page show the same providers scoped down to that project's/that user's share of consumption — see their own design-notes for how the three levels relate (org is the authoritative quota view; project and user are contribution slices of it, not separate quotas).</div>
+
+        <div class="page-header">
+          <div>
+            <h1>Usage</h1>
+            <p>Token usage across every provider connected to Acme Retail.</p>
+          </div>
+        </div>
+
+        <div class="stat-row">
+          <div class="card stat-card">
+            <div class="label">Total tokens this cycle</div>
+            <div class="value">6.8M</div>
+            <div class="sub">Across 4 connected providers</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">Highest usage</div>
+            <div class="value">OpenRouter</div>
+            <div class="sub">3.9M tokens &middot; 39% of limit</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">Next reset</div>
+            <div class="value">18 days</div>
+            <div class="sub">Anthropic &middot; Dec 1</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="usage-card">
+            <div class="usage-head">
+              <div>
+                <div class="label">OpenRouter</div>
+                <div class="desc">As reported by the provider</div>
+              </div>
+              <div class="usage-numbers"><span class="pct">39%</span> &middot; 3.9M / 10M tokens</div>
+            </div>
+            <div class="usage-bar-track"><div class="usage-bar-fill" style="width:39%;"></div></div>
+            <div class="usage-foot">
+              <span>Used across 3 projects</span>
+              <span>Resets in 22 days</span>
+            </div>
+          </div>
+
+          <div class="usage-card" style="border-top:1px solid var(--rime-soft); padding-top:20px; margin-top:20px;">
+            <div class="usage-head">
+              <div>
+                <div class="label">Anthropic</div>
+                <div class="desc">As reported by the provider</div>
+              </div>
+              <div class="usage-numbers"><span class="pct">81%</span> &middot; 2.0M / 2.5M tokens</div>
+            </div>
+            <div class="usage-bar-track"><div class="usage-bar-fill warn" style="width:81%;"></div></div>
+            <div class="usage-foot">
+              <span>Used across 2 projects</span>
+              <span>Resets in 18 days</span>
+            </div>
+          </div>
+
+          <div class="usage-card" style="border-top:1px solid var(--rime-soft); padding-top:20px; margin-top:20px;">
+            <div class="usage-head">
+              <div>
+                <div class="label">OpenAI</div>
+                <div class="desc">As reported by the provider</div>
+              </div>
+              <div class="usage-numbers"><span class="pct">6%</span> &middot; 120K / 2M tokens</div>
+            </div>
+            <div class="usage-bar-track"><div class="usage-bar-fill" style="width:6%;"></div></div>
+            <div class="usage-foot">
+              <span>Used across 1 project</span>
+              <span>Resets in 9 days</span>
+            </div>
+          </div>
+
+          <div class="usage-card" style="border-top:1px solid var(--rime-soft); padding-top:20px; margin-top:20px;">
+            <div class="usage-head">
+              <div>
+                <div class="label">Together AI</div>
+                <div class="desc">As reported by the provider</div>
+              </div>
+              <div class="usage-numbers"><span class="pct">14%</span> &middot; 780K / 5.5M tokens</div>
+            </div>
+            <div class="usage-bar-track"><div class="usage-bar-fill" style="width:14%;"></div></div>
+            <div class="usage-foot">
+              <span>Used across 1 project</span>
+              <span>Resets in 25 days</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

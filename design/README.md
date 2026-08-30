@@ -49,9 +49,17 @@ page.
 | `/projects/:projectId/tests` | `projects/detail/tests/index.html` |
 | `/projects/:projectId/tests/new` | `projects/detail/tests/new/index.html` |
 | `/projects/:projectId/tests/:testId` | `projects/detail/tests/detail/index.html` |
+| `/projects/:projectId/deployments` | `projects/detail/deployments/index.html` |
+| `/projects/:projectId/usage` | `projects/detail/usage/index.html` |
+| `/projects/:projectId/analytics` | `projects/detail/analytics/index.html` |
 | `/projects/:projectId/settings` | `projects/detail/settings/index.html` |
+| `/deployments` | `deployments/index.html` |
+| `/usage` | `usage/index.html` |
+| `/analytics` | `analytics/index.html` |
+| `/infrastructure` | `infrastructure/index.html` |
 | `/notifications` | `notifications/index.html` |
-| `/settings/account` | `settings/account/index.html` |
+| `/settings/account` | `settings/account/index.html` (also the user-level tier of Usage/Analytics, as sections — no separate route) |
+| `/settings/organization` | `settings/organization/index.html` |
 
 `detail/` stands in for one sample record of a dynamic route segment.
 
@@ -61,10 +69,15 @@ page.
   with [`docs/conventions/theming.md`](../docs/conventions/theming.md) by
   hand. Shared by both `landing/` and the app pages — it's the thing that
   keeps them looking like one product despite the separate navigation.
-- `shared/shell.css` — sidebar / hub-header / layout chrome classes for the
-  app, plus a couple of primitives (`.logo`, `.design-note`) the landing page
-  also reuses. `landing/index.html` otherwise defines its own nav/hero/footer
-  components locally — a marketing page has no use for the app shell.
+- `shared/shell.css` — the app shell: one `.shell`/`.sidebar`/`.main` layout
+  used by every app page, hub-level (Projects, Notifications, Account/
+  Organization settings, New project) and project-level alike — a persistent
+  left sidebar (org switcher pinned above the nav, account cell pinned below
+  it), Vercel-style, rather than a separate top-bar-only layout for hub
+  pages. Also has a couple of primitives (`.logo`, `.design-note`) the
+  landing page reuses. `landing/index.html` otherwise defines its own
+  nav/hero/footer components locally — a marketing page has no use for the
+  app shell.
 - Every page is self-contained: no build step, no framework, no network
   calls beyond the Google Fonts stylesheet. A page may inline a small
   `<script>` for a trivial interaction state (a tab switch) but nothing that

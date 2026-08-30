@@ -87,6 +87,9 @@
         <a class="nav-link" href="/projects/detail/index.html"><span class="icon">&#8962;</span> Home</a>
         <a class="nav-link active" href="/projects/detail/features/index.html"><span class="icon">&#9638;</span> Features</a>
         <a class="nav-link" href="/projects/detail/tests/index.html"><span class="icon">&#9879;</span> Tests</a>
+        <a class="nav-link" href="/projects/detail/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+        <a class="nav-link" href="/projects/detail/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+        <a class="nav-link" href="/projects/detail/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
         <a class="nav-link" href="/projects/detail/settings/index.html"><span class="icon">&#9881;</span> Settings</a>
       </nav>
     </aside>
@@ -94,6 +97,8 @@
     <div class="main">
       <div class="shell-topbar">
         <div class="crumbs">
+          <a href="/projects/index.html">Acme Retail</a>
+          <span class="sep">/</span>
           <a href="/projects/detail/index.html">Acme Storefront</a>
           <span class="sep">/</span>
           <a href="/projects/detail/features/index.html">Features</a>
@@ -114,7 +119,7 @@
                 <div class="handle">@saratc</div>
               </div>
               <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
-              <button class="user-menu-item" type="button">Log out</button>
+              <a class="user-menu-item" href="/login/index.html">Log out</a>
             </div>
           </div>
         </div>
@@ -123,7 +128,7 @@
         <div class="design-note">
           <b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/features/:featureId</span> (web/app/projects/[projectId]/features/[featureId]/page.tsx) ·
           the real page only ever shows <b>one</b> of these sections at a time, driven by feature status — the tabs below are a
-          design-time convenience to review every state on one file. Save/Approve/Retry/Cancel/Send are all inert. ·
+          design-time convenience to review every state on one file. "Approve ADR" and "Retry build" jump to the "Queued/Running" tab to simulate the real transition; Save edits/Cancel/Send remain inert. ·
           <b>proposed IA rework</b>: sidebar/topbar per /projects/:projectId; the breadcrumb replaces the old "&larr; Back to features" link (same destination, plus one more level of context).
         </div>
 
@@ -173,7 +178,7 @@
               <h2>Feature ADR</h2>
               <div style="display:flex; gap:8px;">
                 <button class="btn btn-outline btn-sm" type="button">Save edits</button>
-                <button class="btn btn-primary btn-sm" type="button">Approve ADR</button>
+                <button class="btn btn-primary btn-sm" type="button" onclick="goToTab('building')">Approve ADR</button>
               </div>
             </div>
             <div class="adr-split">
@@ -214,7 +219,7 @@ Repeat customers should be able to save a card.
             <h2>This feature failed</h2>
             <p style="color: var(--mist); margin-top:4px;">The build didn't complete successfully.</p>
             <div class="failed-log">Error: pi container exited 137 (OOMKilled) after 11m32s during `npm run build`</div>
-            <button class="btn btn-primary btn-sm" style="margin-top:16px;" type="button">Retry build</button>
+            <button class="btn btn-primary btn-sm" style="margin-top:16px;" type="button" onclick="goToTab('building')">Retry build</button>
           </section>
         </div>
 
@@ -236,13 +241,12 @@ Repeat customers should be able to save a card.
   </div>
 
   <script>
+    function goToTab(name) {
+      document.querySelectorAll(".state-tab").forEach(function (t) { t.classList.toggle("active", t.dataset.tab === name); });
+      document.querySelectorAll(".state-panel").forEach(function (p) { p.classList.toggle("active", p.id === "panel-" + name); });
+    }
     document.querySelectorAll(".state-tab").forEach(function (tab) {
-      tab.addEventListener("click", function () {
-        document.querySelectorAll(".state-tab").forEach(function (t) { t.classList.remove("active"); });
-        document.querySelectorAll(".state-panel").forEach(function (p) { p.classList.remove("active"); });
-        tab.classList.add("active");
-        document.getElementById("panel-" + tab.dataset.tab).classList.add("active");
-      });
+      tab.addEventListener("click", function () { goToTab(tab.dataset.tab); });
     });
   </script>
 </body>

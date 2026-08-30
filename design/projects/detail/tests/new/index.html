@@ -65,12 +65,17 @@
         <a class="nav-link" href="/projects/detail/index.html"><span class="icon">&#8962;</span> Home</a>
         <a class="nav-link" href="/projects/detail/features/index.html"><span class="icon">&#9638;</span> Features</a>
         <a class="nav-link active" href="/projects/detail/tests/index.html"><span class="icon">&#9879;</span> Tests</a>
+        <a class="nav-link" href="/projects/detail/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+        <a class="nav-link" href="/projects/detail/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+        <a class="nav-link" href="/projects/detail/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
         <a class="nav-link" href="/projects/detail/settings/index.html"><span class="icon">&#9881;</span> Settings</a>
       </nav>
     </aside>
     <div class="main">
       <div class="shell-topbar">
         <div class="crumbs">
+          <a href="/projects/index.html">Acme Retail</a>
+          <span class="sep">/</span>
           <a href="/projects/detail/index.html">Acme Storefront</a>
           <span class="sep">/</span>
           <a href="/projects/detail/tests/index.html">Tests</a>
@@ -91,13 +96,13 @@
                 <div class="handle">@saratc</div>
               </div>
               <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
-              <button class="user-menu-item" type="button">Log out</button>
+              <a class="user-menu-item" href="/login/index.html">Log out</a>
             </div>
           </div>
         </div>
       </div>
       <div class="main-inner">
-        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/tests/new</span> (web/app/projects/[projectId]/tests/new/page.tsx) · form is inert, "Create test" does not submit · proposed IA rework: sidebar/topbar per /projects/:projectId; breadcrumb replaces the old "&larr; Back to tests" link</div>
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/tests/new</span> (web/app/projects/[projectId]/tests/new/page.tsx) · form fields are inert, but "Create test" links to the test-detail wireframe to close the click-through loop (it shows "Checkout flow," not a live reflection of what's typed above) · proposed IA rework: sidebar/topbar per /projects/:projectId; breadcrumb replaces the old "&larr; Back to tests" link</div>
 
         <div class="page-header">
           <div>
@@ -152,7 +157,7 @@ confirmation page renders.</textarea>
           </div>
 
           <div>
-            <button class="btn btn-primary" type="button">Create test</button>
+            <a class="btn btn-primary" href="/projects/detail/tests/detail/index.html">Create test</a>
           </div>
         </form>
       </div>

@@ -10,106 +10,181 @@
   <link rel="stylesheet" href="/shared/tokens.css" />
   <link rel="stylesheet" href="/shared/shell.css" />
   <style>
-    .toolbar { display: flex; justify-content: flex-end; margin-bottom: 24px; }
+    .hub-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+    .search-wrap { position: relative; flex: 1; max-width: 420px; }
+    .search-wrap .icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--shadow); font-size: 13px; }
+    .search-wrap .input { width: 100%; padding-left: 34px; }
+
     .project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
     .project-card { display: block; }
     .project-card .card { height: 100%; transition: border-color 0.15s, background 0.15s; }
     .project-card:hover .card { border-color: var(--rime); background: var(--surface-02); }
     .project-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-    .project-card-head h3 { font-size: 17px; }
-    .project-card p { font-size: 13px; margin-top: 8px; }
-    .pill { border-radius: var(--radius-pill); padding: 2px 10px; font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+    .project-card-head-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .project-card-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--surface-03); color: var(--bifrost); display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; font-family: var(--font-mono); flex-shrink: 0; }
+    .project-card-head h3 { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .project-card p.desc { font-size: 13px; margin-top: 12px; }
+    .project-card-meta { display: flex; align-items: center; gap: 6px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--rime-soft); font-size: 12px; color: var(--shadow); }
+    .project-card-meta .sep { color: var(--rime); }
+    .pill { border-radius: var(--radius-pill); padding: 2px 10px; font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; flex-shrink: 0; }
   </style>
 </head>
 <body>
-  <header class="hub-header">
-    <div class="hub-header-inner">
-      <a href="/projects/index.html" class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></a>
-      <nav class="hub-nav">
-        <a href="/projects/index.html" class="active">Projects</a>
-      </nav>
-      <div class="shell-topbar-actions">
-        <a class="notif-bell" href="/notifications/index.html" aria-label="Notifications">&#128276;<span class="dot"></span></a>
-        <div class="user-menu">
-          <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
-          <label for="user-menu-toggle" class="user-menu-trigger">
-            <span class="avatar">SC</span>
-            <span class="chevron">&#9662;</span>
-          </label>
-          <div class="user-menu-panel">
-            <div class="user-menu-head">
-              <div class="name">Sarat Chandra</div>
-              <div class="handle">@saratc</div>
-            </div>
-            <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
-            <button class="user-menu-item" type="button">Log out</button>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+
+      <div class="org-switcher sidebar-org-switcher">
+        <input type="checkbox" id="org-switcher-toggle" class="user-menu-toggle" />
+        <label for="org-switcher-toggle" class="sidebar-project">
+          <span style="display:flex; align-items:center; gap:8px; min-width:0;">
+            <span class="org-avatar sm">A</span>
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Acme Retail</span>
+          </span>
+          <span class="text-shadow">&#8964;</span>
+        </label>
+        <div class="user-menu-panel org-switcher-panel">
+          <div class="org-switcher-label">Organizations</div>
+          <a class="user-menu-item org-switcher-item active" href="/projects/index.html"><span class="org-avatar sm">A</span> Acme Retail</a>
+          <a class="user-menu-item org-switcher-item" href="/projects/index.html"><span class="org-avatar sm">N</span> Northwind Labs</a>
+          <div class="org-switcher-divider">
+            <a class="user-menu-item" href="/settings/organization/index.html">Organization settings</a>
+            <button class="user-menu-item" type="button">+ Create organization</button>
           </div>
         </div>
       </div>
-    </div>
-  </header>
 
-  <div class="hub-main">
-    <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects</span> (web/app/projects/page.tsx) · shows the populated grid state; loading/error/empty states from the real component aren't mocked here · <b>proposed IA rework</b>: header collapses to a single "Projects" nav item + notification bell + user-menu dropdown (was a 3-item text nav plus an always-expanded profile block) — not yet in web/app-shell, see design/README.md</div>
-    <div class="hub-page-title">
-      <h1>Projects</h1>
-      <p>Connect GitHub repositories and manage agent work from one place.</p>
-    </div>
+      <nav class="sidebar-nav">
+        <a class="nav-link active" href="/projects/index.html"><span class="icon">&#9638;</span> Projects</a>
+        <a class="nav-link" href="/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+        <div class="nav-divider">Monitoring</div>
+        <a class="nav-link" href="/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+        <a class="nav-link" href="/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
+        <a class="nav-link" href="/infrastructure/index.html"><span class="icon">&#128421;</span> Infrastructure</a>
+        <a class="nav-link" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications <span class="nav-dot"></span></a>
+      </nav>
 
-    <div class="toolbar">
-      <a class="btn btn-primary" href="/projects/new/index.html">+ New project</a>
-    </div>
+      <div class="sidebar-foot">
+        <div class="user-menu sidebar-account">
+          <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+          <label for="user-menu-toggle" class="sidebar-account-trigger">
+            <span class="avatar">SC</span>
+            <span class="info">
+              <div class="name">Sarat Chandra</div>
+              <div class="handle">@saratc</div>
+            </span>
+            <span class="chevron">&#9662;</span>
+          </label>
+          <div class="user-menu-panel">
+            <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+            <a class="user-menu-item" href="/settings/organization/index.html">Organization settings</a>
+            <a class="user-menu-item" href="/login/index.html">Log out</a>
+          </div>
+        </div>
+      </div>
+    </aside>
 
-    <ul class="project-grid" style="list-style:none; padding:0; margin:0;">
-      <li>
-        <a class="project-card" href="/projects/detail/index.html">
-          <div class="card">
-            <div class="project-card-head">
-              <h3>Acme Storefront</h3>
-              <span class="pill" style="background:#46c28522; color:#46c285;">Ready</span>
-            </div>
-            <p>Customer-facing storefront and checkout for Acme Retail.</p>
-            <p class="text-shadow">3 linked repositories</p>
+    <div class="main">
+      <div class="main-inner">
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects</span> (web/app/projects/page.tsx) · shows the populated grid state; loading/error/empty states from the real component aren't mocked here · <b>proposed IA rework, round 3</b>: replaced the top hub-header with the same persistent sidebar the project-shell pages use — Vercel-style (workspace/org switcher pinned above the nav, account cell pinned below it) rather than a thin top bar, at the user's request to match that layout. This is a bigger structural shift than rounds 1–2: the "hub" and "project" chrome are now the *same* shell (`.sidebar`/`.main`), just with different nav items and no project-switcher pill — so `shared/shell.css`'s old `.hub-header`/`.hub-nav`/`.hub-main` rules are now dead everywhere once all 5 hub pages are converted (see design/README.md); don't reintroduce a page here using the old header. Search bar is new and inert (no search exists yet). Card footer (repo path + "Updated") replaces the old "N linked repositories" line — repo slugs and timestamps are invented, not pulled from anywhere real. Deliberately did <b>not</b> copy Vercel's literal sidebar items (Deployments/Logs/Analytics/Firewall/CDN/AI Gateway/etc.) or its Usage/Alerts dashboard cards — those map to Vercel features Yggdrasil doesn't have; inventing fake CPU/bandwidth numbers or upsell cards would misrepresent the product the same way fabricated landing-page stats would have. <b>Width, round 2</b>: <span class="mono">.main-inner</span> (shared/shell.css) no longer caps width at all — first tried bumping the shared <span class="mono">--maxw</span> token from 1200px to 1600px, then the user asked to drop the cap entirely instead, so it's back to just <span class="mono">padding: 32px</span>, fully fluid. <span class="mono">--maxw</span> itself is back at 1200px (matches theming.md) since its only remaining consumer is <span class="mono">.design-note</span>, where a reading-width cap still makes sense. Settings pages (<span class="mono">/settings/account</span>, <span class="mono">/settings/organization</span>) keep their own separate <span class="mono">.narrow</span> override and are unaffected — a settings form benefits from a capped line length in a way a dashboard grid doesn't.</div>
+
+        <div class="page-header">
+          <div>
+            <h1>Projects</h1>
+            <p>Connect GitHub repositories and manage agent work from one place.</p>
           </div>
-        </a>
-      </li>
-      <li>
-        <a class="project-card" href="/projects/detail/index.html">
-          <div class="card">
-            <div class="project-card-head">
-              <h3>Internal Ops Console</h3>
-              <span class="pill" style="background:#e2a13c22; color:#e2a13c;">Initializing</span>
-            </div>
-            <p>Fulfillment and inventory dashboard for the ops team.</p>
-            <p class="text-shadow">1 linked repository</p>
+        </div>
+
+        <div class="hub-toolbar">
+          <div class="search-wrap">
+            <span class="icon">&#128269;</span>
+            <input class="input" placeholder="Search projects…" />
           </div>
-        </a>
-      </li>
-      <li>
-        <a class="project-card" href="/projects/detail/index.html">
-          <div class="card">
-            <div class="project-card-head">
-              <h3>Marketing Site</h3>
-              <span class="pill" style="background:#46c28522; color:#46c285;">Ready</span>
-            </div>
-            <p>Public marketing pages, blog, and pricing.</p>
-            <p class="text-shadow">2 linked repositories</p>
-          </div>
-        </a>
-      </li>
-      <li>
-        <a class="project-card" href="/projects/detail/index.html">
-          <div class="card">
-            <div class="project-card-head">
-              <h3>Data Pipeline</h3>
-              <span class="pill" style="background:#46c28522; color:#46c285;">Ready</span>
-            </div>
-            <p>Nightly ETL jobs and the internal analytics warehouse.</p>
-            <p class="text-shadow">1 linked repository</p>
-          </div>
-        </a>
-      </li>
-    </ul>
+          <a class="btn btn-primary" href="/projects/new/index.html">+ New project</a>
+        </div>
+
+        <ul class="project-grid" style="list-style:none; padding:0; margin:0;">
+          <li>
+            <a class="project-card" href="/projects/detail/index.html">
+              <div class="card">
+                <div class="project-card-head">
+                  <div class="project-card-head-left">
+                    <span class="project-card-icon">A</span>
+                    <h3>Acme Storefront</h3>
+                  </div>
+                  <span class="pill" style="background:#46c28522; color:#46c285;">Ready</span>
+                </div>
+                <p class="desc">Customer-facing storefront and checkout for Acme Retail.</p>
+                <div class="project-card-meta">
+                  <span class="mono">acme-retail/storefront</span>
+                  <span class="sep">&middot;</span>
+                  <span>Updated 12m ago</span>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a class="project-card" href="/projects/detail/index.html">
+              <div class="card">
+                <div class="project-card-head">
+                  <div class="project-card-head-left">
+                    <span class="project-card-icon">I</span>
+                    <h3>Internal Ops Console</h3>
+                  </div>
+                  <span class="pill" style="background:#e2a13c22; color:#e2a13c;">Initializing</span>
+                </div>
+                <p class="desc">Fulfillment and inventory dashboard for the ops team.</p>
+                <div class="project-card-meta">
+                  <span class="mono">acme-retail/ops-console</span>
+                  <span class="sep">&middot;</span>
+                  <span>Updated 2h ago</span>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a class="project-card" href="/projects/detail/index.html">
+              <div class="card">
+                <div class="project-card-head">
+                  <div class="project-card-head-left">
+                    <span class="project-card-icon">M</span>
+                    <h3>Marketing Site</h3>
+                  </div>
+                  <span class="pill" style="background:#46c28522; color:#46c285;">Ready</span>
+                </div>
+                <p class="desc">Public marketing pages, blog, and pricing.</p>
+                <div class="project-card-meta">
+                  <span class="mono">acme-retail/marketing-site</span>
+                  <span class="sep">&middot;</span>
+                  <span>Updated yesterday</span>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a class="project-card" href="/projects/detail/index.html">
+              <div class="card">
+                <div class="project-card-head">
+                  <div class="project-card-head-left">
+                    <span class="project-card-icon">D</span>
+                    <h3>Data Pipeline</h3>
+                  </div>
+                  <span class="pill" style="background:#46c28522; color:#46c285;">Ready</span>
+                </div>
+                <p class="desc">Nightly ETL jobs and the internal analytics warehouse.</p>
+                <div class="project-card-meta">
+                  <span class="mono">acme-retail/data-pipeline</span>
+                  <span class="sep">&middot;</span>
+                  <span>Updated 3d ago</span>
+                </div>
+              </div>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
 </body>
 </html>

@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Infrastructure — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .section-title { font-size: 15px; font-weight: 600; color: var(--frost); margin-bottom: 4px; }
+    .section-desc { font-size: 12px; color: var(--shadow); margin-bottom: 16px; }
+
+    .cluster-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .cluster-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-top: 20px; }
+    .cluster-meta .item .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--shadow); }
+    .cluster-meta .item .val { margin-top: 4px; font-size: 13px; color: var(--frost); font-family: var(--font-mono); }
+    .cluster-meta .item .val.sandbox { color: var(--bifrost); }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+    @media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+
+    .gauge-head { display: flex; align-items: baseline; justify-content: space-between; }
+    .gauge-head .label { font-size: 13px; color: var(--mist); }
+    .gauge-head .pct { font-family: var(--font-mono); font-size: 20px; color: var(--frost); font-weight: 600; }
+    .gauge-track { margin-top: 12px; height: 8px; border-radius: 999px; background: var(--surface-02); overflow: hidden; }
+    .gauge-fill { height: 100%; border-radius: 999px; background: var(--bifrost); }
+    .gauge-fill.warn { background: var(--st-input); }
+    .gauge-sub { margin-top: 8px; font-size: 12px; color: var(--shadow); }
+
+    .job-row { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--rime); border-radius: var(--radius-sm); margin-top: 10px; }
+    .job-row:first-of-type { margin-top: 0; }
+    .job-kind-badge { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: var(--radius-pill); font-size: 10px; font-weight: 500; flex-shrink: 0; white-space: nowrap; }
+    .job-main { flex: 1; min-width: 0; }
+    .job-title { font-size: 14px; color: var(--frost); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .job-title a { color: inherit; }
+    .job-title a:hover { color: var(--bifrost); }
+    .job-meta { margin-top: 2px; font-size: 12px; color: var(--shadow); font-family: var(--font-mono); }
+    .job-resources { font-family: var(--font-mono); font-size: 12px; color: var(--mist); flex-shrink: 0; text-align: right; width: 110px; }
+    .job-status { flex-shrink: 0; font-size: 12px; width: 84px; }
+
+    .ns-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--rime); border-radius: var(--radius-sm); margin-top: 8px; }
+    .ns-row:first-of-type { margin-top: 0; }
+    .ns-row .ns-name { font-family: var(--font-mono); font-size: 13px; color: var(--frost); }
+    .ns-row .ns-count { font-size: 12px; color: var(--shadow); }
+
+    .limits-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+    .limits-table th { text-align: left; font-weight: 500; color: var(--shadow); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; padding: 8px 10px; border-bottom: 1px solid var(--rime-soft); }
+    .limits-table td { padding: 10px; border-bottom: 1px solid var(--rime-soft); color: var(--mist); font-family: var(--font-mono); }
+    .limits-table td:first-child { color: var(--frost); font-family: var(--font-sans); }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+
+      <div class="org-switcher sidebar-org-switcher">
+        <input type="checkbox" id="org-switcher-toggle" class="user-menu-toggle" />
+        <label for="org-switcher-toggle" class="sidebar-project">
+          <span style="display:flex; align-items:center; gap:8px; min-width:0;">
+            <span class="org-avatar sm">A</span>
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Acme Retail</span>
+          </span>
+          <span class="text-shadow">&#8964;</span>
+        </label>
+        <div class="user-menu-panel org-switcher-panel">
+          <div class="org-switcher-label">Organizations</div>
+          <a class="user-menu-item org-switcher-item active" href="/projects/index.html"><span class="org-avatar sm">A</span> Acme Retail</a>
+          <a class="user-menu-item org-switcher-item" href="/projects/index.html"><span class="org-avatar sm">N</span> Northwind Labs</a>
+          <div class="org-switcher-divider">
+            <a class="user-menu-item" href="/settings/organization/index.html">Organization settings</a>
+            <button class="user-menu-item" type="button">+ Create organization</button>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/projects/index.html"><span class="icon">&#9638;</span> Projects</a>
+        <a class="nav-link" href="/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+        <div class="nav-divider">Monitoring</div>
+        <a class="nav-link" href="/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+        <a class="nav-link" href="/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
+        <a class="nav-link active" href="/infrastructure/index.html"><span class="icon">&#128421;</span> Infrastructure</a>
+        <a class="nav-link" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="user-menu sidebar-account">
+          <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+          <label for="user-menu-toggle" class="sidebar-account-trigger">
+            <span class="avatar">SC</span>
+            <span class="info">
+              <div class="name">Sarat Chandra</div>
+              <div class="handle">@saratc</div>
+            </span>
+            <span class="chevron">&#9662;</span>
+          </label>
+          <div class="user-menu-panel">
+            <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+            <a class="user-menu-item" href="/settings/organization/index.html">Organization settings</a>
+            <a class="user-menu-item" href="/login/index.html">Log out</a>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="main-inner">
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/infrastructure</span> — a <b>new</b> route/page, no equivalent exists in web/ today. Org-only, per the request — it's a read-only <b>status</b> view of the same cluster <span class="mono">/settings/organization</span>'s Kubernetes cluster section actually configures (kubeconfig, ingress class, cert issuer, apps domain all sourced from there). <b>More grounded than Usage/Analytics</b>: the architecture concepts shown are real — ephemeral per-job pods, one Kubernetes namespace per project as the isolation unit (not per-tenant, not per-repo), a sandboxed container RuntimeClass (gVisor/Kata) applied universally as defense-in-depth since job pods hold a live scoped GitHub token, dedicated node pools explicitly deferred out of MVP scope — all straight from ADR 003 §5–7. <b>What's not grounded</b>: there's no decided mechanism for the API/Orchestrator to expose live cluster telemetry to the Web app at all — CPU/memory gauges, per-pod resource usage, a live "active jobs" list are all new capabilities this page assumes exist, not documented anywhere. The "Resource limits" table is illustrative only — ADR 003 never specifies actual CPU/memory request/limit numbers; don't treat these as real defaults.</div>
+
+        <div class="page-header">
+          <div>
+            <h1>Infrastructure</h1>
+            <p>The Kubernetes cluster Acme Retail's project jobs and deployments run on.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="cluster-head">
+            <div>
+              <div class="section-title" style="margin-bottom:0;">Cluster connection</div>
+              <p class="section-desc" style="margin-top:2px; margin-bottom:0;">Configured in Organization settings.</p>
+            </div>
+            <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Connected</span>
+          </div>
+          <div class="cluster-meta">
+            <div class="item">
+              <div class="label">Kubernetes version</div>
+              <div class="val">v1.29.2</div>
+            </div>
+            <div class="item">
+              <div class="label">Ingress class</div>
+              <div class="val">ingress-nginx</div>
+            </div>
+            <div class="item">
+              <div class="label">Cert issuer</div>
+              <div class="val">letsencrypt-prod</div>
+            </div>
+            <div class="item">
+              <div class="label">Apps base domain</div>
+              <div class="val">apps.acmeretail.com</div>
+            </div>
+            <div class="item">
+              <div class="label">Sandboxed runtime</div>
+              <div class="val sandbox">gVisor</div>
+            </div>
+            <div class="item">
+              <div class="label">Node pools</div>
+              <div class="val">1 shared &middot; dedicated pools not yet supported</div>
+            </div>
+          </div>
+          <p style="margin-top:20px; font-size:13px;"><a href="/settings/organization/index.html" style="color:var(--bifrost);">Manage cluster connection &rarr;</a></p>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="gauge-head">
+              <span class="label">CPU</span>
+              <span class="pct">62%</span>
+            </div>
+            <div class="gauge-track"><div class="gauge-fill" style="width:62%;"></div></div>
+            <div class="gauge-sub">24.8 / 40 vCPU across the shared node pool</div>
+          </div>
+          <div class="card">
+            <div class="gauge-head">
+              <span class="label">Memory</span>
+              <span class="pct">78%</span>
+            </div>
+            <div class="gauge-track"><div class="gauge-fill warn" style="width:78%;"></div></div>
+            <div class="gauge-sub">62.4 / 80 GB across the shared node pool</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:24px;">
+          <div class="section-title">Active jobs</div>
+          <div class="section-desc">Every job pod currently running or pending across all projects.</div>
+
+          <div class="job-row">
+            <span class="job-kind-badge" style="background:#2fd4c622; color:#2fd4c6;">feature_build</span>
+            <div class="job-main">
+              <div class="job-title"><a href="/projects/detail/features/detail/index.html">Saved payment methods</a></div>
+              <div class="job-meta">acme-storefront/feature-build-482-x7k2p</div>
+            </div>
+            <div class="job-resources">1.2 vCPU &middot; 2.1 GB</div>
+            <div class="job-status" style="color:var(--aurora);">&#9679; Running</div>
+          </div>
+
+          <div class="job-row">
+            <span class="job-kind-badge" style="background:#4f9bf022; color:#4f9bf0;">spec_grill</span>
+            <div class="job-main">
+              <div class="job-title">Inventory sync webhook</div>
+              <div class="job-meta">internal-ops-console/spec-grill-317-m9qz</div>
+            </div>
+            <div class="job-resources">0.4 vCPU &middot; 0.9 GB</div>
+            <div class="job-status" style="color:var(--aurora);">&#9679; Running</div>
+          </div>
+
+          <div class="job-row">
+            <span class="job-kind-badge" style="background:#e2a13c22; color:#e2a13c;">test_run</span>
+            <div class="job-main">
+              <div class="job-title"><a href="/projects/detail/tests/detail/index.html">Checkout regression suite</a></div>
+              <div class="job-meta">acme-storefront/test-run-901-t4jd</div>
+            </div>
+            <div class="job-resources">&mdash;</div>
+            <div class="job-status" style="color:var(--shadow);">&#9679; Pending</div>
+          </div>
+        </div>
+
+        <div class="two-col" style="margin-top:0;">
+          <div class="card">
+            <div class="section-title">Namespaces</div>
+            <div class="section-desc">One per project — the isolation unit (ADR 003).</div>
+            <div class="ns-row">
+              <span class="ns-name">acme-storefront</span>
+              <span class="ns-count">2 active pods</span>
+            </div>
+            <div class="ns-row">
+              <span class="ns-name">internal-ops-console</span>
+              <span class="ns-count">1 active pod</span>
+            </div>
+            <div class="ns-row">
+              <span class="ns-name">marketing-site</span>
+              <span class="ns-count">0 active pods</span>
+            </div>
+            <div class="ns-row">
+              <span class="ns-name">data-pipeline</span>
+              <span class="ns-count">0 active pods</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">Resource limits</div>
+            <div class="section-desc">Per-job defaults. Illustrative — not a real ADR 003 value.</div>
+            <table class="limits-table">
+              <thead><tr><th>Job kind</th><th>CPU</th><th>Memory</th></tr></thead>
+              <tbody>
+                <tr><td>spec_grill</td><td>0.5 vCPU</td><td>1 GB</td></tr>
+                <tr><td>feature_build</td><td>2 vCPU</td><td>4 GB</td></tr>
+                <tr><td>test_run</td><td>1 vCPU</td><td>2 GB</td></tr>
+                <tr><td>design_grill</td><td>0.5 vCPU</td><td>1 GB</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

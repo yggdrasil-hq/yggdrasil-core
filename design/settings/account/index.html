@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="/shared/tokens.css" />
   <link rel="stylesheet" href="/shared/shell.css" />
   <style>
-    .hub-main.narrow { max-width: 880px; }
+    .main-inner.narrow { max-width: 880px; }
 
     .section-toggle { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
 
@@ -24,17 +24,47 @@
 
     #section-profile:checked ~ .account-layout .account-nav label[for="section-profile"],
     #section-providers:checked ~ .account-layout .account-nav label[for="section-providers"],
-    #section-models:checked ~ .account-layout .account-nav label[for="section-models"],
-    #section-jobs:checked ~ .account-layout .account-nav label[for="section-jobs"] {
+    #section-usage:checked ~ .account-layout .account-nav label[for="section-usage"],
+    #section-analytics:checked ~ .account-layout .account-nav label[for="section-analytics"] {
       background: var(--surface-02);
       color: var(--frost);
     }
     #section-profile:checked ~ .account-layout #panel-profile,
     #section-providers:checked ~ .account-layout #panel-providers,
-    #section-models:checked ~ .account-layout #panel-models,
-    #section-jobs:checked ~ .account-layout #panel-jobs {
+    #section-usage:checked ~ .account-layout #panel-usage,
+    #section-analytics:checked ~ .account-layout #panel-analytics {
       display: block;
     }
+
+    .stat-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px; }
+    .stat-card .label { font-size: 13px; color: var(--mist); }
+    .stat-card .value { font-size: 24px; font-weight: 600; color: var(--frost); margin-top: 6px; font-family: var(--font-mono); }
+    .stat-card .sub { font-size: 12px; color: var(--shadow); margin-top: 4px; }
+    .usage-bar-track { margin-top: 10px; height: 8px; border-radius: 999px; background: var(--surface-02); overflow: hidden; }
+    .usage-bar-fill { height: 100%; border-radius: 999px; background: var(--bifrost); }
+    .breakdown-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+    .breakdown-row:first-of-type { margin-top: 0; }
+    .breakdown-label { width: 150px; flex-shrink: 0; font-size: 13px; color: var(--frost); display: flex; align-items: center; gap: 8px; }
+    .breakdown-track { flex: 1; height: 8px; border-radius: 999px; background: var(--surface-02); overflow: hidden; }
+    .breakdown-fill { height: 100%; border-radius: 999px; background: var(--bifrost); }
+    .breakdown-value { width: 70px; flex-shrink: 0; text-align: right; font-family: var(--font-mono); font-size: 12px; color: var(--mist); }
+    .kind-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .kind-dot.spec_grill { background: #4f9bf0; }
+    .kind-dot.feature_build { background: #2fd4c6; }
+    .kind-dot.test_run { background: #e2a13c; }
+    .session-row { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--rime); border-radius: var(--radius-sm); margin-top: 10px; }
+    .session-row:first-of-type { margin-top: 0; }
+    .session-kind-badge { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: var(--radius-pill); font-size: 10px; font-weight: 500; flex-shrink: 0; }
+    .session-main { flex: 1; min-width: 0; }
+    .session-title { font-size: 14px; color: var(--frost); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .session-meta { margin-top: 2px; font-size: 12px; color: var(--shadow); }
+    .session-tokens { font-family: var(--font-mono); font-size: 13px; color: var(--mist); flex-shrink: 0; }
+
+    .org-owned-note { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border: 1px solid var(--rime); border-radius: var(--radius-sm); background: var(--surface-01); }
+    .org-owned-note .org-avatar { margin-top: 1px; }
+    .org-owned-note p { font-size: 13px; color: var(--mist); line-height: 1.5; }
+    .org-owned-note a { color: var(--bifrost); }
+    .readonly-row { opacity: 0.9; }
 
     @media (max-width: 720px) {
       .account-layout { flex-direction: column; gap: 20px; }
@@ -72,54 +102,85 @@
     .job-title { font-size: 14px; font-weight: 500; color: var(--frost); }
     .job-desc { margin-top: 2px; font-size: 13px; }
     .job-row select.input { margin-top: 12px; width: 100%; }
+    .job-row .job-value { margin-top: 8px; font-size: 14px; color: var(--frost); }
   </style>
 </head>
 <body>
-  <header class="hub-header">
-    <div class="hub-header-inner">
-      <a href="/projects/index.html" class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></a>
-      <nav class="hub-nav">
-        <a href="/projects/index.html">Projects</a>
-      </nav>
-      <div class="shell-topbar-actions">
-        <a class="notif-bell" href="/notifications/index.html" aria-label="Notifications">&#128276;<span class="dot"></span></a>
-        <div class="user-menu">
-          <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
-          <label for="user-menu-toggle" class="user-menu-trigger">
-            <span class="avatar">SC</span>
-            <span class="chevron">&#9662;</span>
-          </label>
-          <div class="user-menu-panel">
-            <div class="user-menu-head">
-              <div class="name">Sarat Chandra</div>
-              <div class="handle">@saratc</div>
-            </div>
-            <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
-            <button class="user-menu-item" type="button">Log out</button>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+
+      <div class="org-switcher sidebar-org-switcher">
+        <input type="checkbox" id="org-switcher-toggle" class="user-menu-toggle" />
+        <label for="org-switcher-toggle" class="sidebar-project">
+          <span style="display:flex; align-items:center; gap:8px; min-width:0;">
+            <span class="org-avatar sm">A</span>
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Acme Retail</span>
+          </span>
+          <span class="text-shadow">&#8964;</span>
+        </label>
+        <div class="user-menu-panel org-switcher-panel">
+          <div class="org-switcher-label">Organizations</div>
+          <a class="user-menu-item org-switcher-item active" href="/projects/index.html"><span class="org-avatar sm">A</span> Acme Retail</a>
+          <a class="user-menu-item org-switcher-item" href="/projects/index.html"><span class="org-avatar sm">N</span> Northwind Labs</a>
+          <div class="org-switcher-divider">
+            <a class="user-menu-item" href="/settings/organization/index.html">Organization settings</a>
+            <button class="user-menu-item" type="button">+ Create organization</button>
           </div>
         </div>
       </div>
-    </div>
-  </header>
 
-  <div class="hub-main narrow">
-    <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/settings/account</span> (web/app/settings/account/page.tsx) · <b>proposed rework</b>, not yet reflected in ADR 007 or the api/web model-secrets code: replaces the single account-wide <span class="mono">MODEL_BASE_URL</span>/<span class="mono">MODEL_API_KEY</span>/<span class="mono">MODEL_ID</span> bundle with multi-provider, multi-model config and a default per job kind · needs an ADR 007 amendment once this settles, and a matching pass on the project-settings model card (<span class="mono">/projects/:projectId/settings</span>), which still shows the old triplet · <span class="mono">design_grill</span> row included for completeness though the job kind itself isn't implemented yet (ADR 014) · connected/idle states shown throughout; editing forms ("Add custom provider", "Add model", "Update" on a field) aren't mocked here · header rework, see /projects — this page is now reached via the user-menu dropdown rather than a persistent "Settings" text nav item · <b>relaid out</b> from one long scroll into a sectioned settings page (Profile / Providers / Models / Job defaults) — CSS-only radio-toggle tabs, same technique as the /projects/new stepper, so section switching works without JS; on narrow viewports the side nav collapses to a horizontal row above the content</div>
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/projects/index.html"><span class="icon">&#9638;</span> Projects</a>
+        <a class="nav-link" href="/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+        <div class="nav-divider">Monitoring</div>
+        <a class="nav-link" href="/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+        <a class="nav-link" href="/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
+        <a class="nav-link" href="/infrastructure/index.html"><span class="icon">&#128421;</span> Infrastructure</a>
+        <a class="nav-link" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="user-menu sidebar-account">
+          <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+          <label for="user-menu-toggle" class="sidebar-account-trigger">
+            <span class="avatar">SC</span>
+            <span class="info">
+              <div class="name">Sarat Chandra</div>
+              <div class="handle">@saratc</div>
+            </span>
+            <span class="chevron">&#9662;</span>
+          </label>
+          <div class="user-menu-panel">
+            <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+            <a class="user-menu-item" href="/settings/organization/index.html">Organization settings</a>
+            <a class="user-menu-item" href="/login/index.html">Log out</a>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="main-inner narrow">
+    <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/settings/account</span> (web/app/settings/account/page.tsx) · <b>IA rework round 3</b>: top hub-header replaced by the same persistent sidebar as every other page — this page is now reached via the sidebar account cell's dropdown rather than a separate user-menu (see /projects's design-note for the full rationale) · relaid out from one long scroll into a sectioned settings page (Profile / Providers &amp; Models) — CSS-only radio-toggle tabs, same technique as the /projects/new stepper · <b>superseded pass</b>: this page previously had full multi-provider/multi-model CRUD (connect providers, add models, set per-job defaults) as a proposed rework of ADR 007's single-bundle design. Now that <span class="mono">/settings/organization</span> exists, that CRUD moved there and admin-managed — letting individual members configure their own provider keys would undercut the whole point of centralizing on an audited, admin-controlled set of connections (and directly contradicts the "scoped, admin-controlled access" story the landing page now makes). This page is read-only, showing what the org has made available, with a link out to Organization settings for whoever can actually change it. <span class="mono">design_grill</span> row dropped from the job-defaults list here for brevity (still present in the org settings page) — not implemented yet either way (ADR 014). None of this exists in ADR 007 or the api/web model-secrets code; ADR 007 itself will need a full rewrite (or replacement) once an Organization entity is real, since its central premise — "no team/org entity yet" — no longer holds. <b>Added Usage and Analytics sections</b> as the user-level tier of /usage and /analytics (folded into Account settings rather than given their own top-level nav item, since "your personal usage/activity" reads as an account concern, not a primary destination) — same "nothing here is tracked today" caveat as those two pages, see their design-notes for the full explanation. Framed the same way as project-level Usage: your numbers are a slice of Acme Retail's shared quota, not a separate one — no independent limit or reset date shown here.</div>
     <div class="hub-page-title">
       <h1>Account</h1>
-      <p>Profile and default model configuration.</p>
+      <p>Your profile, and the providers &amp; models your organization has made available to you.</p>
     </div>
 
     <input type="radio" name="account-section" id="section-profile" class="section-toggle" checked />
     <input type="radio" name="account-section" id="section-providers" class="section-toggle" />
-    <input type="radio" name="account-section" id="section-models" class="section-toggle" />
-    <input type="radio" name="account-section" id="section-jobs" class="section-toggle" />
+    <input type="radio" name="account-section" id="section-usage" class="section-toggle" />
+    <input type="radio" name="account-section" id="section-analytics" class="section-toggle" />
 
     <div class="account-layout">
       <nav class="account-nav">
         <label for="section-profile">Profile</label>
-        <label for="section-providers">Providers <span class="count">4</span></label>
-        <label for="section-models">Models <span class="count">5</span></label>
-        <label for="section-jobs">Job defaults <span class="count">4</span></label>
+        <label for="section-providers">Providers &amp; Models</label>
+        <label for="section-usage">Usage</label>
+        <label for="section-analytics">Analytics</label>
       </nav>
 
       <div class="account-content">
@@ -137,87 +198,47 @@
           </div>
         </div>
         <div class="card-footer">
-          <button class="btn btn-outline" type="button">Log out</button>
+          <a class="btn btn-outline" href="/login/index.html">Log out</a>
         </div>
         </section>
 
         <section class="account-panel" id="panel-providers">
-        <div class="card-title">Providers</div>
-        <p class="card-desc">Connect the providers you want to pull models from. Known providers only need an API key; custom providers also need a base URL.</p>
+        <div class="card-title">Providers &amp; Models</div>
+        <p class="card-desc">Standardized and managed by your organization's admins, so every project shares one audited set of connections and nobody's individual key becomes a dependency.</p>
 
-        <div class="secret-field">
+        <div class="org-owned-note">
+          <span class="org-avatar sm">A</span>
+          <p>You're an <span style="color:var(--frost);">Admin</span> of <span style="color:var(--frost);">Acme Retail</span>, so you can manage these directly. <a href="/settings/organization/index.html">Open Organization settings &rarr;</a></p>
+        </div>
+
+        <div class="subdivider">Connected providers</div>
+        <div class="secret-field readonly-row">
           <div class="secret-head">
-            <div>
-              <div class="label">OpenRouter</div>
-              <div class="desc text-mist">Access hundreds of models through one API key.</div>
-            </div>
+            <div><div class="label">OpenRouter</div></div>
             <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Connected</span>
           </div>
-          <div class="secret-actions">
-            <button class="btn btn-outline btn-sm" type="button">Update</button>
-            <button class="btn btn-ghost btn-sm" type="button">Clear</button>
-          </div>
         </div>
-
-        <div class="secret-field">
+        <div class="secret-field readonly-row">
           <div class="secret-head">
-            <div>
-              <div class="label">Anthropic</div>
-              <div class="desc text-mist">Claude models, called directly.</div>
-            </div>
+            <div><div class="label">Anthropic</div></div>
             <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Connected</span>
           </div>
-          <div class="secret-actions">
-            <button class="btn btn-outline btn-sm" type="button">Update</button>
-            <button class="btn btn-ghost btn-sm" type="button">Clear</button>
-          </div>
         </div>
-
-        <div class="secret-field">
+        <div class="secret-field readonly-row">
           <div class="secret-head">
-            <div>
-              <div class="label">OpenAI</div>
-              <div class="desc text-mist">GPT models, called directly.</div>
-            </div>
+            <div><div class="label">OpenAI</div></div>
             <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Connected</span>
           </div>
-          <div class="secret-actions">
-            <button class="btn btn-outline btn-sm" type="button">Update</button>
-            <button class="btn btn-ghost btn-sm" type="button">Clear</button>
-          </div>
         </div>
-
-        <div class="subdivider">Custom providers</div>
-
-        <div class="secret-field">
+        <div class="secret-field readonly-row">
           <div class="secret-head">
-            <div>
-              <div class="label">Together AI</div>
-              <div class="desc mono provider-base-url text-mist">https://api.together.xyz/v1</div>
-            </div>
+            <div><div class="label">Together AI</div><div class="desc mono provider-base-url text-mist">https://api.together.xyz/v1</div></div>
             <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Connected</span>
           </div>
-          <div class="secret-actions">
-            <button class="btn btn-outline btn-sm" type="button">Update</button>
-            <button class="btn btn-ghost btn-sm" type="button">Remove</button>
-          </div>
         </div>
 
-        <div class="add-row">
-          <button class="btn btn-outline btn-sm" type="button">+ Add custom provider</button>
-        </div>
-        </section>
-
-        <section class="account-panel" id="panel-models">
-        <div class="card-head-row">
-          <div>
-            <div class="card-title">Models</div>
-            <p class="card-desc">Models available to use across your projects and the job defaults below. Each is tied to one connected provider.</p>
-          </div>
-          <button class="btn btn-outline btn-sm" type="button" style="flex-shrink:0;">+ Add model</button>
-        </div>
-
-        <div class="model-row">
+        <div class="subdivider">Models available to you</div>
+        <div class="model-row readonly-row">
           <div class="model-info">
             <div class="model-name-row">
               <span class="model-name">Claude Opus 5</span>
@@ -225,10 +246,8 @@
             </div>
             <div class="mono model-id text-mist">claude-opus-5</div>
           </div>
-          <button class="btn btn-ghost btn-sm" type="button" aria-label="Remove model">&#128465;</button>
         </div>
-
-        <div class="model-row">
+        <div class="model-row readonly-row">
           <div class="model-info">
             <div class="model-name-row">
               <span class="model-name">Claude Sonnet 5</span>
@@ -236,21 +255,8 @@
             </div>
             <div class="mono model-id text-mist">claude-sonnet-5</div>
           </div>
-          <button class="btn btn-ghost btn-sm" type="button" aria-label="Remove model">&#128465;</button>
         </div>
-
-        <div class="model-row">
-          <div class="model-info">
-            <div class="model-name-row">
-              <span class="model-name">GPT-5.1</span>
-              <span class="provider-tag" style="background:#4f9bf022; color:#4f9bf0;">OpenAI</span>
-            </div>
-            <div class="mono model-id text-mist">gpt-5.1</div>
-          </div>
-          <button class="btn btn-ghost btn-sm" type="button" aria-label="Remove model">&#128465;</button>
-        </div>
-
-        <div class="model-row">
+        <div class="model-row readonly-row">
           <div class="model-info">
             <div class="model-name-row">
               <span class="model-name">DeepSeek V3</span>
@@ -258,85 +264,126 @@
             </div>
             <div class="mono model-id text-mist">deepseek/deepseek-chat</div>
           </div>
-          <button class="btn btn-ghost btn-sm" type="button" aria-label="Remove model">&#128465;</button>
         </div>
 
-        <div class="model-row">
-          <div class="model-info">
-            <div class="model-name-row">
-              <span class="model-name">Kimi K2</span>
-              <span class="provider-tag" style="background:#e2a13c22; color:#e2a13c;">Together AI</span>
-            </div>
-            <div class="mono model-id text-mist">moonshotai/Kimi-K2-Instruct</div>
-          </div>
-          <button class="btn btn-ghost btn-sm" type="button" aria-label="Remove model">&#128465;</button>
-        </div>
-        </section>
-
-        <section class="account-panel" id="panel-jobs">
-        <div class="card-title">Default models per job</div>
-        <p class="card-desc">Used by any project that doesn't set its own model for a job. New projects use these by default unless you set something different for them.</p>
-
-        <div class="job-row">
-          <div class="job-head">
-            <span class="job-title">Design session</span>
-            <span class="mono text-shadow" style="font-size:11px;">design_grill</span>
-          </div>
-          <p class="job-desc text-mist">Live HTML mockups during a design session.</p>
-          <select class="input">
-            <option>Claude Sonnet 5 — Anthropic</option>
-            <option>Claude Opus 5 — Anthropic</option>
-            <option>GPT-5.1 — OpenAI</option>
-            <option>DeepSeek V3 — OpenRouter</option>
-            <option>Kimi K2 — Together AI</option>
-          </select>
-        </div>
-
+        <div class="subdivider">Default models per job</div>
         <div class="job-row">
           <div class="job-head">
             <span class="job-title">Feature spec</span>
             <span class="mono text-shadow" style="font-size:11px;">spec_grill</span>
           </div>
-          <p class="job-desc text-mist">Interviews scope and produces the feature's ADR.</p>
-          <select class="input">
-            <option>Claude Opus 5 — Anthropic</option>
-            <option>Claude Sonnet 5 — Anthropic</option>
-            <option>GPT-5.1 — OpenAI</option>
-            <option>DeepSeek V3 — OpenRouter</option>
-            <option>Kimi K2 — Together AI</option>
-          </select>
+          <div class="job-value">Claude Opus 5 — Anthropic</div>
         </div>
-
         <div class="job-row">
           <div class="job-head">
             <span class="job-title">Feature build</span>
             <span class="mono text-shadow" style="font-size:11px;">feature_build</span>
           </div>
-          <p class="job-desc text-mist">Implements the approved ADR unattended.</p>
-          <select class="input">
-            <option>Claude Sonnet 5 — Anthropic</option>
-            <option>Claude Opus 5 — Anthropic</option>
-            <option>GPT-5.1 — OpenAI</option>
-            <option>DeepSeek V3 — OpenRouter</option>
-            <option>Kimi K2 — Together AI</option>
-          </select>
+          <div class="job-value">Claude Sonnet 5 — Anthropic</div>
         </div>
-
         <div class="job-row">
           <div class="job-head">
             <span class="job-title">Tests</span>
             <span class="mono text-shadow" style="font-size:11px;">test_run</span>
           </div>
-          <p class="job-desc text-mist">Runs a test suite's steps against the deployed preview.</p>
-          <select class="input">
-            <option>DeepSeek V3 — OpenRouter</option>
-            <option>Claude Sonnet 5 — Anthropic</option>
-            <option>Claude Opus 5 — Anthropic</option>
-            <option>GPT-5.1 — OpenAI</option>
-            <option>Kimi K2 — Together AI</option>
-          </select>
+          <div class="job-value">DeepSeek V3 — OpenRouter</div>
         </div>
         </section>
+
+        <section class="account-panel" id="panel-usage">
+        <div class="card-title">Usage</div>
+        <p class="card-desc">Your token usage across Acme Retail's connected providers this cycle.</p>
+
+        <div class="org-owned-note" style="margin-top:20px;">
+          <span class="text-shadow" style="margin-top:1px;">&#8505;</span>
+          <p>These numbers count toward Acme Retail's shared provider quotas — you don't have a separate limit. <a href="/usage/index.html">View organization usage &amp; limits &rarr;</a></p>
+        </div>
+
+        <div class="stat-row" style="margin-top:20px;">
+          <div class="card stat-card">
+            <div class="label">Your tokens this cycle</div>
+            <div class="value">1.1M</div>
+            <div class="sub">16% of Acme Retail's total usage</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">Most-used provider</div>
+            <div class="value">OpenRouter</div>
+            <div class="sub">640K tokens</div>
+          </div>
+        </div>
+
+        <div class="subdivider" style="margin-top:0;">By provider</div>
+        <div class="breakdown-row" style="margin-top:16px;">
+          <div class="breakdown-label"><span class="name">OpenRouter</span></div>
+          <div class="breakdown-track"><div class="breakdown-fill" style="width:100%;"></div></div>
+          <div class="breakdown-value">640K</div>
+        </div>
+        <div class="breakdown-row">
+          <div class="breakdown-label"><span class="name">Anthropic</span></div>
+          <div class="breakdown-track"><div class="breakdown-fill" style="width:66%;"></div></div>
+          <div class="breakdown-value">420K</div>
+        </div>
+        <div class="breakdown-row">
+          <div class="breakdown-label"><span class="name">OpenAI</span></div>
+          <div class="breakdown-track"><div class="breakdown-fill" style="width:6%;"></div></div>
+          <div class="breakdown-value">40K</div>
+        </div>
+        </section>
+
+        <section class="account-panel" id="panel-analytics">
+        <div class="card-title">Analytics</div>
+        <p class="card-desc">Your agent activity across Acme Retail's projects.</p>
+
+        <div class="stat-row" style="margin-top:20px;">
+          <div class="card stat-card">
+            <div class="label">Your sessions (30d)</div>
+            <div class="value">31</div>
+            <div class="sub">Across 2 projects</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">Your tokens (30d)</div>
+            <div class="value">1.1M</div>
+            <div class="sub">Avg 35.5K / session</div>
+          </div>
+        </div>
+
+        <div class="subdivider" style="margin-top:0;">By session type</div>
+        <div class="breakdown-row" style="margin-top:16px;">
+          <div class="breakdown-label"><span class="kind-dot feature_build"></span><span class="name">Feature build</span></div>
+          <div class="breakdown-track"><div class="breakdown-fill" style="width:100%; background:#2fd4c6;"></div></div>
+          <div class="breakdown-value">640K</div>
+        </div>
+        <div class="breakdown-row">
+          <div class="breakdown-label"><span class="kind-dot spec_grill"></span><span class="name">Feature spec</span></div>
+          <div class="breakdown-track"><div class="breakdown-fill" style="width:56%; background:#4f9bf0;"></div></div>
+          <div class="breakdown-value">360K</div>
+        </div>
+        <div class="breakdown-row">
+          <div class="breakdown-label"><span class="kind-dot test_run"></span><span class="name">Tests</span></div>
+          <div class="breakdown-track"><div class="breakdown-fill" style="width:16%; background:#e2a13c;"></div></div>
+          <div class="breakdown-value">100K</div>
+        </div>
+
+        <div class="subdivider">Recent sessions</div>
+        <div class="session-row" style="margin-top:16px;">
+          <span class="session-kind-badge" style="background:#2fd4c622; color:#2fd4c6;">feature_build</span>
+          <div class="session-main">
+            <div class="session-title">Saved payment methods</div>
+            <div class="session-meta">Acme Storefront</div>
+          </div>
+          <div class="session-tokens">94.2K</div>
+        </div>
+        <div class="session-row">
+          <span class="session-kind-badge" style="background:#4f9bf022; color:#4f9bf0;">spec_grill</span>
+          <div class="session-main">
+            <div class="session-title">Guest checkout autofill</div>
+            <div class="session-meta">Acme Storefront</div>
+          </div>
+          <div class="session-tokens">31.4K</div>
+        </div>
+        </section>
+      </div>
+    </div>
       </div>
     </div>
   </div>

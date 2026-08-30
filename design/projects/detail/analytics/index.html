@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Analytics — Acme Storefront — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+    .stat-card .label { font-size: 13px; color: var(--mist); }
+    .stat-card .value { font-size: 28px; font-weight: 600; color: var(--frost); margin-top: 6px; font-family: var(--font-mono); }
+    .stat-card .sub { font-size: 12px; color: var(--shadow); margin-top: 4px; }
+
+    .section-title { font-size: 15px; font-weight: 600; color: var(--frost); margin-bottom: 4px; }
+    .section-desc { font-size: 12px; color: var(--shadow); margin-bottom: 16px; }
+
+    .heatmap-wrap { overflow-x: auto; padding-bottom: 4px; }
+    .heatmap { display: grid; grid-template-columns: repeat(52, 1fr); grid-template-rows: repeat(7, 14px); grid-auto-flow: column; gap: 3px; width: 100%; }
+    .heat-cell { border-radius: 2px; min-width: 2px; }
+    .heat-cell.lvl0 { background: var(--surface-02); }
+    .heat-cell.lvl1 { background: rgba(47, 212, 198, 0.25); }
+    .heat-cell.lvl2 { background: rgba(47, 212, 198, 0.45); }
+    .heat-cell.lvl3 { background: rgba(47, 212, 198, 0.7); }
+    .heat-cell.lvl4 { background: var(--bifrost); }
+    .heatmap-legend { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 11px; color: var(--shadow); }
+    .heatmap-legend .heat-cell { display: inline-block; width: 12px; height: 12px; }
+
+    .breakdown-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+    .breakdown-row:first-of-type { margin-top: 0; }
+    .breakdown-label { width: 150px; flex-shrink: 0; font-size: 13px; color: var(--frost); display: flex; align-items: center; gap: 8px; overflow: hidden; }
+    .breakdown-label span.name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .breakdown-track { flex: 1; height: 8px; border-radius: 999px; background: var(--surface-02); overflow: hidden; }
+    .breakdown-fill { height: 100%; border-radius: 999px; background: var(--bifrost); }
+    .breakdown-value { width: 90px; flex-shrink: 0; text-align: right; font-family: var(--font-mono); font-size: 12px; color: var(--mist); }
+
+    .kind-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .kind-dot.design_grill { background: #9b8cf0; }
+    .kind-dot.spec_grill { background: #4f9bf0; }
+    .kind-dot.feature_build { background: #2fd4c6; }
+    .kind-dot.test_run { background: #e2a13c; }
+
+    .session-row { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--rime); border-radius: var(--radius-sm); margin-top: 10px; }
+    .session-row:first-of-type { margin-top: 0; }
+    .session-kind-badge { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: var(--radius-pill); font-size: 10px; font-weight: 500; flex-shrink: 0; white-space: nowrap; }
+    .session-main { flex: 1; min-width: 0; }
+    .session-title { font-size: 14px; color: var(--frost); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .session-title a { color: inherit; }
+    .session-title a:hover { color: var(--bifrost); }
+    .session-meta { margin-top: 2px; font-size: 12px; color: var(--shadow); }
+    .session-tokens { font-family: var(--font-mono); font-size: 13px; color: var(--mist); flex-shrink: 0; text-align: right; width: 76px; }
+    .session-status { flex-shrink: 0; font-size: 12px; width: 90px; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+      <a class="sidebar-project" href="/projects/index.html">
+        <span>Acme Storefront</span>
+        <span class="text-shadow">&#8964;</span>
+      </a>
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/projects/detail/index.html"><span class="icon">&#8962;</span> Home</a>
+        <a class="nav-link" href="/projects/detail/features/index.html"><span class="icon">&#9638;</span> Features</a>
+        <a class="nav-link" href="/projects/detail/tests/index.html"><span class="icon">&#9879;</span> Tests</a>
+        <a class="nav-link" href="/projects/detail/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+        <a class="nav-link" href="/projects/detail/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+        <a class="nav-link active" href="/projects/detail/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
+        <a class="nav-link" href="/projects/detail/settings/index.html"><span class="icon">&#9881;</span> Settings</a>
+      </nav>
+    </aside>
+
+    <div class="main">
+      <div class="shell-topbar">
+        <div class="crumbs">
+          <a href="/projects/index.html">Acme Retail</a>
+          <span class="sep">/</span>
+          <a href="/projects/detail/index.html">Acme Storefront</a>
+          <span class="sep">/</span>
+          <span class="current">Analytics</span>
+        </div>
+        <div class="shell-topbar-actions">
+          <a class="notif-bell" href="/notifications/index.html" aria-label="Notifications"><span class="dot"></span>&#128276;</a>
+          <div class="user-menu">
+            <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+            <label for="user-menu-toggle" class="user-menu-trigger">
+              <span class="avatar">SC</span>
+              <span class="chevron">&#9662;</span>
+            </label>
+            <div class="user-menu-panel">
+              <div class="user-menu-head">
+                <div class="name">Sarat Chandra</div>
+                <div class="handle">@saratc</div>
+              </div>
+              <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+              <a class="user-menu-item" href="/login/index.html">Log out</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="main-inner">
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/analytics</span> — a <b>new</b> route/page, no equivalent exists in web/ today. Same "nothing here is tracked today" caveat as <span class="mono">/analytics</span> (see its design-note). Scoped to this project only: drops the "By project" breakdown (redundant at this level) and keeps "By session type" and "By user," since both are meaningful within a single project. Heatmap (52 weeks, fluid-width cells — see /analytics's design-note for why they're rectangles not squares), stats, and session list are this project's activity only — a different random sample than the org-level page, so don't expect the numbers to visibly roll up to it.</div>
+
+        <div class="page-header">
+          <div>
+            <h1>Analytics</h1>
+            <p>Agent activity and token consumption for Acme Storefront.</p>
+          </div>
+        </div>
+
+        <div class="stat-row">
+          <div class="card stat-card">
+            <div class="label">Sessions (30d)</div>
+            <div class="value">58</div>
+            <div class="sub">+9% vs. previous 30 days</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">Tokens consumed (30d)</div>
+            <div class="value">2.1M</div>
+            <div class="sub">31% of Acme Retail's total</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">Avg tokens / session</div>
+            <div class="value">36.2K</div>
+            <div class="sub">feature_build runs highest, ~88K avg</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:24px;">
+          <div class="section-title">Activity</div>
+          <div class="section-desc">Sessions run per day, last 52 weeks.</div>
+          <div class="heatmap-wrap">
+            <div class="heatmap">
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl4"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl2"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl3"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl0"></span>
+            <span class="heat-cell lvl1"></span>
+            <span class="heat-cell lvl0"></span>
+            </div>
+          </div>
+          <div class="heatmap-legend">
+            <span>Less</span>
+            <span class="heat-cell lvl0"></span><span class="heat-cell lvl1"></span><span class="heat-cell lvl2"></span><span class="heat-cell lvl3"></span><span class="heat-cell lvl4"></span>
+            <span>More</span>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:24px;">
+          <div class="section-title">By session type</div>
+          <div class="section-desc">Token consumption, last 30 days.</div>
+          <div class="breakdown-row">
+            <div class="breakdown-label"><span class="kind-dot feature_build"></span><span class="name">Feature build</span></div>
+            <div class="breakdown-track"><div class="breakdown-fill" style="width:100%; background:#2fd4c6;"></div></div>
+            <div class="breakdown-value">1.3M</div>
+          </div>
+          <div class="breakdown-row">
+            <div class="breakdown-label"><span class="kind-dot spec_grill"></span><span class="name">Feature spec</span></div>
+            <div class="breakdown-track"><div class="breakdown-fill" style="width:44%; background:#4f9bf0;"></div></div>
+            <div class="breakdown-value">570K</div>
+          </div>
+          <div class="breakdown-row">
+            <div class="breakdown-label"><span class="kind-dot test_run"></span><span class="name">Tests</span></div>
+            <div class="breakdown-track"><div class="breakdown-fill" style="width:18%; background:#e2a13c;"></div></div>
+            <div class="breakdown-value">230K</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:24px;">
+          <div class="section-title">By user</div>
+          <div class="section-desc">Token consumption, last 30 days.</div>
+          <div class="breakdown-row">
+            <div class="breakdown-label"><span class="avatar" style="width:22px; height:22px; font-size:10px;">SC</span><span class="name">Sarat Chandra</span></div>
+            <div class="breakdown-track"><div class="breakdown-fill" style="width:100%;"></div></div>
+            <div class="breakdown-value">1.1M</div>
+          </div>
+          <div class="breakdown-row">
+            <div class="breakdown-label"><span class="avatar" style="width:22px; height:22px; font-size:10px;">JE</span><span class="name">Jordan Ellis</span></div>
+            <div class="breakdown-track"><div class="breakdown-fill" style="width:64%;"></div></div>
+            <div class="breakdown-value">700K</div>
+          </div>
+          <div class="breakdown-row">
+            <div class="breakdown-label"><span class="avatar" style="width:22px; height:22px; font-size:10px;">AR</span><span class="name">Aisha Rahman</span></div>
+            <div class="breakdown-track"><div class="breakdown-fill" style="width:27%;"></div></div>
+            <div class="breakdown-value">300K</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">Recent sessions</div>
+          <div class="section-desc">Every grill, build, and test run for this project, most recent first.</div>
+
+          <div class="session-row">
+            <span class="session-kind-badge" style="background:#2fd4c622; color:#2fd4c6;">feature_build</span>
+            <div class="session-main">
+              <div class="session-title"><a href="/projects/detail/features/detail/index.html">Saved payment methods</a></div>
+              <div class="session-meta">Sarat Chandra</div>
+            </div>
+            <div class="session-tokens">94.2K</div>
+            <div class="session-status" style="color:var(--aurora);">&#9679; Running</div>
+          </div>
+
+          <div class="session-row">
+            <span class="session-kind-badge" style="background:#e2a13c22; color:#e2a13c;">test_run</span>
+            <div class="session-main">
+              <div class="session-title"><a href="/projects/detail/tests/detail/index.html">Checkout regression suite</a></div>
+              <div class="session-meta">Scheduled</div>
+            </div>
+            <div class="session-tokens">18.6K</div>
+            <div class="session-status" style="color:var(--st-rejected);">&#9679; Failed</div>
+          </div>
+
+          <div class="session-row">
+            <span class="session-kind-badge" style="background:#4f9bf022; color:#4f9bf0;">spec_grill</span>
+            <div class="session-main">
+              <div class="session-title"><a href="/projects/detail/features/detail/index.html">Guest checkout autofill</a></div>
+              <div class="session-meta">Jordan Ellis</div>
+            </div>
+            <div class="session-tokens">31.4K</div>
+            <div class="session-status" style="color:var(--st-approved);">&#9679; Completed</div>
+          </div>
+
+          <div class="session-row">
+            <span class="session-kind-badge" style="background:#e2a13c22; color:#e2a13c;">test_run</span>
+            <div class="session-main">
+              <div class="session-title">Auth flow</div>
+              <div class="session-meta">Scheduled</div>
+            </div>
+            <div class="session-tokens">15.1K</div>
+            <div class="session-status" style="color:var(--st-approved);">&#9679; Completed</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

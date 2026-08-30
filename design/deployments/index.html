@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Deployments — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .filter-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+    .pill { border: 1px solid var(--rime); background: var(--surface-01); color: var(--mist); border-radius: var(--radius-pill); padding: 5px 12px; font-size: 12px; font-weight: 500; cursor: default; }
+    .pill.active { border-color: var(--bifrost); color: var(--bifrost); background: rgba(47, 212, 198, 0.08); }
+
+    .project-group { margin-bottom: 28px; }
+    .project-group-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .project-group-head .project-icon { width: 28px; height: 28px; border-radius: 7px; background: var(--surface-03); color: var(--bifrost); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; font-family: var(--font-mono); flex-shrink: 0; }
+    .project-group-head h2 { font-size: 15px; }
+    .project-group-head a.h2-link { color: var(--frost); }
+    .project-group-head a.h2-link:hover { color: var(--bifrost); }
+
+    .deploy-list { display: flex; flex-direction: column; }
+    .deploy-row { display: flex; align-items: center; gap: 16px; padding: 16px; border: 1px solid var(--rime); border-radius: var(--radius-sm); margin-top: 10px; }
+    .deploy-row:first-of-type { margin-top: 0; }
+
+    .deploy-env { display: inline-flex; align-items: center; height: 22px; padding: 0 10px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; flex-shrink: 0; }
+
+    .deploy-status { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--mist); flex-shrink: 0; width: 84px; }
+    .deploy-status .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .deploy-status .dot.ready { background: var(--st-approved); }
+    .deploy-status .dot.building { background: var(--aurora); animation: deploy-pulse 1.8s ease-in-out infinite; }
+    @keyframes deploy-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(79, 155, 240, 0.4); } 50% { box-shadow: 0 0 0 5px rgba(79, 155, 240, 0); } }
+
+    .deploy-main { flex: 1; min-width: 0; }
+    .deploy-url { font-size: 14px; color: var(--frost); display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .deploy-url a { color: inherit; }
+    .deploy-url a:hover { color: var(--bifrost); }
+    .deploy-source { margin-top: 4px; font-size: 12px; color: var(--shadow); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .deploy-source a { color: var(--mist); }
+    .deploy-source a:hover { color: var(--frost); }
+
+    .deploy-time { font-size: 12px; color: var(--shadow); flex-shrink: 0; white-space: nowrap; }
+
+    .empty-row { padding: 14px 16px; border: 1px dashed var(--rime); border-radius: var(--radius-sm); font-size: 13px; color: var(--shadow); }
+
+    @media (max-width: 640px) {
+      .deploy-row { flex-wrap: wrap; }
+      .deploy-main { width: 100%; order: 3; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+
+      <div class="org-switcher sidebar-org-switcher">
+        <input type="checkbox" id="org-switcher-toggle" class="user-menu-toggle" />
+        <label for="org-switcher-toggle" class="sidebar-project">
+          <span style="display:flex; align-items:center; gap:8px; min-width:0;">
+            <span class="org-avatar sm">A</span>
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Acme Retail</span>
+          </span>
+          <span class="text-shadow">&#8964;</span>
+        </label>
+        <div class="user-menu-panel org-switcher-panel">
+          <div class="org-switcher-label">Organizations</div>
+          <a class="user-menu-item org-switcher-item active" href="/projects/index.html"><span class="org-avatar sm">A</span> Acme Retail</a>
+          <a class="user-menu-item org-switcher-item" href="/projects/index.html"><span class="org-avatar sm">N</span> Northwind Labs</a>
+          <div class="org-switcher-divider">
+            <a class="user-menu-item" href="/settings/organization/index.html">Organization settings</a>
+            <button class="user-menu-item" type="button">+ Create organization</button>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/projects/index.html"><span class="icon">&#9638;</span> Projects</a>
+        <a class="nav-link active" href="/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+        <a class="nav-link" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="user-menu sidebar-account">
+          <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+          <label for="user-menu-toggle" class="sidebar-account-trigger">
+            <span class="avatar">SC</span>
+            <span class="info">
+              <div class="name">Sarat Chandra</div>
+              <div class="handle">@saratc</div>
+            </span>
+            <span class="chevron">&#9662;</span>
+          </label>
+          <div class="user-menu-panel">
+            <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+            <a class="user-menu-item" href="/settings/organization/index.html">Organization settings</a>
+            <a class="user-menu-item" href="/login/index.html">Log out</a>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="main-inner">
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/deployments</span> — a <b>new</b> route/page, no equivalent exists in web/ today. Same maturity caveat as the project-level version (<span class="mono">/projects/:projectId/deployments</span>, see its design-note): only <b>Production</b> rows reflect something actually built (ADR 003/ADR 013); <b>Preview</b> is designed but has zero orchestrator implementation (roadmap/phases.md, Phase 2); <b>Staging</b> isn't decided at all (open-questions.md #9). This page additionally assumes every project has at most one production deployment and that deployments are visible org-wide to every member regardless of role — the permission matrix on /settings/organization doesn't currently say who can *view* deployments vs. just projects in general, worth resolving alongside whichever ADR formalizes this page. Internal Ops Console and Data Pipeline are shown with empty states rather than invented deployments: the former is still <span class="mono">initializing</span> (ADR 002 §4 — a project can't do much until <span class="mono">project_init</span> merges), and the latter is an ETL project that may not expose a web app at all — not every project necessarily has something to deploy. Filter pills are inert.</div>
+
+        <div class="page-header">
+          <div>
+            <h1>Deployments</h1>
+            <p>Every active deployment across Acme Retail's projects — production, staging, and preview.</p>
+          </div>
+        </div>
+
+        <div class="filter-pills">
+          <button class="pill active" type="button">All</button>
+          <button class="pill" type="button">Production</button>
+          <button class="pill" type="button">Staging</button>
+          <button class="pill" type="button">Preview</button>
+        </div>
+
+        <div class="project-group">
+          <div class="project-group-head">
+            <span class="project-icon">A</span>
+            <h2><a class="h2-link" href="/projects/detail/index.html">Acme Storefront</a></h2>
+          </div>
+          <div class="deploy-list">
+            <div class="deploy-row">
+              <span class="deploy-env" style="background:#2fd4c622; color:#2fd4c6;">Production</span>
+              <span class="deploy-status"><span class="dot ready"></span> Ready</span>
+              <div class="deploy-main">
+                <div class="deploy-url"><a href="#">acme-storefront.apps.acmeretail.com</a> <span class="text-shadow">&#8599;</span></div>
+                <div class="deploy-source">Branch <span class="mono">main</span></div>
+              </div>
+              <div class="deploy-time">Deployed 12m ago</div>
+            </div>
+            <div class="deploy-row">
+              <span class="deploy-env" style="background:#e2a13c22; color:#e2a13c;">Staging</span>
+              <span class="deploy-status"><span class="dot ready"></span> Ready</span>
+              <div class="deploy-main">
+                <div class="deploy-url"><a href="#">acme-storefront-staging.apps.acmeretail.com</a> <span class="text-shadow">&#8599;</span></div>
+                <div class="deploy-source">Branch <span class="mono">staging</span></div>
+              </div>
+              <div class="deploy-time">Deployed 1h ago</div>
+            </div>
+            <div class="deploy-row">
+              <span class="deploy-env" style="background:#4f9bf022; color:#4f9bf0;">Preview</span>
+              <span class="deploy-status"><span class="dot building"></span> Building</span>
+              <div class="deploy-main">
+                <div class="deploy-url"><a href="#">acme-storefront-feature_build-482.preview.acmeretail.com</a> <span class="text-shadow">&#8599;</span></div>
+                <div class="deploy-source"><span class="mono">feature_build</span> &middot; <a href="/projects/detail/features/detail/index.html">Saved payment methods</a></div>
+              </div>
+              <div class="deploy-time">Deployed 3m ago</div>
+            </div>
+            <div class="deploy-row">
+              <span class="deploy-env" style="background:#4f9bf022; color:#4f9bf0;">Preview</span>
+              <span class="deploy-status"><span class="dot ready"></span> Ready</span>
+              <div class="deploy-main">
+                <div class="deploy-url"><a href="#">acme-storefront-test_run-901.preview.acmeretail.com</a> <span class="text-shadow">&#8599;</span></div>
+                <div class="deploy-source"><span class="mono">test_run</span> &middot; <a href="/projects/detail/tests/detail/index.html">Checkout regression suite</a></div>
+              </div>
+              <div class="deploy-time">Deployed 20m ago</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-group">
+          <div class="project-group-head">
+            <span class="project-icon">M</span>
+            <h2><a class="h2-link" href="/projects/detail/index.html">Marketing Site</a></h2>
+          </div>
+          <div class="deploy-list">
+            <div class="deploy-row">
+              <span class="deploy-env" style="background:#2fd4c622; color:#2fd4c6;">Production</span>
+              <span class="deploy-status"><span class="dot ready"></span> Ready</span>
+              <div class="deploy-main">
+                <div class="deploy-url"><a href="#">marketing-site.apps.acmeretail.com</a> <span class="text-shadow">&#8599;</span></div>
+                <div class="deploy-source">Branch <span class="mono">main</span></div>
+              </div>
+              <div class="deploy-time">Deployed yesterday</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-group">
+          <div class="project-group-head">
+            <span class="project-icon">I</span>
+            <h2><a class="h2-link" href="/projects/detail/index.html">Internal Ops Console</a></h2>
+          </div>
+          <div class="empty-row">Still initializing — no deployments until <span class="mono">project_init</span> merges.</div>
+        </div>
+
+        <div class="project-group">
+          <div class="project-group-head">
+            <span class="project-icon">D</span>
+            <h2><a class="h2-link" href="/projects/detail/index.html">Data Pipeline</a></h2>
+          </div>
+          <div class="empty-row">No production deployment configured for this project.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

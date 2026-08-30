@@ -57,7 +57,7 @@
   </style>
 </head>
 <body>
-  <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/login</span> (web/app/login/page.tsx) · no live OAuth, button is inert</div>
+  <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/login</span> (web/app/login/page.tsx) · no live OAuth — "Continue with GitHub" instead links straight to <span class="mono">/projects</span> to let you click through the app as an existing, already-onboarded user (Sarat Chandra); the real flow would round-trip through GitHub and land new users on <span class="mono">/onboarding/confirm-username</span> instead</div>
 
   <div class="auth-wrap">
     <div class="auth-inner">
@@ -70,7 +70,7 @@
       <div class="card auth-card">
         <div class="card-title">Sign in with GitHub</div>
         <p class="card-desc">Your Yggdrasil account is your GitHub identity.</p>
-        <button class="btn btn-primary" type="button">Continue with GitHub</button>
+        <a class="btn btn-primary" href="/projects/index.html">Continue with GitHub</a>
       </div>
     </div>
   </div>

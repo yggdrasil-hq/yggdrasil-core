@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Usage — Acme Storefront — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card .label { font-size: 13px; color: var(--mist); }
+    .stat-card .value { font-size: 28px; font-weight: 600; color: var(--frost); margin-top: 6px; font-family: var(--font-mono); }
+    .stat-card .sub { font-size: 12px; color: var(--shadow); margin-top: 4px; }
+
+    .usage-card { margin-top: 12px; }
+    .usage-card:first-of-type { margin-top: 0; }
+    .usage-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .usage-head .label { font-size: 15px; font-weight: 500; color: var(--frost); }
+    .usage-numbers { font-family: var(--font-mono); font-size: 13px; color: var(--mist); text-align: right; flex-shrink: 0; }
+
+    .usage-bar-track { margin-top: 14px; height: 8px; border-radius: 999px; background: var(--surface-02); overflow: hidden; }
+    .usage-bar-fill { height: 100%; border-radius: 999px; background: var(--bifrost); }
+
+    .usage-foot { margin-top: 10px; font-size: 12px; color: var(--shadow); }
+
+    .org-quota-note { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border: 1px solid var(--rime); border-radius: var(--radius-sm); background: var(--surface-01); margin-bottom: 24px; }
+    .org-quota-note p { font-size: 13px; color: var(--mist); line-height: 1.5; }
+    .org-quota-note a { color: var(--bifrost); }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+      <a class="sidebar-project" href="/projects/index.html">
+        <span>Acme Storefront</span>
+        <span class="text-shadow">&#8964;</span>
+      </a>
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/projects/detail/index.html"><span class="icon">&#8962;</span> Home</a>
+        <a class="nav-link" href="/projects/detail/features/index.html"><span class="icon">&#9638;</span> Features</a>
+        <a class="nav-link" href="/projects/detail/tests/index.html"><span class="icon">&#9879;</span> Tests</a>
+        <a class="nav-link" href="/projects/detail/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+        <a class="nav-link active" href="/projects/detail/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+        <a class="nav-link" href="/projects/detail/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
+        <a class="nav-link" href="/projects/detail/settings/index.html"><span class="icon">&#9881;</span> Settings</a>
+      </nav>
+    </aside>
+
+    <div class="main">
+      <div class="shell-topbar">
+        <div class="crumbs">
+          <a href="/projects/index.html">Acme Retail</a>
+          <span class="sep">/</span>
+          <a href="/projects/detail/index.html">Acme Storefront</a>
+          <span class="sep">/</span>
+          <span class="current">Usage</span>
+        </div>
+        <div class="shell-topbar-actions">
+          <a class="notif-bell" href="/notifications/index.html" aria-label="Notifications"><span class="dot"></span>&#128276;</a>
+          <div class="user-menu">
+            <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+            <label for="user-menu-toggle" class="user-menu-trigger">
+              <span class="avatar">SC</span>
+              <span class="chevron">&#9662;</span>
+            </label>
+            <div class="user-menu-panel">
+              <div class="user-menu-head">
+                <div class="name">Sarat Chandra</div>
+                <div class="handle">@saratc</div>
+              </div>
+              <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+              <a class="user-menu-item" href="/login/index.html">Log out</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="main-inner">
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/usage</span> — a <b>new</b> route/page, no equivalent exists in web/ today. Same "entirely speculative" caveat as <span class="mono">/usage</span> (see its design-note) — no token-tracking concept exists anywhere in the current system. This project-level view is deliberately framed as a <b>slice</b> of the organization's quota, not a separate one: providers/limits/reset dates are owned by Acme Retail (org-managed since /settings/organization), this project just shows how much of that shared quota its own jobs accounted for. No progress-bar-against-a-limit here on purpose — a per-project "limit" isn't a real thing unless the org configures per-project caps, which isn't a decided feature either.</div>
+
+        <div class="page-header">
+          <div>
+            <h1>Usage</h1>
+            <p>This project's token usage across Acme Retail's connected providers.</p>
+          </div>
+        </div>
+
+        <div class="org-quota-note">
+          <span class="text-shadow" style="margin-top:1px;">&#8505;</span>
+          <p>These numbers count toward Acme Retail's shared provider quotas — this project doesn't have its own limit. <a href="/usage/index.html">View organization usage &amp; limits &rarr;</a></p>
+        </div>
+
+        <div class="stat-row">
+          <div class="card stat-card">
+            <div class="label">Tokens this cycle</div>
+            <div class="value">2.1M</div>
+            <div class="sub">31% of Acme Retail's total usage</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">Most-used provider</div>
+            <div class="value">OpenRouter</div>
+            <div class="sub">1.4M tokens</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">Most-used for</div>
+            <div class="value">feature_build</div>
+            <div class="sub">1.1M tokens &middot; 52%</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="usage-card">
+            <div class="usage-head">
+              <div class="label">OpenRouter</div>
+              <div class="usage-numbers">1.4M tokens</div>
+            </div>
+            <div class="usage-bar-track"><div class="usage-bar-fill" style="width:67%;"></div></div>
+            <div class="usage-foot">67% of this project's usage this cycle</div>
+          </div>
+
+          <div class="usage-card" style="border-top:1px solid var(--rime-soft); padding-top:20px; margin-top:20px;">
+            <div class="usage-head">
+              <div class="label">Anthropic</div>
+              <div class="usage-numbers">620K tokens</div>
+            </div>
+            <div class="usage-bar-track"><div class="usage-bar-fill" style="width:30%;"></div></div>
+            <div class="usage-foot">30% of this project's usage this cycle</div>
+          </div>
+
+          <div class="usage-card" style="border-top:1px solid var(--rime-soft); padding-top:20px; margin-top:20px;">
+            <div class="usage-head">
+              <div class="label">OpenAI</div>
+              <div class="usage-numbers">62K tokens</div>
+            </div>
+            <div class="usage-bar-track"><div class="usage-bar-fill" style="width:3%;"></div></div>
+            <div class="usage-foot">3% of this project's usage this cycle</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

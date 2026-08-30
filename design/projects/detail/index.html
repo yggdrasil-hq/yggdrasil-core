@@ -41,12 +41,17 @@
         <a class="nav-link active" href="/projects/detail/index.html"><span class="icon">&#8962;</span> Home</a>
         <a class="nav-link" href="/projects/detail/features/index.html"><span class="icon">&#9638;</span> Features</a>
         <a class="nav-link" href="/projects/detail/tests/index.html"><span class="icon">&#9879;</span> Tests</a>
+        <a class="nav-link" href="/projects/detail/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+        <a class="nav-link" href="/projects/detail/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+        <a class="nav-link" href="/projects/detail/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
         <a class="nav-link" href="/projects/detail/settings/index.html"><span class="icon">&#9881;</span> Settings</a>
       </nav>
     </aside>
     <div class="main">
       <div class="shell-topbar">
         <div class="crumbs">
+          <a href="/projects/index.html">Acme Retail</a>
+          <span class="sep">/</span>
           <span class="current">Acme Storefront</span>
         </div>
         <div class="shell-topbar-actions">
@@ -63,7 +68,7 @@
                 <div class="handle">@saratc</div>
               </div>
               <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
-              <button class="user-menu-item" type="button">Log out</button>
+              <a class="user-menu-item" href="/login/index.html">Log out</a>
             </div>
           </div>
         </div>
@@ -77,7 +82,7 @@
           <a class="btn btn-outline" href="/projects/detail/features/index.html">View features</a>
         </div>
 
-        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId</span> (web/components/projects/project-home-client.tsx) · shows the "ready" state (deploy panel visible); the "initializing" banner isn't mocked here · <b>proposed IA rework</b>: sidebar gains Settings as a primary link and drops Notifications (it's cross-project, not project-scoped); a new topbar (breadcrumb + bell + user-menu) replaces the old sidebar-footer profile block/Log out button, shared with every other project page — see design/README.md</div>
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId</span> (web/components/projects/project-home-client.tsx) · shows the "ready" state (deploy panel visible); the "initializing" banner isn't mocked here · <b>proposed IA rework</b>: sidebar gains Settings as a primary link and drops Notifications (it's cross-project, not project-scoped); a new topbar (breadcrumb + bell + user-menu) replaces the old sidebar-footer profile block/Log out button, shared with every other project page — see design/README.md · <b>org-prefixed breadcrumb added</b> — this project now belongs to an organization, not just a user; full rationale + data-model implications in /settings/organization's design-note</div>
 
         <div class="content-stack">
           <div class="card">
