@@ -7,6 +7,14 @@
 > **Authoritative states:** ADR 002 (`docs/adr/002-projects-features-tests.md`).
 > This doc is the implementation reference.
 
+> **Proposed rework, not implemented:** `design/projects/detail/features/detail/*`
+> mocks a six-stage lifecycle — Spec → Action Items → Implementation → Testing
+> → Agentic Review → Manual Review — with failures at Testing/Agentic
+> Review/Manual Review routing back to Implementation with a comment instead
+> of failing outright. No ADR covers this yet. See `docs/CONTEXT.md`'s
+> "Proposed" section and `docs/roadmap/open-questions.md` #14. Everything
+> below is what's actually built today.
+
 ## What a feature is
 
 A user-described unit of work for the agent to build. Each feature goes through a

@@ -23,6 +23,16 @@ source-of-truth state — everything comes from the API.
 - **API WebSocket** — live run/agent events.
 - Never talks to the Orchestrator directly.
 
+## Proposed IA
+
+`design/` (meta repo root) holds the current wireframed page/route inventory
+for this app — a materially larger surface than what `web/` implements today
+(org-level settings, a six-stage feature lifecycle, usage/analytics/
+allocations pages, and more). It's the source of truth for where the IA is
+headed, not for what's live. See `design/README.md`'s route map and
+`docs/CONTEXT.md`'s "Proposed (surfaced by `design/`)" section before
+assuming a route described there exists in `web/`.
+
 ## Deep docs
 
 - `web/CLAUDE.md` — router for the web repo

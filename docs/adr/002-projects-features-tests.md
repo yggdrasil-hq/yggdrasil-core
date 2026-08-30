@@ -4,6 +4,15 @@
 **Date:** 2026-06-22 (amended 2026-06-28 by ADR 005; amended 2026-07-10 by ADR 007)  
 **Deciders:** Product/design session (grill-me)
 
+> **`design/` proposes a superseding rework** of this ADR's feature lifecycle
+> — six stages (Spec → Action Items → Implementation → Testing → Agentic
+> Review → Manual Review) replacing the `draft → spec_ready → … → merged`
+> flow below — and treats projects as belonging to an **Organization** rather
+> than `owner_user_id`. Neither is decided or built. See
+> `docs/CONTEXT.md`'s "Proposed (surfaced by `design/`)" section and
+> `docs/roadmap/open-questions.md` #13–14. Everything below remains the
+> accepted, implemented model.
+
 ## Context
 
 Yggdrasil needs a domain model for how users organize work: **projects** (linked

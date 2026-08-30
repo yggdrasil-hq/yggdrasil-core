@@ -37,7 +37,11 @@ are also built (live agent chat/steering for `spec_grill`, build-progress UI,
 per-user/per-project model configuration) and `design_grill` (ADR 014) is
 decided but not yet implemented. `test_run` (Phase 3), RBAC, team
 invitations, and live preview tunnels remain unbuilt. See
-`roadmap/phases.md` for the current build-order snapshot.
+`roadmap/phases.md` for the current build-order snapshot. Separately,
+`design/` sketches a much larger IA (organizations/RBAC, a six-stage feature
+lifecycle, usage/analytics/allocations surfaces) than any of the above — see
+["Proposed (surfaced by `design/`, not yet decided)"](#proposed-surfaced-by-design-not-yet-decided)
+below before assuming any of it is real.
 
 → [`overview/product.md`](overview/product.md)
 
@@ -303,6 +307,75 @@ sub-repos** ([`adr/008-project-init-grill-and-submodule-repos.md`](adr/008-proje
   tools, and `web/` has no design-session UI. Everything in this ADR is the
   design, not shipped behavior — see `concepts/job-dispatch.md` and
   `concepts/pi-agent.md`.
+
+## Proposed (surfaced by `design/`, not yet decided)
+
+`design/` (the meta-repo wireframe directory, see
+[`conventions/design-wireframes.md`](conventions/design-wireframes.md)) is
+the current source of truth for **where the Web app's IA is headed** — every
+page's own `.design-note` states precisely what it maps to, what's faked, and
+what's grounded vs. invented. That directory now sketches a substantially
+larger product surface than anything below has decided or built. **None of
+what follows is implemented; none of it has an ADR.** This section is a rollup
+for agents who want the summary without opening every wireframe — the
+per-page `.design-note` is still the authoritative detail on each point.
+
+- **Organization entity + RBAC.** `design/settings/organization/*` treats
+  projects as belonging to an **Organization**, not `owner_user_id` (ADR 002)
+  — a sidebar org switcher, and a Settings → Organization group (General /
+  Members / Providers / Secrets / Cluster). Five proposed roles (Admin /
+  Developer / Designer / Product Manager / Tester) with a best-effort
+  capability matrix. This is exactly the "team/org entity" ADR 002 and ADR 007
+  both explicitly defer — see `roadmap/open-questions.md` #13. Needs its own
+  ADR before being built; would also require rewriting ADR 007's "no team/org
+  entity yet" premise.
+- **Org-level provider/model/secret config.** `design/settings/organization/providers`
+  and `.../secrets` propose admin-managed, org-owned provider/model/secret
+  config that projects and users inherit from and resolve against — superseding
+  ADR 007's per-user-default model wholesale. See `roadmap/open-questions.md` #16.
+- **Six-stage feature lifecycle.** `design/projects/detail/features/detail/*`
+  mocks a real lifecycle rework — Spec → Action Items → Implementation →
+  Testing → Agentic Review → Manual Review — replacing ADR 002 /
+  `concepts/feature-lifecycle.md`'s `draft → spec_ready → queued → running →
+  in_review → merged` flow, with failures at Testing / Agentic Review /
+  Manual Review routing back to Implementation with a comment instead of
+  failing outright. New concepts inside it, grounded very unevenly (see each
+  page's own note): **Action Item** (env var request, secret request, test
+  request, move-to-`design_grill`, new blocking subtask feature — a
+  parent/child feature relationship ADR 002 doesn't have), **Testing** (its
+  Agentic group reuses the real `test_run`/Tests feature; Unit/Integration are
+  pure invention — no CI/code-level test runner concept exists anywhere), and
+  **Agentic Review** (a fully new proposed gate/job kind — no ADR, skill, or
+  contract event for "an agent reviews another agent's diff"). See
+  `roadmap/open-questions.md` #14.
+- **Token usage tracking + resource allocation caps.** `design/usage`,
+  `design/analytics`, and `design/allocations/{infra,api}` (org, project, and
+  account-level views) assume the API/Orchestrator log a token count and
+  duration per job and expose cluster/spend telemetry — none of that exists
+  today, at any level. `roadmap/phases.md` Phase 4's "token budgets" is the
+  spend-cap half of this (`allocations/api`); consumption *reporting*
+  (`usage`, `analytics`) is a distinct, equally unbuilt feature. `infrastructure`
+  (org-only cluster status) and `allocations/infra` (per-project k8s
+  ResourceQuota) are grounded in ADR 003's real namespace-per-project
+  isolation but assume a live cluster-telemetry API that doesn't exist. See
+  `roadmap/open-questions.md` #15.
+- **Sidebar-first IA.** Every hub page (Projects, Notifications, Account/
+  Organization settings, New project) now shares the same persistent
+  `.sidebar`/`.main` shell as project pages (Vercel-style: org switcher above
+  the nav, account cell below it) — replacing the old top-bar-only
+  `.hub-header` pattern. Layout-only; no product concept behind it needing a
+  decision, but it's a real change from what `web/` renders today.
+- **Landing page redesign.** `design/landing/` is a full proposed copy/IA
+  rework of the marketing site — positioning around safety/security, a
+  6-step "how it works," a "no lock-in" (BYOK/BYOI/BYOG) section. The real
+  `landing/` page today is just a logo + one-line tagline splash; nothing in
+  the redesign is live.
+- **Per-message grill resume/restart.** `design/projects/detail/features/detail/spec`
+  adds "Resume from here" / "Restart from here" on individual grill-transcript
+  messages, plus a "Stop" control. ADR 006 covers mid-run reply delivery and
+  ADR 012 covers job-level retry, but neither operates at the granularity of
+  one transcript message — this would need new API surface and a new
+  Orchestrator/Pi contract. See `roadmap/open-questions.md` #17.
 
 ## Still open
 

@@ -90,3 +90,9 @@ Full route → file map: `design/README.md`.
 - When a new page/route is added to `web/`, add its wireframe here in the
   same change that adds the route, and add a row to `design/README.md`'s
   route → file map.
+- When a wireframe introduces a new product concept that isn't in any ADR
+  yet (a new entity, lifecycle stage, or surface — not just a layout change),
+  add it to `docs/CONTEXT.md`'s "Proposed (surfaced by `design/`)" section
+  (and `docs/roadmap/open-questions.md` if it needs its own decision) in the
+  same change — that section is the rollup agents read instead of every
+  `.design-note`.

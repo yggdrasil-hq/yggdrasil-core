@@ -41,6 +41,11 @@ definition. This is a lookup table, not a narrative — read only the row you ne
 | **Project installer** | Yggdrasil user who completed the App install for a project (audit). |
 | **GitHub access warning** | Project flag when installation access breaks; blocks jobs. |
 | **pending_username** | Onboarding state after GitHub signup — user must confirm username before using the app. |
+| **Organization** *(proposed, not implemented)* | Entity `design/settings/organization/*` proposes above Project, replacing `owner_user_id` ownership (ADR 002). No ADR yet. See `docs/CONTEXT.md`. |
+| **Membership / Role** *(proposed, not implemented)* | Five proposed org-scoped roles (Admin/Developer/Designer/Product Manager/Tester) with a best-effort capability matrix. Not decided. |
+| **Action item** *(proposed, not implemented)* | A blocking item raised during `spec_grill` (env var/secret/test request, `design_grill` handoff, new blocking subtask feature) that must resolve before Implementation can start, in `design/`'s proposed six-stage feature lifecycle. |
+| **Agentic Review** *(proposed, not implemented)* | A proposed gate between Testing and Manual Review where an agent reviews another agent's diff. No job kind, skill, or contract event exists for it. |
+| **Allocation** *(proposed, not implemented)* | Org-admin-configured cap: infra (per-project Kubernetes ResourceQuota) or API (per-project provider access + monthly token cap). See `roadmap/open-questions.md` #15. |
 
 > Missing a term? Add a row (alphabetical-ish by importance) when you introduce
 > new vocabulary, per `conventions/documentation-guide.md`.

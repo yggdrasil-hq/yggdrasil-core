@@ -13,6 +13,14 @@
 > default model config itself) is unaffected. See
 > [ADR 012](012-spec-grill-retry-state-reset.md#follow-ups-out-of-scope-for-this-adr).
 
+> **`design/settings/organization/providers` and `.../secrets` propose
+> superseding this ADR entirely** with org-level, admin-managed provider/
+> model/secret config once an Organization entity exists — this ADR's central
+> premise ("no team/org entity yet") would no longer hold. Not decided or
+> built. See `docs/CONTEXT.md`'s "Proposed" section and
+> `docs/roadmap/open-questions.md` #16. Until then, the per-user default
+> described below is what's actually implemented.
+
 ## Context
 
 Project creation (`POST /projects`) dispatches the `project_init` feature's `spec_grill`

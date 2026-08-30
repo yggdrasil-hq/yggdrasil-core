@@ -13,6 +13,17 @@ For the conventions behind this directory (and how it differs from ADR 014's
 `designs/`), see
 [`docs/conventions/design-wireframes.md`](../docs/conventions/design-wireframes.md).
 
+## Implementation status
+
+This directory is the source of truth for where the product's IA is headed —
+**not** for what's built. Most pages below are proposed and unimplemented;
+each page's own `.design-note` (visible in its HTML source) states precisely
+what it maps to and what's real vs. faked vs. invented for that page. For a
+rollup across all of them — the Organization/RBAC entity, the six-stage
+feature lifecycle, usage/analytics/allocations surfaces, and more — see
+[`docs/CONTEXT.md`](../docs/CONTEXT.md)'s "Proposed (surfaced by `design/`)"
+section.
+
 ## Viewing
 
 Links between pages use root-absolute paths (e.g. `/projects/index.html`), so

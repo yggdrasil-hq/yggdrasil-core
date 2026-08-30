@@ -25,7 +25,8 @@ webhook-driven `deploy`/`merged`/`changes_requested` automation (ADR 013).
   drive `merged`/`changes_requested`).
 - ✅ `queued`/`running` build-progress UI (ADR 011).
 - ⬜ RBAC, team invitations — not started (no team/org entity exists yet,
-  per this doc's glossary).
+  per this doc's glossary). Proposed shape now sketched in
+  `design/settings/organization/` — not decided, see `docs/CONTEXT.md`.
 - ⬜ Live preview tunnel for ephemeral job runs — designed in ADR 003 but not
   implemented in `orchestrator/` (no preview/temporary-deployment code
   exists).
@@ -44,6 +45,9 @@ the RPC-driven path `spec_grill`/`feature_build` use.
 Pi extension uploads, per-feature model override, token budgets, notification
 preferences, audit (logging/trails). Per-user default model configuration
 (ADR 007) and per-project override already exist, ahead of this phase.
+Token budgets' proposed shape is sketched in `design/allocations/api`;
+consumption reporting (`design/usage`, `design/analytics`) is a related but
+distinct, equally unbuilt feature — not decided, see `docs/CONTEXT.md`.
 
 > When working a feature, note its phase so out-of-phase scope is flagged rather
 > than silently built.

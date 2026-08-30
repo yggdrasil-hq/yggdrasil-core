@@ -9,6 +9,13 @@ per-feature/run overrides for the agent.
 > **Account default model config, resolution order, dispatch-site gating:** ADR 007
 > (`docs/adr/007-per-user-default-model-configuration.md`).
 
+> **Proposed rework, not implemented:** `design/projects/detail/settings/*`
+> splits project settings into per-route pages (General / Secrets / Models,
+> currently one page in `web/`) and adds an org tier above Account
+> (`design/settings/organization/*`) that Providers/Models/Secrets would
+> inherit from, superseding ADR 007. See `docs/CONTEXT.md`'s "Proposed"
+> section.
+
 ## Levels
 
 0. **Account default** — a user's personal fallback **model configuration**
@@ -52,6 +59,10 @@ cleared) works the same way — action queue item "Fix model configuration" (ADR
 | **Tool allowlist** | Packages/tools the agent may install in the container. | TODO |
 | **Timeout** | Max run duration per job. | TODO |
 | **Token budget** | Optional token cap per job. | TODO |
+
+`design/allocations/api` mocks this as an org-admin-set monthly token cap
+per project (distinct from the consumption *reporting* on `design/usage`) —
+proposed, not implemented; see `docs/roadmap/open-questions.md` #15.
 
 ## TODO
 
