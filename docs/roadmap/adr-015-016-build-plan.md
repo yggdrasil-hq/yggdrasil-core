@@ -11,8 +11,9 @@ delivers, and what it depends on.
 > delivers, and what it depends on. No migration paths are included anywhere
 > below — the application has no live deployment yet.
 >
-> **Implementation status (updated):** Track A (A1-A5), B1, and B4's Agentic
-> Testing slice are implemented and tested. B2/B3/B5-B7 remain to build. Each slice
+> **Implementation status (updated):** Track A (A1-A5), B1, B4's Agentic
+> Testing slice, and the ADR 014 `design_grill` foundation are implemented
+> and tested. B2/B3/B5-B7 remain to build. Each slice
 > row below has a status marker (✅ built / 🚧 partial / ⬜ not built).
 
 ## How to read this
@@ -45,7 +46,7 @@ rebasing Track B's work onto a moving foundation.
 | # | Slice | Repo(s) | Depends on | Delivers | Status |
 |---|-------|---------|------------|----------|--------|
 | B1 | **Feature state machine extension** | `api/` | A1 (can start once Track A is underway; doesn't need it finished) | New states (`testing`, `agentic_review`, `returned`) + `return_reason`/`return_comment`. New `feature_action_items` table, `features.parent_feature_id`, `projects.agentic_review_enabled`. Action queue gains "Resume implementation" / Action Item rows. | ✅ |
-| B2 | **Action Items in `spec_grill`** | `agent-images/`, `api/`, `web/` | B1 | `submit_adr` gains an `actionItems` field. All four resolution mechanics wired: env var/secret auto-resolve (poll `project_secrets`), move-to-`design_grill` (snapshot attached to next grill context), blocking subtask feature (auto-created, parent resolves on `merged`), test request (synchronous, human-supervised). "Start build" gated on all resolved. Web Action Items view. | 🚧 `submit_adr` `actionItems` + persistence + "Start build" gate, secret auto-resolve, subtask creation & merge-resolution, and the Web Action Items / returned + resume UI are in. The `design_grill`-snapshot-attach mechanic (needs the unbuilt design_grill flow) remains. |
+| B2 | **Action Items in `spec_grill`** | `agent-images/`, `api/`, `web/` | B1 | `submit_adr` gains an `actionItems` field. All four resolution mechanics wired: env var/secret auto-resolve (poll `project_secrets`), move-to-`design_grill` (snapshot attached to next grill context), blocking subtask feature (auto-created, parent resolves on `merged`), test request (synchronous, human-supervised). "Start build" gated on all resolved. Web Action Items view. | 🚧 `submit_adr` `actionItems` + persistence + "Start build" gate, secret auto-resolve, subtask creation & merge-resolution, and the Web Action Items / returned + resume UI are in. The `design_grill`-snapshot-attach mechanic remains; the ADR 014 foundation it depends on is now built. |
 | B3 | **`feature_build` kickback path** | `agent-images/`, `orchestrator/`, `api/` | B1 (parallelizable with B2) | New terminal tool `request_action_item`, distinct from generic crash/`run_failed`. Orchestrator dispatches a context-seeded `spec_grill` (previous ADR + grill-transcript summary + kickback reason) on kickback; feature lands back in `draft`. | 🚧 The `request_action_item` curated event + translation + relay (orchestrator), and the API's feature→`draft` reset + re-dispatch of a fresh `spec_grill` + batch clear are in. The `agent-images/` image/skill for the tool and the grill-context **seeding** payload remain. |
 | B4 | **Testing stage: Agentic** | `orchestrator/`, `api/`, `web/` | B1 (parallelizable with B2/B3) | `test_run` jobs persist a feature ref and on-demand trigger, target an ephemeral deployment of the feature branch, relay structured step/report events, aggregate results, and expose the Testing route/panel. | ✅ |
 | B5 | **Testing stage: Unit/Integration (`script_test_run`)** | `agent-images/`, `orchestrator/`, `api/`, `web/` | B1 (parallelizable with B4) | New non-agent job kind + lightweight (no-Pi) image. Structure standard gains `test-unit.sh`/`test-integration.sh` convention (amends ADR 008 §6). Canonical `.yggdrasil/test-report.json` schema, read and rendered (pass/fail/skip counts, coverage %, failing tests) — never framework-parsed. Testing tab UI (Unit/Integration groups). | 🚧 job kind plumbing + orchestrator routing (blocking non-Pi path) + `SCRIPT_TEST_RUN_IMAGE` config are in; the `agent-images/` image, `test-*.sh` convention/doc, report schema/rendering, and Testing tab UI remain. |
@@ -53,6 +54,13 @@ rebasing Track B's work onto a moving foundation.
 | B7 | **Unified `returned` state + Manual Review UI** | `api/`, `web/` | B3, B6 (needs all three trigger sources: Testing, Agentic Review, human PR review) | Wires Testing failure, Agentic Review `changes_requested`, and the existing ADR 013 human-review webhook into one `returned` state + reason. "Resume implementation" action (human-gated, no auto-retry). Manual Review tab groups `in_review`/`returned`/`merged`. Retires `changes_requested` as a state name. | 🚧 `returned`/resume + the human-review webhook path + Agentic Review `changes_requested` are in; the Manual Review tab UI and the Testing-stage trigger wiring remain. |
 
 ## Cross-track notes
+
+- **ADR 014 prerequisite delivered:** the first `design_grill` slice now has
+  job-scoped API sessions and metadata, full snapshot events, Orchestrator
+  Pi/RPC routing, the write-scoped agent image/skill, and a gated Web
+  sandboxed-preview surface. Design browse/history and the B2
+  Action-Item-to-design-session attachment remain intentionally deferred
+  while Design persistence is unresolved.
 
 - **No slice here touches `landing/`** — the `design/landing/` redesign
   needs no ADR and isn't sequenced against either track; it can happen

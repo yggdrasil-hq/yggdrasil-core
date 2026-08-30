@@ -8,9 +8,9 @@ keep short, link, don't duplicate.
 - **Submodule path:** `agent-images/`
 - **GitHub repo:** `yggdrasil-hq/yggdrasil-agent-images`
 - **Status:** Dockerfiles, skills, and the shared extension are scaffolded and
-  build cleanly. CI builds and pushes all four images (common base + the
-  three per-job-kind images below — `design_grill` has no image yet, see
-  below) to GitHub Container Registry on every push to `main`. Registry
+  build cleanly. CI builds and pushes all five images (common base + the
+  four per-job-kind images below) to GitHub Container Registry on every push
+  to `main`. Registry
   pull-secret provisioning for self-hosted installs (GHCR packages default to
   private) is documented in `docs/conventions/deploy.md`.
 - **Design rationale:** ADR 004 (`docs/adr/004-agent-base-containers.md`)
@@ -22,22 +22,24 @@ Build-time only — publishes container images to GitHub Container Registry,
 per-project app images living inside each install's own cluster; this is one
 shared, suite-maintained artifact instead). No runtime service; the
 Orchestrator resolves an image tag per job kind via env var
-(`SPEC_GRILL_IMAGE` / `FEATURE_BUILD_IMAGE` / `TEST_RUN_IMAGE`) and never
+(`SPEC_GRILL_IMAGE` / `FEATURE_BUILD_IMAGE` / `TEST_RUN_IMAGE` /
+`AGENTIC_REVIEW_IMAGE` / `SCRIPT_TEST_RUN_IMAGE` / `DESIGN_GRILL_IMAGE`)
+and never
 calls this repo directly.
 
 1. A common base layer: Pi installed + the shared `yggdrasil-contract`
    extension (structured tool calls for turn/completion signaling, replacing
    prose-convention parsing).
-2. Three per-job-kind images on top of that base:
+2. Six per-job-kind images on top of that base:
    - `spec_grill` → **two** skills (ADR 008), `project-init` and
      `feature-grill` — the Orchestrator's initial prompt names exactly one
      per run, never left to model inference.
    - `feature_build` → unattended "implement" skill + Playwright CLI.
    - `test_run` → "run-tests" skill + Playwright CLI.
-   - `design_grill` (ADR 014) is **decided but not yet built here** — no
-     `design_grill/` Dockerfile, skill, or contract-extension tools
-     (`update_design_preview`/`submit_design`) exist in this repo yet, and
-     the CI workflow's image matrix doesn't include it.
+   - `agentic_review` → read-only "review" skill.
+   - `script_test_run` → standalone test runner (no Pi).
+   - `design_grill` → "design-grill" skill + write-scoped design contract
+     tools (`update_design_preview`/`submit_design`).
 3. A `models.json` template reading `MODEL_BASE_URL` / `MODEL_API_KEY` /
    `MODEL_ID` from the environment — populated per-project by the Orchestrator
    at job-pod creation time (see `concepts/pi-agent.md`).

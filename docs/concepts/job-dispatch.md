@@ -117,12 +117,10 @@ in the Orchestrator itself.
 
 ### `design_grill`
 
-> **Not yet implemented.** ADR 014 decided this design, but as of this
-> writing there is no `design_grill` job kind in the Orchestrator's
-> `JobKind` enum, no `update_design_preview`/`submit_design` curated-event
-> handling, no routing in `driveAgentSession`, and no `design_grill` image or
-> skill in `agent-images/`. The description below is the design, not the
-> current behavior.
+Implemented as a project-scoped, job-backed session. The API exposes creation,
+chat, cancellation, and event polling under `/projects/:projectId/designs`,
+while the session's name, slug, and description remain on the job row until
+the Design-persistence question is resolved.
 
 - Same attach/RPC machinery as `spec_grill` (ADR 006), reused wholesale — see
   [ADR 014](../adr/014-design-grill-live-mockups.md).
@@ -162,12 +160,14 @@ in the Orchestrator itself.
 
 ## Job spec (common fields)
 
-- Job kind: `spec_grill` | `feature_build` | `test_run` | `deploy` (implemented);
-  `design_grill` (ADR 014), `script_test_run` | `agentic_review` (ADR 015) —
-  all three decided but not yet implemented (see above). `script_test_run` is
+- Job kind: `spec_grill` | `feature_build` | `test_run` | `deploy` |
+  `design_grill` (ADR 014; implemented); `script_test_run` |
+  `agentic_review` (ADR 015) — the latter two remain decided but not yet
+  implemented. `script_test_run` is
   the only job kind with no Pi/RPC involvement at all (alongside `deploy`).
 - Container image: resolved by the Orchestrator from one env var per job kind
-  (`SPEC_GRILL_IMAGE` / `FEATURE_BUILD_IMAGE` / `TEST_RUN_IMAGE`), pointing at
+  (`SPEC_GRILL_IMAGE` / `FEATURE_BUILD_IMAGE` / `TEST_RUN_IMAGE` /
+  `DESIGN_GRILL_IMAGE`), pointing at
   an image built by `agent-images/` (ADR 004) — replaces the placeholder
   `JOB_PLACEHOLDER_IMAGE` used today.
 - Target repos (all linked) + persisted ref / branch name as applicable.

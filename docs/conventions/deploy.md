@@ -158,7 +158,7 @@ submodule's `.env.example` for the full, commented list):
   `SECRETS_ENCRYPTION_KEY` (32-byte base64, `openssl rand -base64 32`), `INTERNAL_API_TOKEN` (shared with orchestrator),
   `APPS_BASE_DOMAIN` (must match the orchestrator's value exactly).
 - **web** — `NEXT_PUBLIC_API_BASE_URL` (browser-facing API path/URL), `API_INTERNAL_URL` (server-side, reaches `api` directly), `NEXT_PUBLIC_BASE_PATH` (empty for a subdomain deploy).
-- **orchestrator** — `PORT`, `DATABASE_URL` (same Postgres as api, shared `jobs` table), `KUBECONFIG` (unset to use in-cluster config), `API_INTERNAL_URL`/`INTERNAL_API_TOKEN` (shared with api), `APPS_BASE_DOMAIN`/`INGRESS_CLASS_NAME`/`CERT_ISSUER_NAME`, and the per-job-kind images (`SPEC_GRILL_IMAGE`/`FEATURE_BUILD_IMAGE`/`TEST_RUN_IMAGE`, from `ghcr.io/yggdrasil-hq/yggdrasil-agent-images` — also private by default, so the target cluster needs an `imagePullSecret` too).
+- **orchestrator** — `PORT`, `DATABASE_URL` (same Postgres as api, shared `jobs` table), `KUBECONFIG` (unset to use in-cluster config), `API_INTERNAL_URL`/`INTERNAL_API_TOKEN` (shared with api), `APPS_BASE_DOMAIN`/`INGRESS_CLASS_NAME`/`CERT_ISSUER_NAME`, and the per-job-kind images (`SPEC_GRILL_IMAGE`/`FEATURE_BUILD_IMAGE`/`TEST_RUN_IMAGE`/`DESIGN_GRILL_IMAGE`, from `ghcr.io/yggdrasil-hq/yggdrasil-agent-images` — also private by default, so the target cluster needs an `imagePullSecret` too).
 - **landing** — none.
 - **docusaurus** — `DOCS_BASE_URL` (`/` for a subdomain deploy), `DOCS_SITE_URL`.
 

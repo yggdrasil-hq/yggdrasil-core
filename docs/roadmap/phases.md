@@ -39,8 +39,10 @@ webhook-driven `deploy`/`merged`/`changes_requested` automation (ADR 013).
 - ⬜ Live preview tunnel for ephemeral job runs — designed in ADR 003 but not
   implemented in `orchestrator/` (no preview/temporary-deployment code
   exists).
-- ⬜ `design_grill` (ADR 014) — decided but not implemented in any of
-  `orchestrator/`, `agent-images/`, or `web/`.
+- 🚧 `design_grill` (ADR 014) — the job-backed API, Orchestrator RPC path,
+  agent image/skill, and minimal Web live-preview session are implemented.
+  Design browse/history and re-open flows remain deferred with the
+  Design-persistence question.
 - 🚧 **Six-stage feature lifecycle** (ADR 015: Spec → Action Items →
   Implementation → Testing → Agentic Review → Manual Review) — Track B of
   `docs/roadmap/adr-015-016-build-plan.md`, partially implemented. The state

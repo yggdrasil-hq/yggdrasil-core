@@ -21,18 +21,22 @@ keep short, link, don't duplicate.
 Two distinct workload shapes, both scoped to a project's own Kubernetes
 namespace:
 
-**Ephemeral job runs** (`spec_grill`, `feature_build`, `test_run` — ADR 002):
+**Ephemeral job runs** (`spec_grill`, `feature_build`, `test_run`, `design_grill` — ADRs 002/014):
 
 1. Provision an ephemeral Pod/Job in the project's namespace.
 2. Inject the Pi coding agent (see `concepts/pi-agent.md`) and configured tools.
 3. Clone the target GitHub repo(s) with a short-lived installation token.
-4. Create a feature branch `yggdrasil/<feature-slug>-<id>` (for `feature_build`).
+4. Create a feature branch `yggdrasil/<feature-slug>-<id>` (for
+   `feature_build`) or `yggdrasil/design-<design-slug>-<id>` (for
+   `design_grill`).
 5. Open a draft PR immediately (for `feature_build`).
 6. Run Pi in RPC/SDK mode, streaming all events back to the API.
 7. For `test_run`, stand up a temporary Helm release and named Ingress with a
    preview URL, then remove both after the run. The test-run agent checks out
    the requested existing feature ref; other jobs retain their normal branch
    behavior.
+   For `design_grill`, relay full HTML/CSS snapshots for client-side sandboxed
+   preview and finalize the design PR through `submit_design`.
 8. Tear down the Pod/Job and archive artefacts when done.
 
 **Primary deployment hosting** (ADR 003):
