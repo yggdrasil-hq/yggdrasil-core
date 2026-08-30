@@ -142,7 +142,18 @@
         <a class="nav-link" href="/projects/detail/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
         <a class="nav-link" href="/projects/detail/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
         <a class="nav-link" href="/projects/detail/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
-        <a class="nav-link" href="/projects/detail/settings/index.html"><span class="icon">&#9881;</span> Settings</a>
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-settings" class="nav-group-toggle" checked />
+          <label for="nav-group-settings" class="nav-group-label">
+            <span class="nav-group-title">Settings</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/projects/detail/settings/general/index.html"><span class="icon">&#9881;</span> General</a>
+            <a class="nav-link" href="/projects/detail/settings/secrets/index.html"><span class="icon">&#128273;</span> Secrets</a>
+            <a class="nav-link" href="/projects/detail/settings/models/index.html"><span class="icon">&#129504;</span> Models</a>
+          </div>
+        </div>
       </nav>
     </aside>
 
@@ -175,7 +186,7 @@
         </div>
       </div>
       <div class="main-inner">
-        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/features</span> (web/app/projects/[projectId]/features/page.tsx) · search/sort/filter are inert · <b>proposed IA rework</b>: sidebar/topbar per /projects/:projectId · "+ New Feature" now expands the real component's inline title-only create row (web/components/features/features-page-client.tsx's showCreate/newTitle state) instead of doing nothing — CSS-only reveal · its "Create" button links to the feature-detail wireframe, which conveniently defaults to the "Draft — spec grill" tab, matching what a just-created feature (draft state, spec_grill just dispatched) would actually show</div>
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/features</span> (web/app/projects/[projectId]/features/page.tsx) · search/sort/filter are inert · <b>proposed IA rework</b>: sidebar/topbar per /projects/:projectId · "+ New Feature" now expands the real component's inline create row (web/components/features/features-page-client.tsx's showCreate/newTitle state) instead of doing nothing — CSS-only reveal · <b>Title + Description, not title-only</b>: per the user's spec, creation now takes a description alongside the title, which seeds the spec_grill conversation instead of the agent starting from title alone — this is a change from the current real component (title-only) and from job-dispatch.md's <span class="mono">spec_grill</span> payload, which today is just <span class="mono">featureType</span> + title · its "Create" button links to the feature-detail wireframe, which defaults to the Spec step, matching what a just-created feature (draft state, spec_grill just dispatched) would actually show</div>
 
         <div class="page-header">
           <div>
@@ -188,11 +199,16 @@
         <input type="checkbox" id="new-feature-toggle" />
         <div class="card" id="new-feature-panel" style="display:none; margin-bottom:24px;">
           <div class="card-title" style="font-size:14px;">New feature</div>
-          <p class="card-desc">Just a title — the agent interviews you for the rest during spec grill.</p>
-          <div style="display:flex; gap:10px; margin-top:12px;">
-            <input class="input" style="flex:1;" placeholder="Feature title" value="" />
-            <a class="btn btn-primary" href="/projects/detail/features/detail/index.html">Create</a>
+          <p class="card-desc">Title + a short description to seed spec grill — the agent interviews you for the rest.</p>
+          <div class="field" style="margin-top:12px;">
+            <input class="input" placeholder="Feature title" value="" />
+          </div>
+          <div class="field" style="margin-top:10px;">
+            <textarea class="input" rows="3" placeholder="Briefly describe what this feature should do…"></textarea>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:12px; justify-content:flex-end;">
             <label class="btn btn-ghost" for="new-feature-toggle">Cancel</label>
+            <a class="btn btn-primary" href="/projects/detail/features/detail/index.html">Create</a>
           </div>
         </div>
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Saved payment methods — Yggdrasil</title>
+  <title>Implementation — Saved payment methods — Yggdrasil</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -15,35 +15,38 @@
 
     section.block { border: 1px solid var(--rime); background: var(--surface-01); border-radius: var(--radius-card); padding: 24px; margin-bottom: 20px; }
     section.block h2 { font-size: 16px; margin-bottom: 4px; }
-    section.block .desc { font-size: 12px; color: var(--shadow); margin-bottom: 16px; }
 
-    .current-phase-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 16px; }
-    .current-phase-row .status-line { display: flex; align-items: center; gap: 10px; }
+    .section-toggle { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+    .subview-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--rime-soft); margin-bottom: 20px; flex-wrap: wrap; }
+    .subview-tabs label { padding: 9px 4px; margin-right: 16px; font-size: 13px; color: var(--mist); border-bottom: 2px solid transparent; cursor: pointer; }
+    .subview-tabs label:hover { color: var(--frost); }
+    .subview-panel { display: none; }
+
+    #impl-view-running:checked ~ .impl-tabs .subview-tabs label[for="impl-view-running"],
+    #impl-view-failed:checked ~ .impl-tabs .subview-tabs label[for="impl-view-failed"],
+    #impl-view-returned:checked ~ .impl-tabs .subview-tabs label[for="impl-view-returned"] {
+      color: var(--frost);
+      border-bottom-color: var(--bifrost);
+    }
+    #impl-view-running:checked ~ .impl-tabs #panel-impl-running,
+    #impl-view-failed:checked ~ .impl-tabs #panel-impl-failed,
+    #impl-view-returned:checked ~ .impl-tabs #panel-impl-returned {
+      display: block;
+    }
+
+    .build-status { display: flex; align-items: center; gap: 12px; border: 1px solid var(--rime-soft); background: var(--surface-02); border-radius: var(--radius-sm); padding: 16px; }
     .dots { display: inline-flex; gap: 4px; }
     .dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--aurora); animation: dot-pulse 1.4s ease-in-out infinite; }
     .dots span:nth-child(2) { animation-delay: 0.2s; }
     .dots span:nth-child(3) { animation-delay: 0.4s; }
     @keyframes dot-pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
 
-    .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-top: 4px; }
-    .meta-grid .item .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--shadow); }
-    .meta-grid .item .val { margin-top: 4px; font-size: 13px; color: var(--frost); font-family: var(--font-mono); }
-    .meta-grid .item .val a { color: var(--bifrost); }
+    .failed-block { border-color: rgba(224,108,117,0.3); background: rgba(224,108,117,0.08); }
+    .failed-log { margin-top: 12px; background: var(--surface-02); border-radius: var(--radius-sm); padding: 12px; font-family: var(--font-mono); font-size: 12px; color: var(--st-rejected); }
 
-    .run-row { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--rime); border-radius: var(--radius-sm); margin-top: 10px; }
-    .run-row:first-of-type { margin-top: 0; }
-    .run-kind { width: 110px; flex-shrink: 0; font-size: 12px; color: var(--mist); font-family: var(--font-mono); }
-    .run-main { flex: 1; min-width: 0; font-size: 13px; color: var(--frost); }
-    .run-status { flex-shrink: 0; font-size: 12px; width: 90px; }
-
-    .token-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--rime-soft); font-size: 13px; }
-    .token-row:last-of-type { border-bottom: none; padding-bottom: 0; }
-    .token-row:first-of-type { padding-top: 0; }
-    .token-row .job { color: var(--mist); }
-    .token-row .amount { font-family: var(--font-mono); color: var(--frost); }
-    .token-row.pending .job, .token-row.pending .amount { color: var(--shadow); }
-    .token-total-row { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--rime); font-size: 13px; font-weight: 500; }
-    .token-total-row .amount { font-family: var(--font-mono); color: var(--frost); }
+    .returned-block { border-color: rgba(226,161,60,0.3); background: rgba(226,161,60,0.08); }
+    .returned-source { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--shadow); margin-top: 4px; }
+    .comment-box { margin-top: 12px; background: var(--surface-02); border-radius: var(--radius-sm); padding: 12px; font-size: 13px; color: var(--mist); }
   </style>
 </head>
 <body>
@@ -87,7 +90,9 @@
           <span class="sep">/</span>
           <a href="/projects/detail/features/index.html">Features</a>
           <span class="sep">/</span>
-          <span class="current">Saved payment methods</span>
+          <a href="/projects/detail/features/detail/index.html">Saved payment methods</a>
+          <span class="sep">/</span>
+          <span class="current">Implementation</span>
         </div>
         <div class="shell-topbar-actions">
           <a class="notif-bell" href="/notifications/index.html" aria-label="Notifications"><span class="dot"></span>&#128276;</a>
@@ -110,14 +115,14 @@
       </div>
       <div class="main-inner">
         <div class="design-note">
-          <b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/features/:featureId</span> · <b>proposed IA rework, round 3 — a real lifecycle redesign, not just a
-          layout change.</b> Per the user's spec, the feature lifecycle now has six real stages instead of three: <b>Spec &rarr; Action Items &rarr; Implementation &rarr; Testing
-          &rarr; Agentic Review &rarr; Manual Review</b>, each a separate page, with a failure at Testing/Agentic Review/Manual Review sending the feature back to Implementation
-          with a comment rather than failing outright. <b>This supersedes the documented lifecycle</b> — ADR 002 / <span class="mono">feature-lifecycle.md</span> currently
-          define <span class="mono">draft &rarr; spec_ready &rarr; queued &rarr; running &rarr; in_review &rarr; merged</span> with no Action Items, Testing, or Agentic Review
-          states, and no notion of one feature blocking on another. None of what follows is in any ADR yet; treat this whole flow as a proposal to write up, not current
-          behavior. Grounding varies a lot piece by piece — each new page's own design-note says what's real vs. invented for that piece specifically. Creation now takes
-          <b>Title + Description</b> (was title-only) — see the updated create panel on <a href="/projects/detail/features/index.html" style="color:var(--bifrost);">/features</a>.
+          <b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/features/:featureId/implementation</span> (renamed from <span class="mono">/build</span> —
+          the user's spec calls this stage "implementation," and it's now one of six stages rather than the second of three, so the old name stopped fitting). Still the
+          real <span class="mono">feature_build</span> job underneath. Three CSS-only sub-views instead of two: <b>Running</b>, <b>Failed</b> (the job itself errored —
+          unchanged from before), and the new <b>Returned</b> view — what this page looks like after Testing, Agentic Review, or Manual Review sends the feature back
+          per the user's spec ("failed at any of these steps... moved back to implementation with a comment"). None of the three later gates exist in any ADR yet
+          (see Testing/Agentic Review's own design-notes), so neither does this return path — the comment shown is illustrative of the shape, not a real event type.
+          "Retry build" / "Resume implementation" both flip back to Running to simulate re-dispatch; per ADR 012 a real retry creates a new job row rather than
+          mutating this one.
         </div>
 
         <div class="detail-title">
@@ -135,7 +140,7 @@
               <span class="step-num">&#10003;</span> Action Items
             </a>
             <span class="step-sep">&#8594;</span>
-            <a class="step-link active" href="/projects/detail/features/detail/implementation/index.html">
+            <a class="step-link active here" href="/projects/detail/features/detail/implementation/index.html">
               <span class="step-num">3</span> Implementation
             </a>
             <span class="step-sep">&#8594;</span>
@@ -167,76 +172,48 @@
           </ul>
         </details>
 
-        <section class="block">
-          <h2>Current phase — Implementation</h2>
-          <p class="desc">feature_build job running. All action items were resolved before this started.</p>
-          <div class="current-phase-row">
-            <div class="status-line">
-              <span class="dots"><span></span><span></span><span></span></span>
-              <span class="text-mist" style="font-size:14px;">Agent is implementing… (4m 12s elapsed)</span>
+        <input type="radio" name="impl-view" id="impl-view-running" class="section-toggle" checked />
+        <input type="radio" name="impl-view" id="impl-view-failed" class="section-toggle" />
+        <input type="radio" name="impl-view" id="impl-view-returned" class="section-toggle" />
+        <div class="impl-tabs">
+          <section class="block">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+              <h2 style="margin-bottom:0;">feature_build &middot; run #1</h2>
+              <span class="text-shadow" style="font-size:12px;">Started 4m 12s ago</span>
             </div>
-            <a class="btn btn-outline btn-sm" href="/projects/detail/features/detail/implementation/index.html">Open Implementation &rarr;</a>
-          </div>
-        </section>
+            <div class="subview-tabs">
+              <label for="impl-view-running">Running</label>
+              <label for="impl-view-failed">Failed (preview)</label>
+              <label for="impl-view-returned">Returned from Testing (preview)</label>
+            </div>
 
-        <section class="block">
-          <h2>Feature details</h2>
-          <div class="meta-grid">
-            <div class="item">
-              <div class="label">Branch</div>
-              <div class="val">yggdrasil/saved-payment-methods-482</div>
+            <div class="subview-panel" id="panel-impl-running">
+              <div class="build-status">
+                <span class="dots"><span></span><span></span><span></span></span>
+                <p class="text-mist" style="font-size:14px;">Agent is implementing… (4m 12s elapsed)</p>
+              </div>
+              <p class="text-shadow" style="font-size:12px; margin-top:12px;">Detailed step-by-step agent output isn't relayed yet — you'll see the result (success, failure, or a pull request) as soon as the run ends. The subtasks above are the ADR's own decision points, not a live progress feed.</p>
             </div>
-            <div class="item">
-              <div class="label">Primary repo</div>
-              <div class="val">acme-retail/storefront</div>
-            </div>
-            <div class="item">
-              <div class="label">Created</div>
-              <div class="val" style="font-family:var(--font-sans);">3 hours ago</div>
-            </div>
-            <div class="item">
-              <div class="label">Pull request</div>
-              <div class="val" style="font-family:var(--font-sans); color:var(--shadow);">Opens when implementation finishes</div>
-            </div>
-          </div>
 
-          <div class="run-row" style="margin-top:20px;">
-            <span class="run-kind">spec_grill</span>
-            <span class="run-main">Run #1 &middot; <a href="/projects/detail/features/detail/spec/index.html" style="color:var(--bifrost);">view</a></span>
-            <span class="run-status" style="color:var(--st-approved);">&#9679; Completed</span>
-          </div>
-          <div class="run-row">
-            <span class="run-kind">action items</span>
-            <span class="run-main">5 of 5 resolved &middot; <a href="/projects/detail/features/detail/action-items/index.html" style="color:var(--bifrost);">view</a></span>
-            <span class="run-status" style="color:var(--st-approved);">&#9679; Completed</span>
-          </div>
-          <div class="run-row">
-            <span class="run-kind">feature_build</span>
-            <span class="run-main">Run #1 &middot; <a href="/projects/detail/features/detail/implementation/index.html" style="color:var(--bifrost);">view</a></span>
-            <span class="run-status" style="color:var(--aurora);">&#9679; Running</span>
-          </div>
-        </section>
+            <div class="subview-panel" id="panel-impl-failed">
+              <section class="block failed-block" style="margin-bottom:0;">
+                <h2>This run failed</h2>
+                <p style="color: var(--mist); margin-top:4px;">The build didn't complete successfully.</p>
+                <div class="failed-log">Error: pi container exited 137 (OOMKilled) after 11m32s during `npm run build`</div>
+                <label class="btn btn-primary btn-sm" style="margin-top:16px;" for="impl-view-running">Retry build</label>
+              </section>
+            </div>
 
-        <section class="block">
-          <h2>Token usage</h2>
-          <p class="desc">This feature's slice of Acme Retail's shared provider quota. See <a href="/usage/index.html" style="color:var(--bifrost);">org Usage</a> for the full picture — numbers here are illustrative, no tracking exists yet.</p>
-          <div class="token-row">
-            <span class="job">spec_grill &middot; run #1</span>
-            <span class="amount">12.1K tokens</span>
-          </div>
-          <div class="token-row">
-            <span class="job">feature_build &middot; run #1 (so far)</span>
-            <span class="amount">79.1K tokens</span>
-          </div>
-          <div class="token-row pending">
-            <span class="job">Testing / Agentic Review — not reached yet</span>
-            <span class="amount">&mdash;</span>
-          </div>
-          <div class="token-total-row">
-            <span>Total</span>
-            <span class="amount">91.2K tokens</span>
-          </div>
-        </section>
+            <div class="subview-panel" id="panel-impl-returned">
+              <section class="block returned-block" style="margin-bottom:0;">
+                <h2>Sent back from Testing</h2>
+                <div class="returned-source">Returned by <a href="/projects/detail/features/detail/testing/index.html" style="color:inherit; text-decoration:underline;">Testing</a> &middot; run #1 failed</div>
+                <div class="comment-box">"2 integration tests failed. Card removal doesn't handle the case where the customer has only one saved card — the picker throws instead of blocking removal. Please fix and re-run." &mdash; Testing gate, on feature_build run #1</div>
+                <label class="btn btn-primary btn-sm" style="margin-top:16px;" for="impl-view-running">Resume implementation</label>
+              </section>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   </div>

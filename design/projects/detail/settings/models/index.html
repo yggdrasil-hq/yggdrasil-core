@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Project settings — Yggdrasil</title>
+  <title>Models — Settings — Yggdrasil</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -10,85 +10,16 @@
   <link rel="stylesheet" href="/shared/tokens.css" />
   <link rel="stylesheet" href="/shared/shell.css" />
   <style>
-    .settings-col {
-      max-width: 640px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    .settings-col .card-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--frost);
-    }
-    .settings-col .card-desc {
-      margin-top: 6px;
-      font-size: 13px;
-    }
-    .settings-col .card-body {
-      margin-top: 16px;
-    }
-    .card-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 10px 12px;
-      border: 1px solid var(--rime);
-      border-radius: var(--radius-sm);
-    }
-    .card-row + .card-row {
-      margin-top: 10px;
-    }
-    .card-row .repo-name {
-      font-size: 14px;
-      color: var(--frost);
-    }
-    .add-repo-row {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-    }
-    .dashed-block {
-      border: 1px dashed var(--rime);
-      border-radius: var(--radius-sm);
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .secret-field {
-      border: 1px solid var(--rime);
-      border-radius: var(--radius-sm);
-      padding: 12px;
-    }
-    .secret-field + .secret-field {
-      margin-top: 10px;
-    }
-    .secret-field-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    .secret-field-head p:first-child {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--frost);
-    }
-    .secret-field-head p:last-child {
-      font-size: 13px;
-      margin-top: 2px;
-    }
-    .secret-actions {
-      margin-top: 10px;
-      display: flex;
-      gap: 8px;
-    }
-    .warning-card {
-      border-color: rgba(226, 161, 60, 0.3);
-      background: rgba(226, 161, 60, 0.1);
-    }
+    .settings-col { max-width: 640px; display: flex; flex-direction: column; gap: 20px; }
+    .settings-col .card-title { font-size: 16px; font-weight: 600; color: var(--frost); }
+    .settings-col .card-desc { margin-top: 6px; font-size: 13px; }
+    .settings-col .card-body { margin-top: 16px; }
+    .dashed-block { border: 1px dashed var(--rime); border-radius: var(--radius-sm); padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .secret-field { border: 1px solid var(--rime); border-radius: var(--radius-sm); padding: 12px; }
+    .secret-field + .secret-field { margin-top: 10px; }
+    .secret-field-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .secret-field-head p:first-child { font-size: 14px; font-weight: 500; color: var(--frost); }
+    .secret-field-head p:last-child { font-size: 13px; margin-top: 2px; }
   </style>
 </head>
 <body>
@@ -108,7 +39,19 @@
         <a class="nav-link" href="/projects/detail/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
         <a class="nav-link" href="/projects/detail/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
         <a class="nav-link" href="/projects/detail/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
-        <a class="nav-link active" href="/projects/detail/settings/index.html"><span class="icon">&#9881;</span> Settings</a>
+
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-settings" class="nav-group-toggle" checked />
+          <label for="nav-group-settings" class="nav-group-label">
+            <span class="nav-group-title">Settings</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/projects/detail/settings/general/index.html"><span class="icon">&#9881;</span> General</a>
+        <a class="nav-link" href="/projects/detail/settings/secrets/index.html"><span class="icon">&#128273;</span> Secrets</a>
+        <a class="nav-link active" href="/projects/detail/settings/models/index.html"><span class="icon">&#129504;</span> Models</a>
+          </div>
+        </div>
       </nav>
     </aside>
 
@@ -119,7 +62,7 @@
           <span class="sep">/</span>
           <a href="/projects/detail/index.html">Acme Storefront</a>
           <span class="sep">/</span>
-          <span class="current">Settings</span>
+          <span class="current">Models</span>
         </div>
         <div class="shell-topbar-actions">
           <a class="notif-bell" href="/notifications/index.html" aria-label="Notifications"><span class="dot"></span>&#128276;</a>
@@ -141,54 +84,19 @@
         </div>
       </div>
       <div class="main-inner">
-        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/settings</span> (web/components/settings/project-settings-client.tsx, model-secret-field.tsx) · repo/secret data faked, all form controls inert · <b>proposed IA rework</b>: sidebar/topbar per /projects/:projectId (Settings promoted from a footer link to a first-class sidebar item) · <b>model card reworked</b> to match the multi-provider/multi-model settings redesign, and <b>updated again</b>: now sources from the project's organization (Acme Retail) rather than the project owner's personal account — org-scoped model config, not ADR 007's per-user default, is now the fallback this project resolves against. Not yet in ADR 002/007 or web/; see /settings/organization's design-note for the full rationale</div>
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/settings/models</span> — split out of the old single-page settings, see <a href="/projects/detail/settings/general/index.html" style="color:var(--bifrost);">General</a>'s design-note for the IA rework itself. Sources from the project's organization (Acme Retail) rather than the project owner's personal account — org-scoped model config, not ADR 007's per-user default, is now the fallback this project resolves against. Not yet in ADR 002/007 or web/; see <a href="/settings/organization/providers/index.html" style="color:var(--bifrost);">Organization Settings &rarr; Providers &amp; Models</a>'s design-note for the full rationale.</div>
 
         <div class="page-header">
           <div>
-            <h1>Settings</h1>
-            <p>Configuration for <span class="text-bifrost">Acme Storefront</span></p>
+            <h1>Models</h1>
+            <p>Model configuration for <span class="text-bifrost">Acme Storefront</span></p>
           </div>
         </div>
 
         <div class="settings-col">
-          <!-- Uncomment to preview an access-warning banner
-          <div class="card warning-card">
-            <p class="card-title">GitHub access needs attention</p>
-            <p class="card-desc">The GitHub App installation no longer has access to one or more linked repositories. Fix access on GitHub before dispatching new jobs.</p>
-          </div>
-          -->
-
-          <div class="card">
-            <p class="card-title">Primary repository</p>
-            <p class="card-desc">Branches and pull requests are opened on this repo. It cannot be changed after project creation.</p>
-            <div class="card-body">
-              <p class="mono" style="font-size:14px; color:var(--frost);">acme-retail/storefront</p>
-            </div>
-          </div>
-
-          <div class="card">
-            <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
-              <div>
-                <p class="card-title">Sub-repositories</p>
-                <p class="card-desc">Linked repos cloned alongside the primary on every job.</p>
-              </div>
-              <button class="btn btn-outline btn-sm" type="button">+ Add repo</button>
-            </div>
-            <div class="card-body">
-              <div class="card-row">
-                <span class="repo-name">acme-retail/design-system</span>
-                <button class="btn btn-ghost btn-sm" type="button" aria-label="Remove">&#128465;</button>
-              </div>
-              <div class="card-row" style="margin-top:10px;">
-                <span class="repo-name">acme-retail/checkout-service</span>
-                <button class="btn btn-ghost btn-sm" type="button" aria-label="Remove">&#128465;</button>
-              </div>
-            </div>
-          </div>
-
           <div class="card">
             <p class="card-title">Model configuration</p>
-            <p class="card-desc">Which models the Pi agent uses for this project's jobs. Pulls from the providers and models connected in <a href="/settings/organization/index.html" style="color:var(--bifrost);">Organization settings</a>.</p>
+            <p class="card-desc">Which models the Pi agent uses for this project's jobs. Pulls from the providers and models connected in <a href="/settings/organization/providers/index.html" style="color:var(--bifrost);">Organization settings</a>.</p>
             <div class="card-body">
               <label class="radio-option" style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:var(--frost);"><input type="radio" name="model-mode" /> Use Acme Retail's defaults</label>
               <label class="radio-option" style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:var(--frost); margin-top:10px;"><input type="radio" name="model-mode" checked /> Override models for this project</label>
@@ -256,11 +164,6 @@
                 </div>
               </div>
             </div>
-          </div>
-
-          <div class="card" style="border-style:dashed;">
-            <p class="card-title">More settings coming soon</p>
-            <p class="card-desc">Build commands, tool allowlists, and agent timeouts will be configurable here.</p>
           </div>
         </div>
       </div>

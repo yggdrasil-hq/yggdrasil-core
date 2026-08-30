@@ -115,6 +115,13 @@
   color: var(--frost);
 }
 
+/* Pins a single top-level item to the bottom of the nav's flex column,
+   just above the account cell in .sidebar-foot — used by Notifications so
+   it reads as account-adjacent rather than another primary section. */
+.nav-link-bottom {
+  margin-top: auto;
+}
+
 .nav-divider {
   padding: 14px 12px 4px;
   font-size: 10px;
@@ -122,6 +129,62 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--shadow);
+}
+
+/* Collapsible nav groups (e.g. "Monitoring", "Allocations") — zero-JS
+   checkbox-toggle, same mechanic as .user-menu. The toggle is `checked` by
+   default in markup so groups start expanded, matching how the old
+   always-open .nav-divider groups they replace used to read. */
+
+.nav-group-toggle {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.nav-group-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 14px 12px 4px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.nav-group-label:hover .nav-group-title {
+  color: var(--mist);
+}
+
+.nav-group-title {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--shadow);
+}
+
+.nav-group-chevron {
+  font-size: 9px;
+  color: var(--shadow);
+  transform: rotate(-90deg);
+  transition: transform 0.15s;
+}
+
+.nav-group-toggle:checked ~ .nav-group-label .nav-group-chevron {
+  transform: rotate(0deg);
+}
+
+.nav-group-items {
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-group-toggle:checked ~ .nav-group-items {
+  display: flex;
 }
 
 .nav-link .nav-dot {
@@ -524,6 +587,209 @@
 
 .design-note b {
   color: var(--mist);
+}
+
+/* Feature detail: persistent step/preview/subtasks/token context. Shown
+   identically on the feature overview page and every per-step sub-page
+   (spec/build/review) so that data stays visible no matter which step
+   you're looking at — the .step-link hrefs are what make each step a real,
+   separately-loadable page instead of a JS tab. */
+
+.feature-context {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+}
+
+.feature-steps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.step-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--rime);
+  font-size: 13px;
+  color: var(--mist);
+}
+
+.step-link:hover {
+  background: var(--surface-02);
+}
+
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--surface-03);
+  color: var(--shadow);
+  font-size: 10px;
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+
+.step-link.done .step-num {
+  background: rgba(47, 212, 198, 0.13);
+  color: var(--bifrost);
+}
+
+.step-link.active {
+  border-color: var(--bifrost);
+  background: rgba(47, 212, 198, 0.08);
+  color: var(--frost);
+}
+
+.step-link.active .step-num {
+  background: var(--bifrost);
+  color: var(--niflheim);
+}
+
+.step-link.upcoming {
+  color: var(--shadow);
+}
+
+/* Which step page you're actually on right now — independent of .done/
+   .active/.upcoming, which reflect the feature's real phase and stay the
+   same no matter which of the four pages (overview/spec/build/review) you
+   view them from. */
+.step-link.here {
+  color: var(--frost);
+  font-weight: 600;
+}
+
+.step-sep {
+  color: var(--rime);
+  font-size: 12px;
+}
+
+.feature-context-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.preview-chip,
+.token-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--rime);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.preview-chip {
+  color: var(--frost);
+  font-family: var(--font-mono);
+}
+
+.preview-chip:hover {
+  border-color: var(--bifrost);
+  color: var(--bifrost);
+}
+
+.preview-chip.pending {
+  color: var(--shadow);
+  font-family: var(--font-sans);
+}
+
+.token-chip {
+  color: var(--mist);
+  font-family: var(--font-mono);
+}
+
+/* Subtasks — zero-JS collapsible via <details>/<summary>. */
+
+.subtasks-card summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--frost);
+  font-weight: 500;
+}
+
+.subtasks-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.subtasks-card summary .chev {
+  color: var(--shadow);
+  font-size: 11px;
+  transition: transform 0.15s;
+}
+
+.subtasks-card[open] summary .chev {
+  transform: rotate(180deg);
+}
+
+.subtask-list {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.subtask-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--mist);
+}
+
+.subtask-item .box {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid var(--rime);
+  flex-shrink: 0;
+  margin-top: 1px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+
+.subtask-item.done .box {
+  background: var(--bifrost);
+  border-color: var(--bifrost);
+  color: var(--niflheim);
+}
+
+.subtask-item.active .box {
+  border-color: var(--aurora);
+}
+
+.subtask-item.done .label {
+  color: var(--frost);
+  text-decoration: line-through;
+  text-decoration-color: var(--rime);
+}
+
+.subtask-item.active .label {
+  color: var(--frost);
 }
 
 @media (max-width: 900px) {

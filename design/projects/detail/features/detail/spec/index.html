@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Spec — Saved payment methods — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .detail-title { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .detail-title h1 { font-size: 24px; }
+
+    section.block { border: 1px solid var(--rime); background: var(--surface-01); border-radius: var(--radius-card); padding: 24px; margin-bottom: 20px; }
+    section.block h2 { font-size: 16px; margin-bottom: 4px; }
+
+    .section-toggle { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+    .subview-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--rime-soft); margin-bottom: 20px; }
+    .subview-tabs label { padding: 9px 4px; margin-right: 16px; font-size: 13px; color: var(--mist); border-bottom: 2px solid transparent; cursor: pointer; }
+    .subview-tabs label:hover { color: var(--frost); }
+    .subview-panel { display: none; }
+
+    #spec-view-adr:checked ~ .spec-tabs .subview-tabs label[for="spec-view-adr"],
+    #spec-view-grill:checked ~ .spec-tabs .subview-tabs label[for="spec-view-grill"] {
+      color: var(--frost);
+      border-bottom-color: var(--bifrost);
+    }
+    #spec-view-adr:checked ~ .spec-tabs #panel-spec-adr,
+    #spec-view-grill:checked ~ .spec-tabs #panel-spec-grill {
+      display: block;
+    }
+
+    .adr-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .adr-preview { background: var(--surface-02); color: var(--mist); font-size: 14px; line-height: 1.6; border-radius: var(--radius-sm); padding: 16px; }
+    .adr-preview h3 { font-size: 15px; margin-bottom: 6px; margin-top: 16px; color: var(--frost); }
+    .adr-preview h3:first-child { margin-top: 0; }
+
+    .grill-status-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; padding: 10px 12px; border: 1px solid var(--rime-soft); border-radius: var(--radius-sm); background: var(--surface-02); }
+    .grill-status-row .status-text { font-size: 12px; color: var(--shadow); }
+
+    .grill-log { display: flex; flex-direction: column; gap: 4px; max-height: 480px; overflow-y: auto; }
+    .turn { display: flex; flex-direction: column; gap: 4px; }
+    .turn.user { align-items: flex-end; }
+    .bubble { width: 90%; border: 1px solid var(--rime-soft); background: var(--surface-02); border-radius: var(--radius-sm); padding: 12px; }
+    .bubble .who { font-size: 11px; color: var(--shadow); font-weight: 500; margin-bottom: 4px; }
+    .turn.user .bubble { background: var(--surface-03); border-color: var(--rime); }
+    .bubble p { color: var(--frost); font-size: 14px; line-height: 1.5; }
+
+    .turn-actions { display: flex; gap: 4px; width: 90%; padding: 0 2px; }
+    .turn.user .turn-actions { justify-content: flex-end; }
+    .turn-action { font-size: 11px; color: var(--shadow); background: none; border: none; cursor: pointer; padding: 2px 4px; font-family: inherit; }
+    .turn-action:hover { color: var(--bifrost); }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+      <a class="sidebar-project" href="/projects/index.html">
+        <span>Acme Storefront</span>
+        <span class="text-shadow">&#8964;</span>
+      </a>
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/projects/detail/index.html"><span class="icon">&#8962;</span> Home</a>
+        <a class="nav-link active" href="/projects/detail/features/index.html"><span class="icon">&#9638;</span> Features</a>
+        <a class="nav-link" href="/projects/detail/tests/index.html"><span class="icon">&#9879;</span> Tests</a>
+        <a class="nav-link" href="/projects/detail/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+        <a class="nav-link" href="/projects/detail/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+        <a class="nav-link" href="/projects/detail/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-settings" class="nav-group-toggle" checked />
+          <label for="nav-group-settings" class="nav-group-label">
+            <span class="nav-group-title">Settings</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/projects/detail/settings/general/index.html"><span class="icon">&#9881;</span> General</a>
+            <a class="nav-link" href="/projects/detail/settings/secrets/index.html"><span class="icon">&#128273;</span> Secrets</a>
+            <a class="nav-link" href="/projects/detail/settings/models/index.html"><span class="icon">&#129504;</span> Models</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <div class="main">
+      <div class="shell-topbar">
+        <div class="crumbs">
+          <a href="/projects/index.html">Acme Retail</a>
+          <span class="sep">/</span>
+          <a href="/projects/detail/index.html">Acme Storefront</a>
+          <span class="sep">/</span>
+          <a href="/projects/detail/features/index.html">Features</a>
+          <span class="sep">/</span>
+          <a href="/projects/detail/features/detail/index.html">Saved payment methods</a>
+          <span class="sep">/</span>
+          <span class="current">Spec</span>
+        </div>
+        <div class="shell-topbar-actions">
+          <a class="notif-bell" href="/notifications/index.html" aria-label="Notifications"><span class="dot"></span>&#128276;</a>
+          <div class="user-menu">
+            <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+            <label for="user-menu-toggle" class="user-menu-trigger">
+              <span class="avatar">SC</span>
+              <span class="chevron">&#9662;</span>
+            </label>
+            <div class="user-menu-panel">
+              <div class="user-menu-head">
+                <div class="name">Sarat Chandra</div>
+                <div class="handle">@saratc</div>
+              </div>
+              <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+              <a class="user-menu-item" href="/login/index.html">Log out</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="main-inner">
+        <div class="design-note">
+          <b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/features/:featureId/spec</span>. Two additions per the user's spec: <b>(1) per-message
+          controls</b> — every turn in the grill transcript gets "Resume from here" / "Restart from here", and the toolbar gets a "Stop" control while the grill is
+          active. <b>Nothing here is grounded</b>: ADR 006 covers mid-run reply delivery (<span class="mono">ask_user</span> &rarr; human reply &rarr; back into a
+          running job) at the level of "the next turn," and ADR 012 covers retry at the level of "the whole job" (a new job row, old one kept as history) — neither
+          operates at the granularity of "one specific message in the middle of the transcript." Resume/restart-from-message would need new API surface + a new
+          Orchestrator/Pi contract this doesn't attempt to design, it just shows what clicking it would look like. <b>(2) Stop</b>, by contrast, already has a real
+          landing spot — <span class="mono">feature-lifecycle.md</span>'s <span class="mono">cancelled</span> state exists today for exactly this ("spec or build was
+          stopped"). This grill already finished (<span class="mono">spec_ready</span>), so Stop isn't shown — it only applies while a grill is actually running
+          (<span class="mono">draft</span>), which this page can't be in retroactively.
+        </div>
+
+        <div class="detail-title">
+          <h1>Saved payment methods</h1>
+          <span class="badge" style="background:#4f9bf022; color:#4f9bf0;">Implementing</span>
+        </div>
+
+        <div class="card feature-context">
+          <div class="feature-steps">
+            <a class="step-link done here" href="/projects/detail/features/detail/spec/index.html">
+              <span class="step-num">&#10003;</span> Spec
+            </a>
+            <span class="step-sep">&#8594;</span>
+            <a class="step-link done" href="/projects/detail/features/detail/action-items/index.html">
+              <span class="step-num">&#10003;</span> Action Items
+            </a>
+            <span class="step-sep">&#8594;</span>
+            <a class="step-link active" href="/projects/detail/features/detail/implementation/index.html">
+              <span class="step-num">3</span> Implementation
+            </a>
+            <span class="step-sep">&#8594;</span>
+            <a class="step-link upcoming" href="/projects/detail/features/detail/testing/index.html">
+              <span class="step-num">4</span> Testing
+            </a>
+            <span class="step-sep">&#8594;</span>
+            <a class="step-link upcoming" href="/projects/detail/features/detail/agentic-review/index.html">
+              <span class="step-num">5</span> Agentic Review
+            </a>
+            <span class="step-sep">&#8594;</span>
+            <a class="step-link upcoming" href="/projects/detail/features/detail/manual-review/index.html">
+              <span class="step-num">6</span> Manual Review
+            </a>
+          </div>
+          <div class="feature-context-side">
+            <a class="preview-chip" href="#" target="_blank" rel="noopener">&#128279; acme-storefront-feature_build-482.preview&#8230; &#8599;</a>
+            <span class="token-chip">&#9889; 91.2K tokens</span>
+          </div>
+        </div>
+
+        <details class="card subtasks-card" style="margin-bottom:20px;">
+          <summary>Subtasks &middot; 3/4 complete <span class="chev">&#9662;</span></summary>
+          <ul class="subtask-list">
+            <li class="subtask-item done"><span class="box">&#10003;</span><span class="label">Tokenize cards via Stripe SetupIntent</span></li>
+            <li class="subtask-item done"><span class="box">&#10003;</span><span class="label">Store payment_method id + last4/brand only</span></li>
+            <li class="subtask-item done"><span class="box">&#10003;</span><span class="label">Add default_payment_method_id, allow marking one card default</span></li>
+            <li class="subtask-item active"><span class="box"></span><span class="label">Require picking a new default before removing the current one</span></li>
+          </ul>
+        </details>
+
+        <input type="radio" name="spec-view" id="spec-view-adr" class="section-toggle" checked />
+        <input type="radio" name="spec-view" id="spec-view-grill" class="section-toggle" />
+        <div class="spec-tabs">
+          <section class="block">
+            <div class="adr-toolbar">
+              <h2>Feature ADR</h2>
+              <span class="badge" style="background:#46c28522; color:#46c285;">Approved</span>
+            </div>
+            <div class="subview-tabs">
+              <label for="spec-view-adr">ADR</label>
+              <label for="spec-view-grill">Grill transcript</label>
+            </div>
+
+            <div class="subview-panel" id="panel-spec-adr">
+              <div class="adr-preview">
+                <h3>ADR: Saved payment methods</h3>
+                <p><b>Context</b><br/>Customers re-enter card details on every purchase. Repeat customers should be able to save a card.</p>
+                <h3>Decision</h3>
+                <p>
+                  Tokenize cards via Stripe SetupIntent. Store payment_method id + last4/brand only.
+                  Add a <span class="mono">default_payment_method_id</span> on the customer record, allow marking one card default.
+                  Removing the default requires picking a new one first.
+                </p>
+              </div>
+            </div>
+
+            <div class="subview-panel" id="panel-spec-grill">
+              <div class="grill-status-row">
+                <span class="status-text">Grill finished &middot; spec_ready</span>
+                <span class="text-shadow" style="font-size:12px;">Stop only applies while a grill is running</span>
+              </div>
+              <div class="grill-log">
+                <div class="turn">
+                  <div class="bubble">
+                    <div class="who">Agent</div>
+                    <p>I'll spec out saved payment methods. First — should we support more than one saved card per customer, or just one?</p>
+                  </div>
+                  <div class="turn-actions">
+                    <button class="turn-action" type="button">&#8635; Resume from here</button>
+                    <button class="turn-action" type="button">&#10226; Restart from here</button>
+                  </div>
+                </div>
+                <div class="turn user">
+                  <div class="bubble">
+                    <div class="who">You</div>
+                    <p>Multiple cards, with one marked default.</p>
+                  </div>
+                  <div class="turn-actions">
+                    <button class="turn-action" type="button">&#8635; Resume from here</button>
+                    <button class="turn-action" type="button">&#10226; Restart from here</button>
+                  </div>
+                </div>
+                <div class="turn">
+                  <div class="bubble">
+                    <div class="who">Agent</div>
+                    <p>Got it. I'll use a Stripe SetupIntent to tokenize the card without touching raw PAN data, store only the Stripe payment_method id + last4/brand, and add a `default_payment_method_id` on the customer record. Should removing the default card auto-promote another saved card, or require the customer to pick a new default first?</p>
+                  </div>
+                  <div class="turn-actions">
+                    <button class="turn-action" type="button">&#8635; Resume from here</button>
+                    <button class="turn-action" type="button">&#10226; Restart from here</button>
+                  </div>
+                </div>
+                <div class="turn user">
+                  <div class="bubble">
+                    <div class="who">You</div>
+                    <p>Require picking a new default first — don't guess for the customer.</p>
+                  </div>
+                  <div class="turn-actions">
+                    <button class="turn-action" type="button">&#8635; Resume from here</button>
+                    <button class="turn-action" type="button">&#10226; Restart from here</button>
+                  </div>
+                </div>
+                <div class="turn">
+                  <div class="bubble">
+                    <div class="who">Agent</div>
+                    <p>ADR drafted. Ready for your review.</p>
+                  </div>
+                  <div class="turn-actions">
+                    <button class="turn-action" type="button">&#8635; Resume from here</button>
+                    <button class="turn-action" type="button">&#10226; Restart from here</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

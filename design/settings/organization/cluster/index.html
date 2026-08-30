@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Notifications — Yggdrasil</title>
+  <title>Kubernetes cluster — Organization — Yggdrasil</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -10,15 +10,22 @@
   <link rel="stylesheet" href="/shared/tokens.css" />
   <link rel="stylesheet" href="/shared/shell.css" />
   <style>
-    .notif-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
-    .notif-list { display: flex; flex-direction: column; gap: 12px; }
-    .notif-card { display: block; }
-    .notif-card .card { padding: 16px 20px; }
-    .notif-card.unread .card { border-color: var(--rime); background: var(--surface-02); }
-    .notif-card.read .card { opacity: 0.65; }
-    .notif-title { font-size: 15px; font-weight: 600; color: var(--frost); }
-    .notif-body { margin-top: 4px; font-size: 13px; }
-    .notif-time { margin-top: 8px; font-size: 12px; color: var(--shadow); }
+    .main-inner.narrow { max-width: 900px; }
+    .card-title { font-size: 16px; font-weight: 600; color: var(--frost); }
+    .card-desc { margin-top: 6px; font-size: 13px; max-width: 560px; }
+    .card-head-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .field-row { display: flex; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+    .field-row .field { flex: 1; min-width: 220px; }
+    .field .hint { font-size: 12px; color: var(--shadow); margin-top: 4px; }
+    .secret-field { border: 1px solid var(--rime); border-radius: var(--radius-sm); padding: 12px; display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+    .secret-field:first-of-type { margin-top: 20px; }
+    .secret-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .secret-head .label { font-size: 14px; font-weight: 500; color: var(--frost); }
+    .secret-head .desc { font-size: 13px; margin-top: 2px; }
+    .secret-actions { display: flex; gap: 8px; }
+    .subdivider { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--rime-soft); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--shadow); }
+    .add-row { margin-top: 16px; }
+    .cluster-warning { margin-top: 20px; padding: 14px 16px; border: 1px solid rgba(226, 161, 60, 0.3); background: rgba(226, 161, 60, 0.08); border-radius: var(--radius-sm); font-size: 13px; color: var(--mist); }
   </style>
 </head>
 <body>
@@ -88,11 +95,11 @@
             <a class="nav-link" href="/settings/organization/members/index.html"><span class="icon">&#128101;</span> Members</a>
             <a class="nav-link" href="/settings/organization/providers/index.html"><span class="icon">&#129504;</span> Providers &amp; Models</a>
             <a class="nav-link" href="/settings/organization/secrets/index.html"><span class="icon">&#128273;</span> Secrets</a>
-            <a class="nav-link" href="/settings/organization/cluster/index.html"><span class="icon">&#128421;</span> Kubernetes cluster</a>
+            <a class="nav-link active" href="/settings/organization/cluster/index.html"><span class="icon">&#128421;</span> Kubernetes cluster</a>
           </div>
         </div>
 
-        <a class="nav-link nav-link-bottom active" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
+        <a class="nav-link nav-link-bottom" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
       </nav>
 
       <div class="sidebar-foot">
@@ -116,55 +123,54 @@
     </aside>
 
     <div class="main">
-      <div class="main-inner">
-    <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/notifications</span> (web/app/notifications/page.tsx) · shows a mixed read/unread list; empty and error states aren't mocked here · <b>IA rework round 3</b>: top hub-header replaced by the same persistent sidebar as every other page (see /projects's design-note for the full rationale) — this page is now reached via the sidebar's "Notifications" item instead of a bell icon, so the bell/dot indicator is gone here too</div>
-    <div class="hub-page-title">
-      <h1>Notifications</h1>
-      <p>Cross-project activity and updates.</p>
-    </div>
+      <div class="main-inner narrow">
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/settings/organization/cluster</span> — split out of the old single-page tab set, see <a href="/settings/organization/general/index.html" style="color:var(--bifrost);">General</a>'s design-note for the IA rework itself. <b>Supersedes ADR 003 §4</b> — "One target Kubernetes cluster per Orchestrator instance for MVP. No multi-cluster credential routing... yet." This page moves that from an instance-level deploy-time env var (<span class="mono">KUBECONFIG_HOST_PATH</span> etc., <span class="mono">deploy/.env</span>) to org-level in-app config — exactly <span class="mono">open-questions.md</span> #10 ("multi-cluster credential routing"), now being answered rather than left open. Needs its own ADR before being built. All data faked; no controls are wired up.</div>
 
-    <div class="notif-toolbar">
-      <p class="text-mist" style="font-size:14px;">3 unread</p>
-      <button class="btn btn-outline" type="button">Mark all read</button>
-    </div>
+        <div class="page-header">
+          <div>
+            <h1>Kubernetes cluster</h1>
+            <p>The cluster where <span class="text-bifrost">Acme Retail</span>'s project jobs and deployments run. Admin only.</p>
+          </div>
+        </div>
 
-    <div class="notif-list">
-      <a class="notif-card unread" href="/projects/detail/features/detail/index.html">
         <div class="card">
-          <div class="notif-title">Build finished for "Add saved payment methods"</div>
-          <div class="notif-body text-mist">PR #142 opened against acme/storefront-web — ready for review.</div>
-          <div class="notif-time">12 minutes ago</div>
+          <div class="cluster-warning">Changing the cluster connection affects every project in Acme Retail. Jobs already running are not migrated.</div>
+
+          <div class="subdivider" style="margin-top:24px;">Cluster connection</div>
+          <div class="secret-field">
+            <div class="secret-head">
+              <div>
+                <div class="label">Kubeconfig</div>
+                <div class="desc text-mist">Used to provision job pods and manage deployments in this cluster.</div>
+              </div>
+              <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Connected</span>
+            </div>
+            <div class="secret-actions">
+              <button class="btn btn-outline btn-sm" type="button">Update</button>
+              <button class="btn btn-ghost btn-sm" type="button">Clear</button>
+            </div>
+          </div>
+
+          <div class="subdivider">Deployment settings</div>
+          <div class="field-row">
+            <div class="field">
+              <label for="ingress-class">Ingress class name</label>
+              <input class="input" id="ingress-class" value="ingress-nginx" />
+            </div>
+            <div class="field">
+              <label for="cert-issuer">Cert issuer name</label>
+              <input class="input" id="cert-issuer" value="letsencrypt-prod" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="apps-domain">Apps base domain</label>
+              <input class="input" id="apps-domain" value="apps.acmeretail.com" />
+              <p class="hint">Primary deployments resolve at <span class="mono">&lt;project-slug&gt;.apps.acmeretail.com</span>; temporary/preview deployments at <span class="mono">&lt;project-slug&gt;-&lt;kind&gt;-&lt;id&gt;.preview.acmeretail.com</span>.</p>
+            </div>
+          </div>
+          <button class="btn btn-primary" type="button" style="margin-top:20px;">Save changes</button>
         </div>
-      </a>
-      <a class="notif-card unread" href="/projects/detail/tests/detail/index.html">
-        <div class="card">
-          <div class="notif-title">Test run failed: Checkout regression suite</div>
-          <div class="notif-body text-mist">2 of 18 checks failed on acme/storefront-web.</div>
-          <div class="notif-time">1 hour ago</div>
-        </div>
-      </a>
-      <a class="notif-card unread" href="/projects/detail/features/detail/index.html">
-        <div class="card">
-          <div class="notif-title">Feature "Guest checkout" needs your input</div>
-          <div class="notif-body text-mist">The agent has a clarifying question before it can continue.</div>
-          <div class="notif-time">3 hours ago</div>
-        </div>
-      </a>
-      <a class="notif-card read" href="/projects/detail/index.html">
-        <div class="card">
-          <div class="notif-title">Project "Marketing Site" finished setup</div>
-          <div class="notif-body text-mist">project_init completed — the project is ready to work on.</div>
-          <div class="notif-time">Yesterday</div>
-        </div>
-      </a>
-      <a class="notif-card read" href="/projects/detail/features/index.html">
-        <div class="card">
-          <div class="notif-title">Feature "Inventory sync webhook" approved</div>
-          <div class="notif-body text-mist">Spec approved — build queued.</div>
-          <div class="notif-time">2 days ago</div>
-        </div>
-      </a>
-    </div>
       </div>
     </div>
   </div>

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Action Items — Saved payment methods — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .detail-title { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .detail-title h1 { font-size: 24px; }
+
+    section.block { border: 1px solid var(--rime); background: var(--surface-01); border-radius: var(--radius-card); padding: 24px; margin-bottom: 20px; }
+    section.block h2 { font-size: 16px; margin-bottom: 4px; }
+    section.block .desc { font-size: 12px; color: var(--shadow); margin-bottom: 16px; }
+
+    .unlock-banner { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: var(--radius-sm); background: rgba(70,194,133,0.08); border: 1px solid rgba(70,194,133,0.3); font-size: 13px; color: var(--mist); margin-bottom: 20px; }
+    .unlock-banner .dot { color: var(--st-approved); }
+
+    .action-item { border: 1px solid var(--rime); border-radius: var(--radius-sm); padding: 16px; margin-top: 12px; }
+    .action-item:first-of-type { margin-top: 0; }
+    .action-item-head { display: flex; align-items: flex-start; gap: 12px; }
+    .action-item-icon { width: 30px; height: 30px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .action-item-main { flex: 1; min-width: 0; }
+    .action-item-type { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--shadow); }
+    .action-item-title { font-size: 14px; color: var(--frost); margin-top: 2px; }
+    .action-item-status { flex-shrink: 0; }
+
+    .action-item-resolution { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--rime-soft); font-size: 13px; color: var(--mist); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .action-item-resolution a { color: var(--bifrost); }
+
+    .blocks-badge { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: var(--radius-pill); font-size: 10px; font-weight: 500; background: rgba(226,161,60,0.12); color: var(--st-input); }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+      <a class="sidebar-project" href="/projects/index.html">
+        <span>Acme Storefront</span>
+        <span class="text-shadow">&#8964;</span>
+      </a>
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/projects/detail/index.html"><span class="icon">&#8962;</span> Home</a>
+        <a class="nav-link active" href="/projects/detail/features/index.html"><span class="icon">&#9638;</span> Features</a>
+        <a class="nav-link" href="/projects/detail/tests/index.html"><span class="icon">&#9879;</span> Tests</a>
+        <a class="nav-link" href="/projects/detail/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+        <a class="nav-link" href="/projects/detail/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+        <a class="nav-link" href="/projects/detail/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-settings" class="nav-group-toggle" checked />
+          <label for="nav-group-settings" class="nav-group-label">
+            <span class="nav-group-title">Settings</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/projects/detail/settings/general/index.html"><span class="icon">&#9881;</span> General</a>
+            <a class="nav-link" href="/projects/detail/settings/secrets/index.html"><span class="icon">&#128273;</span> Secrets</a>
+            <a class="nav-link" href="/projects/detail/settings/models/index.html"><span class="icon">&#129504;</span> Models</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <div class="main">
+      <div class="shell-topbar">
+        <div class="crumbs">
+          <a href="/projects/index.html">Acme Retail</a>
+          <span class="sep">/</span>
+          <a href="/projects/detail/index.html">Acme Storefront</a>
+          <span class="sep">/</span>
+          <a href="/projects/detail/features/index.html">Features</a>
+          <span class="sep">/</span>
+          <a href="/projects/detail/features/detail/index.html">Saved payment methods</a>
+          <span class="sep">/</span>
+          <span class="current">Action Items</span>
+        </div>
+        <div class="shell-topbar-actions">
+          <a class="notif-bell" href="/notifications/index.html" aria-label="Notifications"><span class="dot"></span>&#128276;</a>
+          <div class="user-menu">
+            <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+            <label for="user-menu-toggle" class="user-menu-trigger">
+              <span class="avatar">SC</span>
+              <span class="chevron">&#9662;</span>
+            </label>
+            <div class="user-menu-panel">
+              <div class="user-menu-head">
+                <div class="name">Sarat Chandra</div>
+                <div class="handle">@saratc</div>
+              </div>
+              <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+              <a class="user-menu-item" href="/login/index.html">Log out</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="main-inner">
+        <div class="design-note">
+          <b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/features/:featureId/action-items</span> — an entirely <b>new</b> route/concept, not in any
+          ADR. Per the user's spec, <span class="mono">spec_grill</span> can now return action items alongside the ADR, and <b>implementation can't start until every
+          item is resolved</b>. Grounding varies per item type, shown below: <b>env var access</b> and <b>new env var</b> requests plausibly extend
+          <span class="mono">project_secrets</span> (job-dispatch.md already has the API decrypting and injecting per-project secrets into job pods — asking for one
+          by name is a small step from that, not a big one). <b>Move to design_grill</b> extends ADR 014, but that ADR describes design sessions as freestanding
+          (name + description, own PR) with no feature-linked entry/exit — treat that link as new. <b>New subtask feature</b> is the least grounded: ADR 002 has no
+          parent/child relationship between features and no "blocked on another feature merging" state at all — this is a genuinely new dependency model, shown
+          below via a linked feature that blocks this one until it merges. <b>Test request</b> is the most grounded — Tests are already a first-class per-project
+          concept with their own create/detail pages; this just proposes spec_grill being able to ask for one.
+        </div>
+
+        <div class="detail-title">
+          <h1>Saved payment methods</h1>
+          <span class="badge" style="background:#4f9bf022; color:#4f9bf0;">Implementing</span>
+        </div>
+
+        <div class="card feature-context">
+          <div class="feature-steps">
+            <a class="step-link done" href="/projects/detail/features/detail/spec/index.html">
+              <span class="step-num">&#10003;</span> Spec
+            </a>
+            <span class="step-sep">&#8594;</span>
+            <a class="step-link done here" href="/projects/detail/features/detail/action-items/index.html">
+              <span class="step-num">&#10003;</span> Action Items
+            </a>
+            <span class="step-sep">&#8594;</span>
+            <a class="step-link active" href="/projects/detail/features/detail/implementation/index.html">
+              <span class="step-num">3</span> Implementation
+            </a>
+            <span class="step-sep">&#8594;</span>
+            <a class="step-link upcoming" href="/projects/detail/features/detail/testing/index.html">
+              <span class="step-num">4</span> Testing
+            </a>
+            <span class="step-sep">&#8594;</span>
+            <a class="step-link upcoming" href="/projects/detail/features/detail/agentic-review/index.html">
+              <span class="step-num">5</span> Agentic Review
+            </a>
+            <span class="step-sep">&#8594;</span>
+            <a class="step-link upcoming" href="/projects/detail/features/detail/manual-review/index.html">
+              <span class="step-num">6</span> Manual Review
+            </a>
+          </div>
+          <div class="feature-context-side">
+            <a class="preview-chip" href="#" target="_blank" rel="noopener">&#128279; acme-storefront-feature_build-482.preview&#8230; &#8599;</a>
+            <span class="token-chip">&#9889; 91.2K tokens</span>
+          </div>
+        </div>
+
+        <details class="card subtasks-card" style="margin-bottom:20px;">
+          <summary>Subtasks &middot; 3/4 complete <span class="chev">&#9662;</span></summary>
+          <ul class="subtask-list">
+            <li class="subtask-item done"><span class="box">&#10003;</span><span class="label">Tokenize cards via Stripe SetupIntent</span></li>
+            <li class="subtask-item done"><span class="box">&#10003;</span><span class="label">Store payment_method id + last4/brand only</span></li>
+            <li class="subtask-item done"><span class="box">&#10003;</span><span class="label">Add default_payment_method_id, allow marking one card default</span></li>
+            <li class="subtask-item active"><span class="box"></span><span class="label">Require picking a new default before removing the current one</span></li>
+          </ul>
+        </details>
+
+        <section class="block">
+          <h2>Action items</h2>
+          <p class="desc">Raised by spec_grill alongside the ADR. All must resolve before implementation can start.</p>
+
+          <div class="unlock-banner"><span class="dot">&#9679;</span> All 5 action items resolved — implementation started automatically.</div>
+
+          <div class="action-item">
+            <div class="action-item-head">
+              <span class="action-item-icon" style="background:#4f9bf022; color:#4f9bf0;">&#128273;</span>
+              <div class="action-item-main">
+                <div class="action-item-type">Env var access</div>
+                <div class="action-item-title">Access to <span class="mono">STRIPE_SECRET_KEY</span> for the feature_build container</div>
+              </div>
+              <span class="badge action-item-status" style="background:#46c28522; color:#46c285;">Resolved</span>
+            </div>
+            <div class="action-item-resolution">Granted via <a href="/projects/detail/settings/secrets/index.html#secret-stripe-secret-key">project secrets</a> · now injected into the feature_build job pod.</div>
+          </div>
+
+          <div class="action-item">
+            <div class="action-item-head">
+              <span class="action-item-icon" style="background:#9b8cf022; color:#9b8cf0;">&#128272;</span>
+              <div class="action-item-main">
+                <div class="action-item-type">New secret</div>
+                <div class="action-item-title">Create <span class="mono">STRIPE_WEBHOOK_SECRET</span> — needed to verify SetupIntent webhooks</div>
+              </div>
+              <span class="badge action-item-status" style="background:#46c28522; color:#46c285;">Resolved</span>
+            </div>
+            <div class="action-item-resolution">Created in <a href="/projects/detail/settings/secrets/index.html#secret-stripe-webhook-secret">project secrets</a> by an admin, scoped to this project only.</div>
+          </div>
+
+          <div class="action-item">
+            <div class="action-item-head">
+              <span class="action-item-icon" style="background:#e2a13c22; color:#e2a13c;">&#127912;</span>
+              <div class="action-item-main">
+                <div class="action-item-type">Move to design_grill</div>
+                <div class="action-item-title">The saved-card picker at checkout needs a UI pass before implementation</div>
+              </div>
+              <span class="badge action-item-status" style="background:#46c28522; color:#46c285;">Resolved</span>
+            </div>
+            <div class="action-item-resolution">Design session completed &middot; layout approved and referenced from the ADR. (Design session pages aren't part of this wireframe pass.)</div>
+          </div>
+
+          <div class="action-item">
+            <div class="action-item-head">
+              <span class="action-item-icon" style="background:#2fd4c622; color:#2fd4c6;">&#129513;</span>
+              <div class="action-item-main">
+                <div class="action-item-type">New subtask feature <span class="blocks-badge">Blocked implementation until merged</span></div>
+                <div class="action-item-title">Split off: Card removal confirmation modal</div>
+              </div>
+              <span class="badge action-item-status" style="background:#46c28522; color:#46c285;">Resolved</span>
+            </div>
+            <div class="action-item-resolution">
+              <a href="/projects/detail/features/detail/index.html">Card removal confirmation modal</a>
+              <span class="mono" style="font-size:12px; color:var(--shadow);">yggdrasil/card-removal-confirm-modal-483</span>
+              <span class="badge" style="background:#46c28522; color:#46c285;">Merged</span>
+            </div>
+          </div>
+
+          <div class="action-item">
+            <div class="action-item-head">
+              <span class="action-item-icon" style="background:#5bc0e822; color:#5bc0e8;">&#129514;</span>
+              <div class="action-item-main">
+                <div class="action-item-type">Test request</div>
+                <div class="action-item-title">Integration test: removing the default card when only one card is saved</div>
+              </div>
+              <span class="badge action-item-status" style="background:#46c28522; color:#46c285;">Resolved</span>
+            </div>
+            <div class="action-item-resolution">Created as <a href="/projects/detail/tests/detail/index.html">Checkout regression suite &middot; default card removal</a>, added to the suite that runs at Testing.</div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

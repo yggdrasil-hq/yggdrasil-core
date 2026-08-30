@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Agentic Review — Saved payment methods — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .detail-title { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .detail-title h1 { font-size: 24px; }
+
+    section.block { border: 1px solid var(--rime); background: var(--surface-01); border-radius: var(--radius-card); padding: 24px; margin-bottom: 20px; }
+    section.block h2 { font-size: 16px; margin-bottom: 4px; }
+
+    .empty-row { padding: 20px; border: 1px dashed var(--rime); border-radius: var(--radius-sm); font-size: 13px; color: var(--shadow); }
+
+    .preview-ref summary { cursor: pointer; list-style: none; font-size: 13px; color: var(--mist); }
+    .preview-ref summary::-webkit-details-marker { display: none; }
+    .preview-ref summary::before { content: "\25B8  "; color: var(--shadow); }
+    .preview-ref[open] summary::before { content: "\25BE  "; }
+    .preview-ref-body { margin-top: 16px; }
+
+    .section-toggle { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+    .subview-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--rime-soft); margin-bottom: 20px; }
+    .subview-tabs label { padding: 9px 4px; margin-right: 16px; font-size: 13px; color: var(--mist); border-bottom: 2px solid transparent; cursor: pointer; }
+    .subview-tabs label:hover { color: var(--frost); }
+    .subview-panel { display: none; }
+
+    #areview-view-approved:checked ~ .areview-tabs .subview-tabs label[for="areview-view-approved"],
+    #areview-view-changes:checked ~ .areview-tabs .subview-tabs label[for="areview-view-changes"] {
+      color: var(--frost);
+      border-bottom-color: var(--bifrost);
+    }
+    #areview-view-approved:checked ~ .areview-tabs #panel-areview-approved,
+    #areview-view-changes:checked ~ .areview-tabs #panel-areview-changes {
+      display: block;
+    }
+
+    .verdict-row { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 13px; }
+    .verdict-row.approved { background: rgba(70,194,133,0.08); border: 1px solid rgba(70,194,133,0.3); color: var(--mist); }
+    .verdict-row.changes { background: rgba(226,161,60,0.08); border: 1px solid rgba(226,161,60,0.3); color: var(--mist); }
+
+    .review-comment { border: 1px solid var(--rime); border-radius: var(--radius-sm); padding: 14px; margin-top: 10px; }
+    .review-comment:first-of-type { margin-top: 0; }
+    .review-comment .loc { font-family: var(--font-mono); font-size: 12px; color: var(--shadow); margin-bottom: 6px; }
+    .review-comment .note { font-size: 13px; color: var(--mist); }
+    .review-comment.blocking { border-color: rgba(224,108,117,0.3); }
+    .review-comment.blocking .loc { color: var(--st-rejected); }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+      <a class="sidebar-project" href="/projects/index.html">
+        <span>Acme Storefront</span>
+        <span class="text-shadow">&#8964;</span>
+      </a>
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/projects/detail/index.html"><span class="icon">&#8962;</span> Home</a>
+        <a class="nav-link active" href="/projects/detail/features/index.html"><span class="icon">&#9638;</span> Features</a>
+        <a class="nav-link" href="/projects/detail/tests/index.html"><span class="icon">&#9879;</span> Tests</a>
+        <a class="nav-link" href="/projects/detail/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+        <a class="nav-link" href="/projects/detail/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+        <a class="nav-link" href="/projects/detail/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-settings" class="nav-group-toggle" checked />
+          <label for="nav-group-settings" class="nav-group-label">
+            <span class="nav-group-title">Settings</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/projects/detail/settings/general/index.html"><span class="icon">&#9881;</span> General</a>
+            <a class="nav-link" href="/projects/detail/settings/secrets/index.html"><span class="icon">&#128273;</span> Secrets</a>
+            <a class="nav-link" href="/projects/detail/settings/models/index.html"><span class="icon">&#129504;</span> Models</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <div class="main">
+      <div class="shell-topbar">
+        <div class="crumbs">
+          <a href="/projects/index.html">Acme Retail</a>
+          <span class="sep">/</span>
+          <a href="/projects/detail/index.html">Acme Storefront</a>
+          <span class="sep">/</span>
+          <a href="/projects/detail/features/index.html">Features</a>
+          <span class="sep">/</span>
+          <a href="/projects/detail/features/detail/index.html">Saved payment methods</a>
+          <span class="sep">/</span>
+          <span class="current">Agentic Review</span>
+        </div>
+        <div class="shell-topbar-actions">
+          <a class="notif-bell" href="/notifications/index.html" aria-label="Notifications"><span class="dot"></span>&#128276;</a>
+          <div class="user-menu">
+            <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+            <label for="user-menu-toggle" class="user-menu-trigger">
+              <span class="avatar">SC</span>
+              <span class="chevron">&#9662;</span>
+            </label>
+            <div class="user-menu-panel">
+              <div class="user-menu-head">
+                <div class="name">Sarat Chandra</div>
+                <div class="handle">@saratc</div>
+              </div>
+              <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+              <a class="user-menu-item" href="/login/index.html">Log out</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="main-inner">
+        <div class="design-note">
+          <b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/features/:featureId/agentic-review</span> — an entirely <b>new</b> route/gate/job with
+          <b>no grounding anywhere</b>. Unlike Testing (which at least has a real Agentic-test sibling) or the Action Item types (each traceable to something that
+          exists), there is no ADR, no job kind, no skill, and no contract-tool event for "an agent reviews another agent's diff" — this page is a pure proposal for
+          what the user described as a gate between Testing and Manual Review. It would presumably need its own job kind (something like <span class="mono">agentic_review</span>),
+          its own skill/image, and its own curated event vocabulary, none of which this wireframe attempts to design. This feature hasn't reached this stage yet
+          (still Implementing), so the default view is honestly empty; Approved/Changes-requested are previewed below only to show the shape of the idea.
+        </div>
+
+        <div class="detail-title">
+          <h1>Saved payment methods</h1>
+          <span class="badge" style="background:#4f9bf022; color:#4f9bf0;">Implementing</span>
+        </div>
+
+        <div class="card feature-context">
+          <div class="feature-steps">
+            <a class="step-link done" href="/projects/detail/features/detail/spec/index.html">
+              <span class="step-num">&#10003;</span> Spec
+            </a>
+            <span class="step-sep">&#8594;</span>
+            <a class="step-link done" href="/projects/detail/features/detail/action-items/index.html">
+              <span class="step-num">&#10003;</span> Action Items
+            </a>
+            <span class="step-sep">&#8594;</span>
+            <a class="step-link active" href="/projects/detail/features/detail/implementation/index.html">
+              <span class="step-num">3</span> Implementation
+            </a>
+            <span class="step-sep">&#8594;</span>
+            <a class="step-link upcoming" href="/projects/detail/features/detail/testing/index.html">
+              <span class="step-num">4</span> Testing
+            </a>
+            <span class="step-sep">&#8594;</span>
+            <a class="step-link upcoming here" href="/projects/detail/features/detail/agentic-review/index.html">
+              <span class="step-num">5</span> Agentic Review
+            </a>
+            <span class="step-sep">&#8594;</span>
+            <a class="step-link upcoming" href="/projects/detail/features/detail/manual-review/index.html">
+              <span class="step-num">6</span> Manual Review
+            </a>
+          </div>
+          <div class="feature-context-side">
+            <a class="preview-chip" href="#" target="_blank" rel="noopener">&#128279; acme-storefront-feature_build-482.preview&#8230; &#8599;</a>
+            <span class="token-chip">&#9889; 91.2K tokens</span>
+          </div>
+        </div>
+
+        <details class="card subtasks-card" style="margin-bottom:20px;">
+          <summary>Subtasks &middot; 3/4 complete <span class="chev">&#9662;</span></summary>
+          <ul class="subtask-list">
+            <li class="subtask-item done"><span class="box">&#10003;</span><span class="label">Tokenize cards via Stripe SetupIntent</span></li>
+            <li class="subtask-item done"><span class="box">&#10003;</span><span class="label">Store payment_method id + last4/brand only</span></li>
+            <li class="subtask-item done"><span class="box">&#10003;</span><span class="label">Add default_payment_method_id, allow marking one card default</span></li>
+            <li class="subtask-item active"><span class="box"></span><span class="label">Require picking a new default before removing the current one</span></li>
+          </ul>
+        </details>
+
+        <section class="block">
+          <h2>Agentic Review</h2>
+          <div class="empty-row" style="margin-top:12px;">Agentic review hasn't run for this feature yet — it starts automatically once Testing passes.</div>
+
+          <details class="preview-ref" style="margin-top:20px;">
+            <summary>Preview other states (design reference)</summary>
+            <div class="preview-ref-body">
+              <input type="radio" name="areview-view" id="areview-view-approved" class="section-toggle" checked />
+              <input type="radio" name="areview-view" id="areview-view-changes" class="section-toggle" />
+              <div class="areview-tabs">
+                <div class="subview-tabs">
+                  <label for="areview-view-approved">Approved</label>
+                  <label for="areview-view-changes">Changes requested</label>
+                </div>
+
+                <div class="subview-panel" id="panel-areview-approved">
+                  <div class="verdict-row approved"><span>&#9679;</span> Approved &mdash; no blocking issues found. Proceeding to Manual Review.</div>
+                  <div class="review-comment">
+                    <div class="loc">payments/setup-intent.ts:42</div>
+                    <div class="note">Nit: consider extracting the Stripe error-mapping block into a shared helper — not blocking.</div>
+                  </div>
+                </div>
+
+                <div class="subview-panel" id="panel-areview-changes">
+                  <div class="verdict-row changes"><span>&#9679;</span> Changes requested &mdash; 1 blocking issue. Sent back to Implementation with a comment.</div>
+                  <div class="review-comment blocking">
+                    <div class="loc">customers/default-payment-method.ts:18 &middot; blocking</div>
+                    <div class="note">Removing the default card doesn't check whether it's the customer's only saved card before requiring a replacement pick — will throw instead of blocking removal, matching the Testing failure on the same path.</div>
+                  </div>
+                  <div class="review-comment">
+                    <div class="loc">payments/setup-intent.ts:42</div>
+                    <div class="note">Nit: consider extracting the Stripe error-mapping block into a shared helper — not blocking.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </details>
+        </section>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

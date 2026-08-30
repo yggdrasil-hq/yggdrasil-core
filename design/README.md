@@ -46,20 +46,34 @@ page.
 | `/projects/:projectId` | `projects/detail/index.html` |
 | `/projects/:projectId/features` | `projects/detail/features/index.html` |
 | `/projects/:projectId/features/:featureId` | `projects/detail/features/detail/index.html` |
+| `/projects/:projectId/features/:featureId/spec` | `projects/detail/features/detail/spec/index.html` |
+| `/projects/:projectId/features/:featureId/action-items` | `projects/detail/features/detail/action-items/index.html` |
+| `/projects/:projectId/features/:featureId/implementation` | `projects/detail/features/detail/implementation/index.html` |
+| `/projects/:projectId/features/:featureId/testing` | `projects/detail/features/detail/testing/index.html` |
+| `/projects/:projectId/features/:featureId/agentic-review` | `projects/detail/features/detail/agentic-review/index.html` |
+| `/projects/:projectId/features/:featureId/manual-review` | `projects/detail/features/detail/manual-review/index.html` |
 | `/projects/:projectId/tests` | `projects/detail/tests/index.html` |
 | `/projects/:projectId/tests/new` | `projects/detail/tests/new/index.html` |
 | `/projects/:projectId/tests/:testId` | `projects/detail/tests/detail/index.html` |
 | `/projects/:projectId/deployments` | `projects/detail/deployments/index.html` |
 | `/projects/:projectId/usage` | `projects/detail/usage/index.html` |
 | `/projects/:projectId/analytics` | `projects/detail/analytics/index.html` |
-| `/projects/:projectId/settings` | `projects/detail/settings/index.html` |
+| `/projects/:projectId/settings/general` | `projects/detail/settings/general/index.html` |
+| `/projects/:projectId/settings/secrets` | `projects/detail/settings/secrets/index.html` |
+| `/projects/:projectId/settings/models` | `projects/detail/settings/models/index.html` |
 | `/deployments` | `deployments/index.html` |
 | `/usage` | `usage/index.html` |
 | `/analytics` | `analytics/index.html` |
 | `/infrastructure` | `infrastructure/index.html` |
+| `/allocations/infra` | `allocations/infra/index.html` |
+| `/allocations/api` | `allocations/api/index.html` |
 | `/notifications` | `notifications/index.html` |
 | `/settings/account` | `settings/account/index.html` (also the user-level tier of Usage/Analytics, as sections — no separate route) |
-| `/settings/organization` | `settings/organization/index.html` |
+| `/settings/organization/general` | `settings/organization/general/index.html` |
+| `/settings/organization/members` | `settings/organization/members/index.html` |
+| `/settings/organization/providers` | `settings/organization/providers/index.html` |
+| `/settings/organization/secrets` | `settings/organization/secrets/index.html` |
+| `/settings/organization/cluster` | `settings/organization/cluster/index.html` |
 
 `detail/` stands in for one sample record of a dynamic route segment.
 

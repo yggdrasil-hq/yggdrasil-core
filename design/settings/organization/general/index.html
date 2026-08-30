@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Notifications — Yggdrasil</title>
+  <title>General — Organization — Yggdrasil</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -10,15 +10,16 @@
   <link rel="stylesheet" href="/shared/tokens.css" />
   <link rel="stylesheet" href="/shared/shell.css" />
   <style>
-    .notif-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
-    .notif-list { display: flex; flex-direction: column; gap: 12px; }
-    .notif-card { display: block; }
-    .notif-card .card { padding: 16px 20px; }
-    .notif-card.unread .card { border-color: var(--rime); background: var(--surface-02); }
-    .notif-card.read .card { opacity: 0.65; }
-    .notif-title { font-size: 15px; font-weight: 600; color: var(--frost); }
-    .notif-body { margin-top: 4px; font-size: 13px; }
-    .notif-time { margin-top: 8px; font-size: 12px; color: var(--shadow); }
+    .main-inner.narrow { max-width: 900px; }
+    .card-title { font-size: 16px; font-weight: 600; color: var(--frost); }
+    .card-desc { margin-top: 6px; font-size: 13px; max-width: 560px; }
+    .field-row { display: flex; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+    .field-row .field { flex: 1; min-width: 220px; }
+    .field .hint { font-size: 12px; color: var(--shadow); margin-top: 4px; }
+    .danger-zone { border-color: rgba(224, 108, 117, 0.3); background: rgba(224, 108, 117, 0.06); margin-top: 24px; padding: 16px; border-radius: var(--radius-sm); border-width: 1px; border-style: solid; }
+    .danger-zone .card-desc { color: var(--mist); max-width: none; }
+    .btn-danger { background: transparent; border: 1px solid rgba(224, 108, 117, 0.4); color: var(--st-rejected); }
+    .btn-danger:hover { background: rgba(224, 108, 117, 0.1); }
   </style>
 </head>
 <body>
@@ -84,7 +85,7 @@
             <span class="nav-group-chevron">&#9662;</span>
           </label>
           <div class="nav-group-items">
-            <a class="nav-link" href="/settings/organization/general/index.html"><span class="icon">&#9881;</span> General</a>
+            <a class="nav-link active" href="/settings/organization/general/index.html"><span class="icon">&#9881;</span> General</a>
             <a class="nav-link" href="/settings/organization/members/index.html"><span class="icon">&#128101;</span> Members</a>
             <a class="nav-link" href="/settings/organization/providers/index.html"><span class="icon">&#129504;</span> Providers &amp; Models</a>
             <a class="nav-link" href="/settings/organization/secrets/index.html"><span class="icon">&#128273;</span> Secrets</a>
@@ -92,7 +93,7 @@
           </div>
         </div>
 
-        <a class="nav-link nav-link-bottom active" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
+        <a class="nav-link nav-link-bottom" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
       </nav>
 
       <div class="sidebar-foot">
@@ -116,55 +117,36 @@
     </aside>
 
     <div class="main">
-      <div class="main-inner">
-    <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/notifications</span> (web/app/notifications/page.tsx) · shows a mixed read/unread list; empty and error states aren't mocked here · <b>IA rework round 3</b>: top hub-header replaced by the same persistent sidebar as every other page (see /projects's design-note for the full rationale) — this page is now reached via the sidebar's "Notifications" item instead of a bell icon, so the bell/dot indicator is gone here too</div>
-    <div class="hub-page-title">
-      <h1>Notifications</h1>
-      <p>Cross-project activity and updates.</p>
-    </div>
+      <div class="main-inner narrow">
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/settings/organization/general</span>. <b>IA rework, round 4</b>: Organization Settings was one page with 5 in-page tabs; per the user's request, each tab is now its own route, and "Settings" is a collapsible sidebar group (same mechanic as Monitoring/Allocations) rather than a page reached only through the org-switcher/account dropdowns. Those dropdown links now point here (the group's first item) instead of the old single page. See <a href="/settings/organization/members/index.html" style="color:var(--bifrost);">Members</a>' design-note for the org/role model this whole section assumes, which ADR 002 explicitly defers to Phase 2 — nothing here is in any ADR yet.</div>
 
-    <div class="notif-toolbar">
-      <p class="text-mist" style="font-size:14px;">3 unread</p>
-      <button class="btn btn-outline" type="button">Mark all read</button>
-    </div>
+        <div class="page-header">
+          <div>
+            <h1>General</h1>
+            <p>Basic information about <span class="text-bifrost">Acme Retail</span>.</p>
+          </div>
+        </div>
 
-    <div class="notif-list">
-      <a class="notif-card unread" href="/projects/detail/features/detail/index.html">
         <div class="card">
-          <div class="notif-title">Build finished for "Add saved payment methods"</div>
-          <div class="notif-body text-mist">PR #142 opened against acme/storefront-web — ready for review.</div>
-          <div class="notif-time">12 minutes ago</div>
+          <div class="field-row" style="margin-top:0;">
+            <div class="field">
+              <label for="org-name">Organization name</label>
+              <input class="input" id="org-name" value="Acme Retail" />
+            </div>
+            <div class="field">
+              <label for="org-slug">Slug</label>
+              <input class="input" id="org-slug" value="acme-retail" disabled style="opacity:0.6;" />
+              <p class="hint">Used in URLs. Permanent.</p>
+            </div>
+          </div>
+          <button class="btn btn-primary" type="button" style="margin-top:20px;">Save changes</button>
+
+          <div class="danger-zone">
+            <div class="card-title" style="font-size:15px; color:var(--st-rejected);">Delete organization</div>
+            <p class="card-desc">Permanently deletes this organization, every project in it, and removes all members' access. This cannot be undone.</p>
+            <button class="btn btn-danger" type="button" style="margin-top:12px;">Delete organization</button>
+          </div>
         </div>
-      </a>
-      <a class="notif-card unread" href="/projects/detail/tests/detail/index.html">
-        <div class="card">
-          <div class="notif-title">Test run failed: Checkout regression suite</div>
-          <div class="notif-body text-mist">2 of 18 checks failed on acme/storefront-web.</div>
-          <div class="notif-time">1 hour ago</div>
-        </div>
-      </a>
-      <a class="notif-card unread" href="/projects/detail/features/detail/index.html">
-        <div class="card">
-          <div class="notif-title">Feature "Guest checkout" needs your input</div>
-          <div class="notif-body text-mist">The agent has a clarifying question before it can continue.</div>
-          <div class="notif-time">3 hours ago</div>
-        </div>
-      </a>
-      <a class="notif-card read" href="/projects/detail/index.html">
-        <div class="card">
-          <div class="notif-title">Project "Marketing Site" finished setup</div>
-          <div class="notif-body text-mist">project_init completed — the project is ready to work on.</div>
-          <div class="notif-time">Yesterday</div>
-        </div>
-      </a>
-      <a class="notif-card read" href="/projects/detail/features/index.html">
-        <div class="card">
-          <div class="notif-title">Feature "Inventory sync webhook" approved</div>
-          <div class="notif-body text-mist">Spec approved — build queued.</div>
-          <div class="notif-time">2 days ago</div>
-        </div>
-      </a>
-    </div>
       </div>
     </div>
   </div>

@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Providers & Models — Organization — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .main-inner.narrow { max-width: 900px; }
+    .card-title { font-size: 16px; font-weight: 600; color: var(--frost); }
+    .card-desc { margin-top: 6px; font-size: 13px; max-width: 560px; }
+    .card-head-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .field-row { display: flex; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+    .field-row .field { flex: 1; min-width: 220px; }
+    .field .hint { font-size: 12px; color: var(--shadow); margin-top: 4px; }
+    .secret-field { border: 1px solid var(--rime); border-radius: var(--radius-sm); padding: 12px; display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+    .secret-field:first-of-type { margin-top: 20px; }
+    .secret-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .secret-head .label { font-size: 14px; font-weight: 500; color: var(--frost); }
+    .secret-head .desc { font-size: 13px; margin-top: 2px; }
+    .secret-actions { display: flex; gap: 8px; }
+    .subdivider { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--rime-soft); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--shadow); }
+    .add-row { margin-top: 16px; }
+    .section-toggle { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+    .view-toggle { display: flex; gap: 4px; margin-top: 20px; padding: 3px; background: var(--surface-02); border-radius: var(--radius-sm); width: fit-content; }
+    .view-toggle label { padding: 6px 14px; border-radius: 5px; font-size: 13px; color: var(--mist); cursor: pointer; }
+    #view-admin:checked ~ .view-toggle label[for="view-admin"],
+    #view-member:checked ~ .view-toggle label[for="view-member"] { background: var(--surface-03); color: var(--frost); }
+    .view-panel-member { display: none; }
+    #view-member:checked ~ .view-panel-admin { display: none; }
+    #view-member:checked ~ .view-panel-member { display: block; }
+    .member-view-note { margin-top: 20px; padding: 12px; border: 1px dashed var(--rime); border-radius: var(--radius-sm); font-size: 13px; color: var(--mist); }
+    .model-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; border: 1px solid var(--rime); border-radius: var(--radius-sm); margin-top: 12px; }
+    .model-row:first-of-type { margin-top: 20px; }
+    .model-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .model-name { font-size: 14px; font-weight: 500; color: var(--frost); }
+    .model-id { margin-top: 2px; }
+    .provider-tag { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 500; }
+    .job-row { border: 1px solid var(--rime); border-radius: var(--radius-sm); padding: 12px; margin-top: 12px; }
+    .job-row:first-of-type { margin-top: 20px; }
+    .job-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .job-title { font-size: 14px; font-weight: 500; color: var(--frost); }
+    .job-row select.input { margin-top: 12px; width: 100%; }
+    .job-row .job-value { margin-top: 10px; font-size: 14px; color: var(--frost); }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+
+      <div class="org-switcher sidebar-org-switcher">
+        <input type="checkbox" id="org-switcher-toggle" class="user-menu-toggle" />
+        <label for="org-switcher-toggle" class="sidebar-project">
+          <span style="display:flex; align-items:center; gap:8px; min-width:0;">
+            <span class="org-avatar sm">A</span>
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Acme Retail</span>
+          </span>
+          <span class="text-shadow">&#8964;</span>
+        </label>
+        <div class="user-menu-panel org-switcher-panel">
+          <div class="org-switcher-label">Organizations</div>
+          <a class="user-menu-item org-switcher-item active" href="/projects/index.html"><span class="org-avatar sm">A</span> Acme Retail</a>
+          <a class="user-menu-item org-switcher-item" href="/projects/index.html"><span class="org-avatar sm">N</span> Northwind Labs</a>
+          <div class="org-switcher-divider">
+            <a class="user-menu-item" href="/settings/organization/general/index.html">Organization settings</a>
+            <button class="user-menu-item" type="button">+ Create organization</button>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/projects/index.html"><span class="icon">&#9638;</span> Projects</a>
+        <a class="nav-link" href="/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-monitoring" class="nav-group-toggle" checked />
+          <label for="nav-group-monitoring" class="nav-group-label">
+            <span class="nav-group-title">Monitoring</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+            <a class="nav-link" href="/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
+            <a class="nav-link" href="/infrastructure/index.html"><span class="icon">&#128421;</span> Infrastructure</a>
+          </div>
+        </div>
+
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-allocations" class="nav-group-toggle" checked />
+          <label for="nav-group-allocations" class="nav-group-label">
+            <span class="nav-group-title">Allocations</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/allocations/infra/index.html"><span class="icon">&#9881;</span> Infra</a>
+            <a class="nav-link" href="/allocations/api/index.html"><span class="icon">&#129302;</span> Agent API</a>
+          </div>
+        </div>
+
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-settings" class="nav-group-toggle" checked />
+          <label for="nav-group-settings" class="nav-group-label">
+            <span class="nav-group-title">Settings</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/settings/organization/general/index.html"><span class="icon">&#9881;</span> General</a>
+            <a class="nav-link" href="/settings/organization/members/index.html"><span class="icon">&#128101;</span> Members</a>
+            <a class="nav-link active" href="/settings/organization/providers/index.html"><span class="icon">&#129504;</span> Providers &amp; Models</a>
+            <a class="nav-link" href="/settings/organization/secrets/index.html"><span class="icon">&#128273;</span> Secrets</a>
+            <a class="nav-link" href="/settings/organization/cluster/index.html"><span class="icon">&#128421;</span> Kubernetes cluster</a>
+          </div>
+        </div>
+
+        <a class="nav-link nav-link-bottom" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="user-menu sidebar-account">
+          <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+          <label for="user-menu-toggle" class="sidebar-account-trigger">
+            <span class="avatar">SC</span>
+            <span class="info">
+              <div class="name">Sarat Chandra</div>
+              <div class="handle">@saratc</div>
+            </span>
+            <span class="chevron">&#9662;</span>
+          </label>
+          <div class="user-menu-panel">
+            <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+            <a class="user-menu-item" href="/settings/organization/general/index.html">Organization settings</a>
+            <a class="user-menu-item" href="/login/index.html">Log out</a>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="main-inner narrow">
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/settings/organization/providers</span> — split out of the old single-page tab set, see <a href="/settings/organization/general/index.html" style="color:var(--bifrost);">General</a>'s design-note for the IA rework itself. <b>Supersedes ADR 007</b> — per-user default model configuration, decided <i>because</i> "there is no team/org entity yet" (ADR 007 context). Moving this to org-level, admin-managed config obsoletes account-level model config as anything other than a read-only view — <span class="mono">/settings/account</span> is read-only and links here for anyone who can actually edit, and both the project-creation wizard and a project's own Settings &rarr; Models resolve against this organization's models instead of a personal account default. ADR 007 itself still needs a full rewrite or replacement once its central premise ("no team/org entity yet") no longer holds. All data faked; only the "Viewing as" toggle is a working control.</div>
+
+        <div class="page-header">
+          <div>
+            <h1>Providers &amp; Models</h1>
+            <p>Configured by organization admins. Connected providers and models are available to every project in <span class="text-bifrost">Acme Retail</span> — other members can pick from them but can't view or change the underlying connection.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <input type="radio" name="view-mode" id="view-admin" class="section-toggle" checked />
+          <input type="radio" name="view-mode" id="view-member" class="section-toggle" />
+          <div class="view-toggle">
+            <label for="view-admin">Viewing as Admin</label>
+            <label for="view-member">Viewing as Member</label>
+          </div>
+
+          <div class="view-panel-admin">
+            <div class="subdivider" style="margin-top:24px;">Providers</div>
+            <div class="secret-field">
+              <div class="secret-head">
+                <div>
+                  <div class="label">OpenRouter</div>
+                  <div class="desc text-mist">Access hundreds of models through one API key.</div>
+                </div>
+                <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Connected</span>
+              </div>
+              <div class="secret-actions">
+                <button class="btn btn-outline btn-sm" type="button">Update</button>
+                <button class="btn btn-ghost btn-sm" type="button">Clear</button>
+              </div>
+            </div>
+            <div class="secret-field">
+              <div class="secret-head">
+                <div>
+                  <div class="label">Anthropic</div>
+                  <div class="desc text-mist">Claude models, called directly.</div>
+                </div>
+                <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Connected</span>
+              </div>
+              <div class="secret-actions">
+                <button class="btn btn-outline btn-sm" type="button">Update</button>
+                <button class="btn btn-ghost btn-sm" type="button">Clear</button>
+              </div>
+            </div>
+            <div class="add-row">
+              <button class="btn btn-outline btn-sm" type="button">+ Add custom provider</button>
+            </div>
+
+            <div class="subdivider">Models</div>
+            <div class="model-row">
+              <div class="model-info">
+                <div class="model-name-row">
+                  <span class="model-name">Claude Sonnet 5</span>
+                  <span class="provider-tag" style="background:#2fd4c622; color:#2fd4c6;">Anthropic</span>
+                </div>
+                <div class="mono model-id text-mist">claude-sonnet-5</div>
+              </div>
+              <button class="btn btn-ghost btn-sm" type="button" aria-label="Remove model">&#128465;</button>
+            </div>
+            <div class="model-row">
+              <div class="model-info">
+                <div class="model-name-row">
+                  <span class="model-name">DeepSeek V3</span>
+                  <span class="provider-tag" style="background:#9b8cf022; color:#9b8cf0;">OpenRouter</span>
+                </div>
+                <div class="mono model-id text-mist">deepseek/deepseek-chat</div>
+              </div>
+              <button class="btn btn-ghost btn-sm" type="button" aria-label="Remove model">&#128465;</button>
+            </div>
+            <div class="add-row">
+              <button class="btn btn-outline btn-sm" type="button">+ Add model</button>
+            </div>
+
+            <div class="subdivider">Default models per job</div>
+            <div class="job-row">
+              <div class="job-head">
+                <span class="job-title">Feature build</span>
+                <span class="mono text-shadow" style="font-size:11px;">feature_build</span>
+              </div>
+              <select class="input">
+                <option>Claude Sonnet 5 — Anthropic</option>
+                <option>DeepSeek V3 — OpenRouter</option>
+              </select>
+            </div>
+            <div class="job-row">
+              <div class="job-head">
+                <span class="job-title">Tests</span>
+                <span class="mono text-shadow" style="font-size:11px;">test_run</span>
+              </div>
+              <select class="input">
+                <option>DeepSeek V3 — OpenRouter</option>
+                <option>Claude Sonnet 5 — Anthropic</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="view-panel-member">
+            <div class="member-view-note">You're viewing this as a non-admin member would see it — connections are visible, but read-only. Ask an organization Admin to change providers, models, or job defaults.</div>
+
+            <div class="subdivider" style="margin-top:20px;">Providers</div>
+            <div class="secret-field">
+              <div class="secret-head">
+                <div>
+                  <div class="label">OpenRouter</div>
+                </div>
+                <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Connected</span>
+              </div>
+            </div>
+            <div class="secret-field">
+              <div class="secret-head">
+                <div>
+                  <div class="label">Anthropic</div>
+                </div>
+                <span class="badge" style="background:#2fd4c622; color:#2fd4c6;">Connected</span>
+              </div>
+            </div>
+
+            <div class="subdivider">Models available to you</div>
+            <div class="model-row">
+              <div class="model-info">
+                <div class="model-name-row">
+                  <span class="model-name">Claude Sonnet 5</span>
+                  <span class="provider-tag" style="background:#2fd4c622; color:#2fd4c6;">Anthropic</span>
+                </div>
+                <div class="mono model-id text-mist">claude-sonnet-5</div>
+              </div>
+            </div>
+            <div class="model-row">
+              <div class="model-info">
+                <div class="model-name-row">
+                  <span class="model-name">DeepSeek V3</span>
+                  <span class="provider-tag" style="background:#9b8cf022; color:#9b8cf0;">OpenRouter</span>
+                </div>
+                <div class="mono model-id text-mist">deepseek/deepseek-chat</div>
+              </div>
+            </div>
+
+            <div class="subdivider">Default models per job</div>
+            <div class="job-row">
+              <div class="job-head">
+                <span class="job-title">Feature build</span>
+                <span class="mono text-shadow" style="font-size:11px;">feature_build</span>
+              </div>
+              <div class="job-value">Claude Sonnet 5 — Anthropic</div>
+            </div>
+            <div class="job-row">
+              <div class="job-head">
+                <span class="job-title">Tests</span>
+                <span class="mono text-shadow" style="font-size:11px;">test_run</span>
+              </div>
+              <div class="job-value">DeepSeek V3 — OpenRouter</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

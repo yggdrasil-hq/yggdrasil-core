@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Members — Organization — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .main-inner.narrow { max-width: 900px; }
+    .card-title { font-size: 16px; font-weight: 600; color: var(--frost); }
+    .card-desc { margin-top: 6px; font-size: 13px; max-width: 560px; }
+    .card-head-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .field-row { display: flex; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+    .field-row .field { flex: 1; min-width: 220px; }
+    .field .hint { font-size: 12px; color: var(--shadow); margin-top: 4px; }
+    .secret-field { border: 1px solid var(--rime); border-radius: var(--radius-sm); padding: 12px; display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+    .secret-field:first-of-type { margin-top: 20px; }
+    .secret-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .secret-head .label { font-size: 14px; font-weight: 500; color: var(--frost); }
+    .secret-head .desc { font-size: 13px; margin-top: 2px; }
+    .secret-actions { display: flex; gap: 8px; }
+    .subdivider { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--rime-soft); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--shadow); }
+    .add-row { margin-top: 16px; }
+    .member-row { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--rime); border-radius: var(--radius-sm); margin-top: 12px; }
+    .member-row:first-of-type { margin-top: 20px; }
+    .member-row .avatar { width: 36px; height: 36px; font-size: 13px; }
+    .member-info { flex: 1; min-width: 0; }
+    .member-info .name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .member-info .name { font-size: 14px; font-weight: 500; color: var(--frost); }
+    .member-info .handle { font-size: 12px; color: var(--shadow); margin-top: 1px; }
+    .role-badge { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 500; flex-shrink: 0; }
+    .member-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .member-actions select.input { height: 32px; font-size: 12px; padding: 0 8px; width: auto; }
+    .invite-toggle { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+    .invite-toggle:checked ~ #invite-panel { display: block !important; }
+    .perm-table-wrap { margin-top: 24px; overflow-x: auto; }
+    .perm-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 640px; }
+    .perm-table th { text-align: left; font-weight: 500; color: var(--shadow); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; padding: 8px 10px; border-bottom: 1px solid var(--rime-soft); }
+    .perm-table td { padding: 10px; border-bottom: 1px solid var(--rime-soft); color: var(--mist); }
+    .perm-table td:first-child { color: var(--frost); font-size: 13px; }
+    .perm-table td.yes { color: var(--bifrost); text-align: center; }
+    .perm-table td.partial { color: var(--st-input); text-align: center; font-size: 12px; }
+    .perm-table td.no { color: var(--shadow); text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+
+      <div class="org-switcher sidebar-org-switcher">
+        <input type="checkbox" id="org-switcher-toggle" class="user-menu-toggle" />
+        <label for="org-switcher-toggle" class="sidebar-project">
+          <span style="display:flex; align-items:center; gap:8px; min-width:0;">
+            <span class="org-avatar sm">A</span>
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Acme Retail</span>
+          </span>
+          <span class="text-shadow">&#8964;</span>
+        </label>
+        <div class="user-menu-panel org-switcher-panel">
+          <div class="org-switcher-label">Organizations</div>
+          <a class="user-menu-item org-switcher-item active" href="/projects/index.html"><span class="org-avatar sm">A</span> Acme Retail</a>
+          <a class="user-menu-item org-switcher-item" href="/projects/index.html"><span class="org-avatar sm">N</span> Northwind Labs</a>
+          <div class="org-switcher-divider">
+            <a class="user-menu-item" href="/settings/organization/general/index.html">Organization settings</a>
+            <button class="user-menu-item" type="button">+ Create organization</button>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/projects/index.html"><span class="icon">&#9638;</span> Projects</a>
+        <a class="nav-link" href="/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-monitoring" class="nav-group-toggle" checked />
+          <label for="nav-group-monitoring" class="nav-group-label">
+            <span class="nav-group-title">Monitoring</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+            <a class="nav-link" href="/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
+            <a class="nav-link" href="/infrastructure/index.html"><span class="icon">&#128421;</span> Infrastructure</a>
+          </div>
+        </div>
+
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-allocations" class="nav-group-toggle" checked />
+          <label for="nav-group-allocations" class="nav-group-label">
+            <span class="nav-group-title">Allocations</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/allocations/infra/index.html"><span class="icon">&#9881;</span> Infra</a>
+            <a class="nav-link" href="/allocations/api/index.html"><span class="icon">&#129302;</span> Agent API</a>
+          </div>
+        </div>
+
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-settings" class="nav-group-toggle" checked />
+          <label for="nav-group-settings" class="nav-group-label">
+            <span class="nav-group-title">Settings</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/settings/organization/general/index.html"><span class="icon">&#9881;</span> General</a>
+            <a class="nav-link active" href="/settings/organization/members/index.html"><span class="icon">&#128101;</span> Members</a>
+            <a class="nav-link" href="/settings/organization/providers/index.html"><span class="icon">&#129504;</span> Providers &amp; Models</a>
+            <a class="nav-link" href="/settings/organization/secrets/index.html"><span class="icon">&#128273;</span> Secrets</a>
+            <a class="nav-link" href="/settings/organization/cluster/index.html"><span class="icon">&#128421;</span> Kubernetes cluster</a>
+          </div>
+        </div>
+
+        <a class="nav-link nav-link-bottom" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="user-menu sidebar-account">
+          <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+          <label for="user-menu-toggle" class="sidebar-account-trigger">
+            <span class="avatar">SC</span>
+            <span class="info">
+              <div class="name">Sarat Chandra</div>
+              <div class="handle">@saratc</div>
+            </span>
+            <span class="chevron">&#9662;</span>
+          </label>
+          <div class="user-menu-panel">
+            <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+            <a class="user-menu-item" href="/settings/organization/general/index.html">Organization settings</a>
+            <a class="user-menu-item" href="/login/index.html">Log out</a>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="main-inner narrow">
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/settings/organization/members</span> — split out of the old single-page tab set, see <a href="/settings/organization/general/index.html" style="color:var(--bifrost);">General</a>'s design-note for the IA rework itself. <b>Introduces a new Organization/Membership/Role data model that ADR 002 explicitly deferred</b> ("Team RBAC and multi-user project permissions (Phase 2)" — see ADR 002 follow-ups, and roadmap/phases.md: "RBAC, team invitations — not started, no team/org entity exists yet"). This wireframe treats projects as belonging to an org (not directly to <span class="mono">owner_user_id</span> as ADR 002 currently has it) — that's the load-bearing assumption behind this entire Settings group and needs its own ADR before being built. The role permission matrix below is a proposed starting point, not derived from any existing spec — five roles (Admin/Developer/Designer/Product Manager/Tester) were given from the original request; the specific capability grants are a best-effort default, flag anything that should change. All data faked; invite reveal is the only working control.</div>
+
+        <div class="page-header">
+          <div>
+            <h1>Members</h1>
+            <p>Everyone with access to <span class="text-bifrost">Acme Retail</span>'s projects, and what they can do.</p>
+          </div>
+          <label class="btn btn-outline btn-sm" for="invite-toggle">+ Invite member</label>
+        </div>
+
+        <div class="card">
+          <input type="checkbox" id="invite-toggle" class="invite-toggle" />
+          <div id="invite-panel" class="secret-field" style="display:none; margin-top:0;">
+            <div class="label">Invite member</div>
+            <div class="field-row" style="margin-top:0;">
+              <div class="field">
+                <label for="invite-handle">GitHub username or email</label>
+                <input class="input" id="invite-handle" placeholder="jellis or jordan@acmeretail.com" />
+              </div>
+              <div class="field" style="max-width:200px;">
+                <label for="invite-role">Role</label>
+                <select class="input" id="invite-role">
+                  <option>Developer</option>
+                  <option>Admin</option>
+                  <option>Designer</option>
+                  <option>Product Manager</option>
+                  <option>Tester</option>
+                </select>
+              </div>
+            </div>
+            <div class="secret-actions" style="margin-top:4px;">
+              <button class="btn btn-primary btn-sm" type="button">Send invite</button>
+              <label class="btn btn-ghost btn-sm" for="invite-toggle">Cancel</label>
+            </div>
+          </div>
+
+          <div class="member-row" style="margin-top:0;">
+            <span class="avatar">SC</span>
+            <div class="member-info">
+              <div class="name-row">
+                <span class="name">Sarat Chandra</span>
+                <span class="text-shadow" style="font-size:12px;">(you)</span>
+              </div>
+              <div class="handle">@saratc</div>
+            </div>
+            <span class="role-badge" style="background:#2fd4c622; color:#2fd4c6;">Admin</span>
+          </div>
+          <div class="member-row">
+            <span class="avatar">JE</span>
+            <div class="member-info">
+              <div class="name-row"><span class="name">Jordan Ellis</span></div>
+              <div class="handle">@jellis</div>
+            </div>
+            <div class="member-actions">
+              <select class="input">
+                <option>Admin</option>
+                <option selected>Developer</option>
+                <option>Designer</option>
+                <option>Product Manager</option>
+                <option>Tester</option>
+              </select>
+              <button class="btn btn-ghost btn-sm" type="button" aria-label="Remove member">&#128465;</button>
+            </div>
+          </div>
+          <div class="member-row">
+            <span class="avatar">PN</span>
+            <div class="member-info">
+              <div class="name-row"><span class="name">Priya Nair</span></div>
+              <div class="handle">@pnair</div>
+            </div>
+            <div class="member-actions">
+              <select class="input">
+                <option>Admin</option>
+                <option>Developer</option>
+                <option>Designer</option>
+                <option selected>Product Manager</option>
+                <option>Tester</option>
+              </select>
+              <button class="btn btn-ghost btn-sm" type="button" aria-label="Remove member">&#128465;</button>
+            </div>
+          </div>
+          <div class="member-row">
+            <span class="avatar">MW</span>
+            <div class="member-info">
+              <div class="name-row"><span class="name">Marcus Webb</span></div>
+              <div class="handle">@mwebb</div>
+            </div>
+            <div class="member-actions">
+              <select class="input">
+                <option>Admin</option>
+                <option>Developer</option>
+                <option selected>Designer</option>
+                <option>Product Manager</option>
+                <option>Tester</option>
+              </select>
+              <button class="btn btn-ghost btn-sm" type="button" aria-label="Remove member">&#128465;</button>
+            </div>
+          </div>
+          <div class="member-row">
+            <span class="avatar">AR</span>
+            <div class="member-info">
+              <div class="name-row"><span class="name">Aisha Rahman</span></div>
+              <div class="handle">@arahman</div>
+            </div>
+            <div class="member-actions">
+              <select class="input">
+                <option>Admin</option>
+                <option>Developer</option>
+                <option>Designer</option>
+                <option>Product Manager</option>
+                <option selected>Tester</option>
+              </select>
+              <button class="btn btn-ghost btn-sm" type="button" aria-label="Remove member">&#128465;</button>
+            </div>
+          </div>
+          <p class="hint" style="margin-top:12px;">An organization must always have at least one Admin — the last Admin can't be removed or reassigned.</p>
+
+          <div class="subdivider">What each role can do</div>
+          <div class="perm-table-wrap">
+            <table class="perm-table">
+              <thead>
+                <tr><th>Capability</th><th>Admin</th><th>Developer</th><th>Designer</th><th>Product Manager</th><th>Tester</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Org settings — cluster, providers, members</td><td class="yes">&#10003;</td><td class="no">&#8212;</td><td class="no">&#8212;</td><td class="no">&#8212;</td><td class="no">&#8212;</td></tr>
+                <tr><td>Create &amp; configure projects</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="partial">view</td><td class="partial">view</td><td class="partial">view</td></tr>
+                <tr><td>Features — create, grill, approve ADR, start build</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="partial">comment</td><td class="yes">&#10003;</td><td class="partial">comment</td></tr>
+                <tr><td>Design sessions</td><td class="yes">&#10003;</td><td class="partial">comment</td><td class="yes">&#10003;</td><td class="partial">comment</td><td class="no">&#8212;</td></tr>
+                <tr><td>Tests — create, manage, view reports</td><td class="yes">&#10003;</td><td class="partial">comment</td><td class="no">&#8212;</td><td class="partial">comment</td><td class="yes">&#10003;</td></tr>
+                <tr><td>Pull request review</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="partial">comment</td><td class="yes">&#10003;</td><td class="partial">comment</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Testing — Saved payment methods — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .detail-title { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .detail-title h1 { font-size: 24px; }
+
+    section.block { border: 1px solid var(--rime); background: var(--surface-01); border-radius: var(--radius-card); padding: 24px; margin-bottom: 20px; }
+    section.block h2 { font-size: 16px; margin-bottom: 4px; }
+
+    .empty-row { padding: 20px; border: 1px dashed var(--rime); border-radius: var(--radius-sm); font-size: 13px; color: var(--shadow); }
+
+    .preview-ref summary { cursor: pointer; list-style: none; font-size: 13px; color: var(--mist); }
+    .preview-ref summary::-webkit-details-marker { display: none; }
+    .preview-ref summary::before { content: "\25B8  "; color: var(--shadow); }
+    .preview-ref[open] summary::before { content: "\25BE  "; }
+    .preview-ref-body { margin-top: 16px; }
+
+    .section-toggle { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+    .subview-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--rime-soft); margin-bottom: 20px; }
+    .subview-tabs label { padding: 9px 4px; margin-right: 16px; font-size: 13px; color: var(--mist); border-bottom: 2px solid transparent; cursor: pointer; }
+    .subview-tabs label:hover { color: var(--frost); }
+    .subview-panel { display: none; }
+
+    #test-view-passed:checked ~ .test-tabs .subview-tabs label[for="test-view-passed"],
+    #test-view-failed:checked ~ .test-tabs .subview-tabs label[for="test-view-failed"] {
+      color: var(--frost);
+      border-bottom-color: var(--bifrost);
+    }
+    #test-view-passed:checked ~ .test-tabs #panel-test-passed,
+    #test-view-failed:checked ~ .test-tabs #panel-test-failed {
+      display: block;
+    }
+
+    .test-group { margin-top: 20px; }
+    .test-group:first-of-type { margin-top: 0; }
+    .test-group-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; color: var(--mist); font-weight: 500; }
+    .test-group-head .count { font-size: 12px; color: var(--shadow); font-weight: 400; }
+    .test-result-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--rime-soft); border-radius: var(--radius-sm); margin-top: 6px; font-size: 13px; }
+    .test-result-row:first-of-type { margin-top: 0; }
+    .test-result-row .icon { flex-shrink: 0; }
+    .test-result-row.pass .icon { color: var(--st-approved); }
+    .test-result-row.fail .icon { color: var(--st-rejected); }
+    .test-result-row .name { flex: 1; color: var(--frost); }
+    .test-result-row .name a { color: inherit; }
+    .test-result-row .name a:hover { color: var(--bifrost); }
+    .test-result-row .dur { flex-shrink: 0; font-size: 12px; color: var(--shadow); font-family: var(--font-mono); }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+      <a class="sidebar-project" href="/projects/index.html">
+        <span>Acme Storefront</span>
+        <span class="text-shadow">&#8964;</span>
+      </a>
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/projects/detail/index.html"><span class="icon">&#8962;</span> Home</a>
+        <a class="nav-link active" href="/projects/detail/features/index.html"><span class="icon">&#9638;</span> Features</a>
+        <a class="nav-link" href="/projects/detail/tests/index.html"><span class="icon">&#9879;</span> Tests</a>
+        <a class="nav-link" href="/projects/detail/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+        <a class="nav-link" href="/projects/detail/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+        <a class="nav-link" href="/projects/detail/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-settings" class="nav-group-toggle" checked />
+          <label for="nav-group-settings" class="nav-group-label">
+            <span class="nav-group-title">Settings</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/projects/detail/settings/general/index.html"><span class="icon">&#9881;</span> General</a>
+            <a class="nav-link" href="/projects/detail/settings/secrets/index.html"><span class="icon">&#128273;</span> Secrets</a>
+            <a class="nav-link" href="/projects/detail/settings/models/index.html"><span class="icon">&#129504;</span> Models</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <div class="main">
+      <div class="shell-topbar">
+        <div class="crumbs">
+          <a href="/projects/index.html">Acme Retail</a>
+          <span class="sep">/</span>
+          <a href="/projects/detail/index.html">Acme Storefront</a>
+          <span class="sep">/</span>
+          <a href="/projects/detail/features/index.html">Features</a>
+          <span class="sep">/</span>
+          <a href="/projects/detail/features/detail/index.html">Saved payment methods</a>
+          <span class="sep">/</span>
+          <span class="current">Testing</span>
+        </div>
+        <div class="shell-topbar-actions">
+          <a class="notif-bell" href="/notifications/index.html" aria-label="Notifications"><span class="dot"></span>&#128276;</a>
+          <div class="user-menu">
+            <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+            <label for="user-menu-toggle" class="user-menu-trigger">
+              <span class="avatar">SC</span>
+              <span class="chevron">&#9662;</span>
+            </label>
+            <div class="user-menu-panel">
+              <div class="user-menu-head">
+                <div class="name">Sarat Chandra</div>
+                <div class="handle">@saratc</div>
+              </div>
+              <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+              <a class="user-menu-item" href="/login/index.html">Log out</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="main-inner">
+        <div class="design-note">
+          <b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/features/:featureId/testing</span> — an entirely <b>new</b> route/gate, run automatically
+          once Implementation finishes, per the user's spec ("all configured Unit/Integration/Agentic tests for the project"). <b>Grounding is mixed by group</b>:
+          <b>Agentic</b> maps directly to the existing Tests feature — a real per-project <span class="mono">test_run</span> job, markdown spec, agent-executed
+          (see <a href="/projects/detail/tests/index.html" style="color:var(--bifrost);">/tests</a>). <b>Unit</b> and <b>Integration</b> have no equivalent
+          anywhere — there's no CI/code-level test runner concept in any ADR, no config for one, and no job kind that would execute <span class="mono">npm test</span>
+          / <span class="mono">pytest</span>-style tests inside a container. Showing them here is entirely aspirational. This feature hasn't reached Testing yet
+          (still Implementing), so the honest default view is empty; pass/fail results are previewed below for reference only.
+        </div>
+
+        <div class="detail-title">
+          <h1>Saved payment methods</h1>
+          <span class="badge" style="background:#4f9bf022; color:#4f9bf0;">Implementing</span>
+        </div>
+
+        <div class="card feature-context">
+          <div class="feature-steps">
+            <a class="step-link done" href="/projects/detail/features/detail/spec/index.html">
+              <span class="step-num">&#10003;</span> Spec
+            </a>
+            <span class="step-sep">&#8594;</span>
+            <a class="step-link done" href="/projects/detail/features/detail/action-items/index.html">
+              <span class="step-num">&#10003;</span> Action Items
+            </a>
+            <span class="step-sep">&#8594;</span>
+            <a class="step-link active" href="/projects/detail/features/detail/implementation/index.html">
+              <span class="step-num">3</span> Implementation
+            </a>
+            <span class="step-sep">&#8594;</span>
+            <a class="step-link upcoming here" href="/projects/detail/features/detail/testing/index.html">
+              <span class="step-num">4</span> Testing
+            </a>
+            <span class="step-sep">&#8594;</span>
+            <a class="step-link upcoming" href="/projects/detail/features/detail/agentic-review/index.html">
+              <span class="step-num">5</span> Agentic Review
+            </a>
+            <span class="step-sep">&#8594;</span>
+            <a class="step-link upcoming" href="/projects/detail/features/detail/manual-review/index.html">
+              <span class="step-num">6</span> Manual Review
+            </a>
+          </div>
+          <div class="feature-context-side">
+            <a class="preview-chip" href="#" target="_blank" rel="noopener">&#128279; acme-storefront-feature_build-482.preview&#8230; &#8599;</a>
+            <span class="token-chip">&#9889; 91.2K tokens</span>
+          </div>
+        </div>
+
+        <details class="card subtasks-card" style="margin-bottom:20px;">
+          <summary>Subtasks &middot; 3/4 complete <span class="chev">&#9662;</span></summary>
+          <ul class="subtask-list">
+            <li class="subtask-item done"><span class="box">&#10003;</span><span class="label">Tokenize cards via Stripe SetupIntent</span></li>
+            <li class="subtask-item done"><span class="box">&#10003;</span><span class="label">Store payment_method id + last4/brand only</span></li>
+            <li class="subtask-item done"><span class="box">&#10003;</span><span class="label">Add default_payment_method_id, allow marking one card default</span></li>
+            <li class="subtask-item active"><span class="box"></span><span class="label">Require picking a new default before removing the current one</span></li>
+          </ul>
+        </details>
+
+        <section class="block">
+          <h2>Testing</h2>
+          <div class="empty-row" style="margin-top:12px;">Testing hasn't run for this feature yet — it starts automatically once implementation finishes.</div>
+
+          <details class="preview-ref" style="margin-top:20px;">
+            <summary>Preview other states (design reference)</summary>
+            <div class="preview-ref-body">
+              <input type="radio" name="test-view" id="test-view-passed" class="section-toggle" checked />
+              <input type="radio" name="test-view" id="test-view-failed" class="section-toggle" />
+              <div class="test-tabs">
+                <div class="subview-tabs">
+                  <label for="test-view-passed">All passed</label>
+                  <label for="test-view-failed">Failed (sent back)</label>
+                </div>
+
+                <div class="subview-panel" id="panel-test-passed">
+                  <div class="test-group">
+                    <div class="test-group-head">Unit <span class="count">12/12 passed</span></div>
+                    <div class="test-result-row pass"><span class="icon">&#10003;</span><span class="name">payments/setup-intent.test.ts</span><span class="dur">1.2s</span></div>
+                    <div class="test-result-row pass"><span class="icon">&#10003;</span><span class="name">customers/default-payment-method.test.ts</span><span class="dur">0.8s</span></div>
+                  </div>
+                  <div class="test-group">
+                    <div class="test-group-head">Integration <span class="count">4/4 passed</span></div>
+                    <div class="test-result-row pass"><span class="icon">&#10003;</span><span class="name">POST /customers/:id/payment-methods</span><span class="dur">2.1s</span></div>
+                    <div class="test-result-row pass"><span class="icon">&#10003;</span><span class="name">DELETE /customers/:id/payment-methods/:id</span><span class="dur">1.9s</span></div>
+                  </div>
+                  <div class="test-group">
+                    <div class="test-group-head">Agentic <span class="count">2/2 passed</span></div>
+                    <div class="test-result-row pass"><span class="icon">&#10003;</span><span class="name"><a href="/projects/detail/tests/detail/index.html">Checkout regression suite</a></span><span class="dur">48s</span></div>
+                    <div class="test-result-row pass"><span class="icon">&#10003;</span><span class="name"><a href="/projects/detail/tests/detail/index.html">Checkout regression suite &middot; default card removal</a></span><span class="dur">31s</span></div>
+                  </div>
+                </div>
+
+                <div class="subview-panel" id="panel-test-failed">
+                  <div class="test-group">
+                    <div class="test-group-head">Unit <span class="count">12/12 passed</span></div>
+                    <div class="test-result-row pass"><span class="icon">&#10003;</span><span class="name">payments/setup-intent.test.ts</span><span class="dur">1.2s</span></div>
+                  </div>
+                  <div class="test-group">
+                    <div class="test-group-head">Integration <span class="count">3/4 passed</span></div>
+                    <div class="test-result-row pass"><span class="icon">&#10003;</span><span class="name">POST /customers/:id/payment-methods</span><span class="dur">2.1s</span></div>
+                    <div class="test-result-row fail"><span class="icon">&#10007;</span><span class="name">DELETE /customers/:id/payment-methods/:id (last card)</span><span class="dur">1.4s</span></div>
+                  </div>
+                  <div class="test-group">
+                    <div class="test-group-head">Agentic <span class="count">1/2 passed</span></div>
+                    <div class="test-result-row pass"><span class="icon">&#10003;</span><span class="name"><a href="/projects/detail/tests/detail/index.html">Checkout regression suite</a></span><span class="dur">48s</span></div>
+                    <div class="test-result-row fail"><span class="icon">&#10007;</span><span class="name"><a href="/projects/detail/tests/detail/index.html">Checkout regression suite &middot; default card removal</a></span><span class="dur">22s</span></div>
+                  </div>
+                  <p class="text-shadow" style="font-size:12px; margin-top:16px;">2 failures &rarr; feature sent back to <a href="/projects/detail/features/detail/implementation/index.html" style="color:var(--bifrost);">Implementation</a> with a comment. See that page's "Returned from Testing" preview.</p>
+                </div>
+              </div>
+            </div>
+          </details>
+        </section>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

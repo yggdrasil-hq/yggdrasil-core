@@ -72,7 +72,7 @@
           <a class="user-menu-item org-switcher-item active" href="/projects/index.html"><span class="org-avatar sm">A</span> Acme Retail</a>
           <a class="user-menu-item org-switcher-item" href="/projects/index.html"><span class="org-avatar sm">N</span> Northwind Labs</a>
           <div class="org-switcher-divider">
-            <a class="user-menu-item" href="/settings/organization/index.html">Organization settings</a>
+            <a class="user-menu-item" href="/settings/organization/general/index.html">Organization settings</a>
             <button class="user-menu-item" type="button">+ Create organization</button>
           </div>
         </div>
@@ -81,7 +81,48 @@
       <nav class="sidebar-nav">
         <a class="nav-link" href="/projects/index.html"><span class="icon">&#9638;</span> Projects</a>
         <a class="nav-link active" href="/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
-        <a class="nav-link" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
+
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-monitoring" class="nav-group-toggle" checked />
+          <label for="nav-group-monitoring" class="nav-group-label">
+            <span class="nav-group-title">Monitoring</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+            <a class="nav-link" href="/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
+            <a class="nav-link" href="/infrastructure/index.html"><span class="icon">&#128421;</span> Infrastructure</a>
+          </div>
+        </div>
+
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-allocations" class="nav-group-toggle" checked />
+          <label for="nav-group-allocations" class="nav-group-label">
+            <span class="nav-group-title">Allocations</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/allocations/infra/index.html"><span class="icon">&#9881;</span> Infra</a>
+            <a class="nav-link" href="/allocations/api/index.html"><span class="icon">&#129302;</span> Agent API</a>
+          </div>
+        </div>
+
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-settings" class="nav-group-toggle" checked />
+          <label for="nav-group-settings" class="nav-group-label">
+            <span class="nav-group-title">Settings</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/settings/organization/general/index.html"><span class="icon">&#9881;</span> General</a>
+            <a class="nav-link" href="/settings/organization/members/index.html"><span class="icon">&#128101;</span> Members</a>
+            <a class="nav-link" href="/settings/organization/providers/index.html"><span class="icon">&#129504;</span> Providers &amp; Models</a>
+            <a class="nav-link" href="/settings/organization/secrets/index.html"><span class="icon">&#128273;</span> Secrets</a>
+            <a class="nav-link" href="/settings/organization/cluster/index.html"><span class="icon">&#128421;</span> Kubernetes cluster</a>
+          </div>
+        </div>
+
+        <a class="nav-link nav-link-bottom" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
       </nav>
 
       <div class="sidebar-foot">
@@ -97,7 +138,7 @@
           </label>
           <div class="user-menu-panel">
             <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
-            <a class="user-menu-item" href="/settings/organization/index.html">Organization settings</a>
+            <a class="user-menu-item" href="/settings/organization/general/index.html">Organization settings</a>
             <a class="user-menu-item" href="/login/index.html">Log out</a>
           </div>
         </div>
