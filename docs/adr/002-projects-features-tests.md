@@ -12,9 +12,9 @@ superseded 2026-08-30 by ADR 016)
 > merged` model and the `changes_requested` state) are superseded by
 > [ADR 015](015-six-stage-feature-lifecycle.md) — decided (six stages: Spec →
 > Action Items → Implementation → Testing → Agentic Review → Manual Review),
-> **not yet built**. Project ownership (`owner_user_id`) is superseded by
+> implemented in Track B. Project ownership (`owner_user_id`) is superseded by
 > [ADR 016](016-organization-rbac-and-cluster-routing.md) — projects now
-> belong to an **Organization**, decided, **not yet built**. Everything else
+> belong to an **Organization**, implemented in Track A. Everything else
 > in this ADR (repos/linking, tests, action queue, notifications, job kinds
 > table) remains the accepted, implemented model, unaffected.
 

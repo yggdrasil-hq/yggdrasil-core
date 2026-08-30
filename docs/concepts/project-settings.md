@@ -58,9 +58,9 @@ points at the org's provider config rather than editing a user default.
 [`github-app.md`](github-app.md). `model_config_warning` (set when a dispatch site can't
 resolve a model configuration, e.g. a `test_run` cron fire after the account default was
 cleared) works the same way — action queue item "Fix model configuration" (ADR 007,
-retired by ADR 016 once that ships, same warning concept re-homed to org-level config).
+retired by ADR 016; the warning concept is now re-homed to org-level config).
 
-*(Not yet implemented, ADR 016):* an **Organization** also has its own status
+An **Organization** also has its own status
 gate — `pending_cluster` → `ready` — blocking all project creation under it
 until a Kubernetes cluster is configured. See
 [`016-organization-rbac-and-cluster-routing.md`](../adr/016-organization-rbac-and-cluster-routing.md).

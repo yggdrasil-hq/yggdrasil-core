@@ -4,11 +4,11 @@
 which phase a feature belongs to.
 **Skip if:** you don't need scheduling/scope context.
 
-> Status (2026-08-30): Phase 1 is complete. Phase 2 is partially built (see
+> Status (2026-08-31): Phase 1 is complete. Phase 2 is partially built (see
 > below). Phase 3 (testing) and the rest of Phase 4 haven't started. ADR 014
-> (`design_grill`), ADR 015 (six-stage feature lifecycle), and ADR 016
-> (Organization/RBAC/org-level config/cluster routing) were all decided out
-> of the original phase plan and aren't built yet either — see
+> (`design_grill`) and ADR 015 (six-stage feature lifecycle) are implemented;
+> ADR 016 (Organization/RBAC/org-level config/cluster routing) was decided out
+> of the original phase plan and is implemented as well — see
 > `docs/CONTEXT.md`'s ADR 014/015/016 entries. For ADR 015/016 specifically,
 > [`adr-015-016-build-plan.md`](adr-015-016-build-plan.md) breaks the actual
 > build into ordered, independently-shippable slices.
@@ -43,26 +43,19 @@ webhook-driven `deploy`/`merged`/`changes_requested` automation (ADR 013).
   agent image/skill, and minimal Web live-preview session are implemented.
   Design browse/history and re-open flows remain deferred with the
   Design-persistence question.
-- 🚧 **Six-stage feature lifecycle** (ADR 015: Spec → Action Items →
+- ✅ **Six-stage feature lifecycle** (ADR 015: Spec → Action Items →
   Implementation → Testing → Agentic Review → Manual Review) — Track B of
-  `docs/roadmap/adr-015-016-build-plan.md`, partially implemented. The state
-  machine, `returned` state (replacing `changes_requested`),
-  `feature_action_items`, and the Action Items persistence hook are in
-  (Slice B1). B5's `script_test_run` path is now built; the remaining
-  job-kind slices (`request_action_item`, on-demand `test_run`,
-  `agentic_review`) and the Manual Review UI (B7) remain incomplete. See
-  `docs/concepts/feature-lifecycle.md`'s "Target model" section for the
-  build-relevant breakdown per stage.
+  `docs/roadmap/adr-015-016-build-plan.md` is implemented. This includes the
+  four Action Item resolution mechanics, feature-branch agentic/script
+  testing, Agentic Review, unified `returned` transitions, and Manual Review
+  UI. See `docs/concepts/feature-lifecycle.md` for the state model.
 
 ## Phase 3 — Testing — not started
 
-Test suite manager, cron scheduling, Orchestrator test runner, report generation,
-screen recording, test history UI. `test_run`'s job kind exists as a stub
-routed through the placeholder job path (`worker.go`'s `runAgentJob`), not
-the RPC-driven path `spec_grill`/`feature_build` use. ADR 015 (Phase 2, see
-above) adds further scope here once its Testing stage is built: `test_run`
-gains an on-demand/feature-branch trigger mode. Unit/Integration testing now
-uses the non-agent `script_test_run` path from B5.
+Future testing-product work remains: test suite manager, cron scheduling,
+screen recording, and test history UI. ADR 015's feature-stage
+`test_run`/`script_test_run` paths are already implemented, including
+feature-branch reports and the Testing tab.
 
 ## Phase 4 — Polish — not started
 

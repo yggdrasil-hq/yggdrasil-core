@@ -29,7 +29,7 @@ source-of-truth state — everything comes from the API.
 for this app — a materially larger surface than what `web/` implements today
 (usage/analytics/allocations pages and more remain undecided — plus the
 six-stage feature lifecycle pages and the org-level settings pages, both of
-which are now decided, ADR 015 and ADR 016 respectively, but not yet built).
+which are now implemented for ADR 015 and ADR 016 respectively).
 It's the source of truth for where the IA is headed, not for what's live.
 See `design/README.md`'s route map, `docs/adr/015-six-stage-feature-lifecycle.md`,
 `docs/adr/016-organization-rbac-and-cluster-routing.md`, and

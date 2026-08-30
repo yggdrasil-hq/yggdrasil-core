@@ -18,11 +18,11 @@ these — surface them.**
 > [ADR 003](../adr/003-orchestrator-kubernetes.md) and removed from this list.
 > Question #14 (six-stage feature lifecycle) was resolved by
 > [ADR 015](../adr/015-six-stage-feature-lifecycle.md) and removed from this
-> list — decided, not yet built. Questions #10 (multi-cluster credential
+> list — decided and implemented. Questions #10 (multi-cluster credential
 > routing), #13 (Organization/RBAC entity), and #16 (org-level provider/
 > secret config) were all resolved together by
 > [ADR 016](../adr/016-organization-rbac-and-cluster-routing.md) and removed
-> from this list — decided, not yet built.
+> from this list — decided and implemented.
 
 ## How to use this list
 

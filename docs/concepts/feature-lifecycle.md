@@ -8,13 +8,11 @@
 > **Authoritative states, decided target model:** ADR 015
 > (`docs/adr/015-six-stage-feature-lifecycle.md`) — six stages (Spec → Action
 > Items → Implementation → Testing → Agentic Review → Manual Review).
-> **Implementation:** the state machine itself (B1 of the build plan) and the
-> non-agent script testing path (B5) are built across `api/`, `orchestrator/`,
-> and `agent-images/`:
-> `testing`/`agentic_review`/`returned`, `feature_action_items`,
-> build-success → `testing`, agentic and script `test_run` dispatch/report
-> aggregation, `returned` on test or human PR review, and "Resume
-> implementation".
+> **Implementation:** ADR 015 is implemented across `api/`, `orchestrator/`,
+> `web/`, and `agent-images/`: `testing`/`agentic_review`/`returned`,
+> `feature_action_items` and all four resolution mechanics, build-success →
+> Testing dispatch/report aggregation, Agentic Review, returned on test/agentic
+> review/human PR review, and "Resume implementation".
 > Not touched by ADR 015: Org/RBAC (`roadmap/open-questions.md` #13) and
 > per-message grill resume/restart (`roadmap/open-questions.md` #17) remain
 > undecided.
@@ -41,7 +39,8 @@ kind with their own single-phase flow — no ADR, no spec/build split. See
 |-------|----------|----------------|--------|
 | Spec | `spec_grill` | `draft` → `spec_ready` | ADR stored on feature record (API) |
 | Build | `feature_build` | `spec_ready` → `queued` → `running` → `testing` → … | Code + ADR commit on feature branch |
-| Agentic Testing | `test_run` | `testing` → `agentic_review` / `in_review` | Feature-branch preview and structured step/report events |
+| Testing | `test_run`, `script_test_run` | `testing` → `agentic_review` / `in_review` / `returned` | Feature-branch preview and structured agentic/script reports |
+| Agentic Review | `agentic_review` | `agentic_review` → `in_review` / `returned` | Read-only ADR/diff review and internal verdict |
 
 User must explicitly approve the ADR and click **Start build** to dispatch
 `feature_build`. Spec and build use **separate containers**.
@@ -106,7 +105,7 @@ stays disabled until every Action Item on the batch resolves.
 | Action Items | `spec_ready` (UI view) | Four types (env var/secret, move to `design_grill`, blocking subtask feature, test request), each with its own resolution mechanic — see ADR 015 items 4-6. "Start build" gates on all being resolved. |
 | Implementation | `queued`, `running`, `failed`, `returned` | `feature_build` gains a new terminal tool, `request_action_item`, called when the agent is blocked on something only a human/another job can supply — distinct from a generic crash (`failed`, unchanged). This is the only path that kicks back to Spec (ADR 015 items 7-8). |
 | Testing | `testing` | Agentic group extends `test_run` with an on-demand trigger against the feature's branch (not `main`). Unit/Integration are a **new, non-agent** job kind `script_test_run` — runs `test-unit.sh`/`test-integration.sh` (optional, structure-standard convention) in a plain container, reads a canonical `.yggdrasil/test-report.json`. |
-| Agentic Review | `agentic_review` | New job kind, read-only tier, reuses ADR 006 attach/RPC machinery. New terminal tool `submit_review({verdict, comment})` — an internal verdict, not a real GitHub PR review. Per-project toggle, default on. |
+| Agentic Review | `agentic_review` | New read-only job kind reusing ADR 006 attach/RPC machinery. Its terminal tool `submit_review({verdict, comment})` produces an internal verdict, not a real GitHub PR review. Per-project toggle, default on. |
 | Manual Review | `in_review`, `returned`, `merged` | Unchanged mechanically (ADR 013's webhooks) — a UI grouping of existing states, now gated behind Agentic Review instead of being the second-of-three-phases finish line. |
 
 ### The unified `returned` state
@@ -146,7 +145,6 @@ covers `testing`, `agentic_review`, and `returned`.
   (before any build was attempted) remains undecided.
 - A closed-without-merge PR has no lifecycle representation (ADR 013,
   deliberately left open).
-- The remaining Agentic Review image/UI work is still pending — see ADR 015's
-  Follow-ups section for what's explicitly out of scope (kickback-context growth cap,
-  blocking-subtask recursion guard, Agentic Review Web UI beyond the
-  Returned view).
+- Design browse/history and per-message grill resume remain deferred. See ADR
+  015's Follow-ups section for other explicitly out-of-scope safeguards such
+  as kickback-context growth caps and blocking-subtask recursion guards.

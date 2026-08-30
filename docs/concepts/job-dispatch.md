@@ -42,11 +42,10 @@ in the Orchestrator itself.
   `submit_adr` call (ADR 015 item 4) → persisted on feature record in API.
 - Feature transitions: `draft` → `spec_ready`.
 - Container torn down on completion.
-- **Not yet implemented (ADR 015):** when dispatched as a kickback from a
-  blocked `feature_build` (`request_action_item`, below), the payload also
-  carries the previous approved ADR, a grill-transcript summary, and the
-  kickback reason, so the run picks up from where it left off instead of
-  re-exploring from scratch.
+- When dispatched as a kickback from a blocked `feature_build`
+  (`request_action_item`, below), the payload carries the previous approved
+  ADR, a bounded grill-transcript summary, the kickback reason, requested
+  Action Items, and resolved design snapshots.
 
 ### `feature_build`
 
@@ -55,14 +54,14 @@ in the Orchestrator itself.
 - Agent implements, commits ADR to `docs/adr/NNN-<slug>.md` on feature branch,
   opens draft PR on primary repo.
 - Optional preview tunnel during build.
-- Feature transitions: `spec_ready` → `queued` → `running` → `in_review` → …
-  (current); `spec_ready` → `queued` → `running` → `testing` → … (ADR 015
-  target, not yet implemented).
-- **Not yet implemented (ADR 015):** a new terminal tool,
-  `request_action_item`, called instead of `submit_build_result` when the
-  agent is blocked on something only a human/another job can supply
-  (distinct from a generic crash, which is unchanged) — kicks the feature
-  back to a fresh `spec_grill` run rather than `failed`.
+- Feature transitions: `spec_ready` → `queued` → `running` → `testing` → …
+  (ADR 015). The Testing gate advances to `agentic_review` when enabled, then
+  to `in_review`; failures land in `returned`.
+- A terminal `request_action_item` tool is called instead of
+  `submit_build_result` when the agent is blocked on something only a
+  human/another job can supply (distinct from a generic crash, which is
+  unchanged). This kicks the feature back to a fresh, context-seeded
+  `spec_grill` run rather than `failed`.
 
 ### `test_run`
 
@@ -100,8 +99,8 @@ attach/RPC, or contract tools.
 
 ### `agentic_review`
 
-> **Not yet implemented.** Decided by [ADR 015](../adr/015-six-stage-feature-lifecycle.md);
-> no job kind, image, skill, or curated-event handling exists yet.
+Implemented as a read-only Pi/RPC job. It reviews the feature branch against
+the approved ADR and submits an internal verdict.
 
 - Same attach/RPC machinery as `spec_grill` (ADR 006), same precedent
   `design_grill` set in ADR 014. **Read-only** installation token
@@ -164,8 +163,7 @@ the Design-persistence question is resolved.
 
 - Job kind: `spec_grill` | `feature_build` | `test_run` | `deploy` |
   `design_grill` (ADR 014; implemented); `script_test_run` |
-  `agentic_review` (ADR 015) — `agentic_review` remains decided but not yet
-  implemented. `script_test_run` is
+  `agentic_review` (ADR 015; implemented). `script_test_run` is
   the only job kind with no Pi/RPC involvement at all (alongside `deploy`).
 - Container image: resolved by the Orchestrator from one env var per job kind
   (`SPEC_GRILL_IMAGE` / `FEATURE_BUILD_IMAGE` / `TEST_RUN_IMAGE` /
@@ -212,12 +210,14 @@ to the Web app over WebSocket.
   `submit_test_report`; the API stores both progress and aggregate results
   without parsing framework-specific output. Script jobs submit the same
   canonical report event after validating `.yggdrasil/test-report.json`.
-  **Extended for the six-stage lifecycle by ADR 015 (Slices B1 and B5):** a
+  **Extended for the six-stage lifecycle by ADR 015 (Slices B1-B7):** a
   `submit_build_result` success now lands a feature in `testing` (not
   `in_review`), and `submit_adr` carries an optional `actionItems` array
   (the Action Item batch, persisted at the `draft` → `spec_ready`
   transition). B4 now dispatches feature-ref `test_run` rows, and B5 adds
   feature-ref `script_test_run` rows; both participate in the Testing gate.
+  B3 adds `request_action_item` and B6 adds `submit_review`; their terminal
+  events advance the unified lifecycle through `returned` or Manual Review.
 - Idempotency / retry / dedupe for dispatch and events (delivery guarantees for
   the Postgres-backed queue itself are decided in ADR 003). **Partially
   resolved for `spec_grill`/`project_init` by ADR 012**

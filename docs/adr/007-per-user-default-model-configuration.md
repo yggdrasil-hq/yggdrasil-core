@@ -13,12 +13,10 @@
 > default model config itself) is unaffected. See
 > [ADR 012](012-spec-grill-retry-state-reset.md#follow-ups-out-of-scope-for-this-adr).
 
-> **Superseded by [ADR 016](016-organization-rbac-and-cluster-routing.md)**,
-> decided but **not yet built**: org-level, admin-managed provider/model/
-> secret config replaces this ADR's per-user default entirely, once an
-> Organization entity exists (ADR 016) — this ADR's central premise ("no
-> team/org entity yet") no longer holds. Until ADR 016 is actually built,
-> the per-user default described below remains what's implemented and live.
+> **Superseded and retired by [ADR 016](016-organization-rbac-and-cluster-routing.md)**:
+> org-level, admin-managed provider/model/secret config replaces this ADR's
+> per-user default entirely. The implementation is now live under Track A;
+> the details below are historical.
 
 ## Context
 

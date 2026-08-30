@@ -43,8 +43,8 @@ definition. This is a lookup table, not a narrative — read only the row you ne
 | **pending_username** | Onboarding state after GitHub signup — user must confirm username before using the app. |
 | **Organization** *(decided, ADR 016, not implemented)* | Entity above Project, replacing `owner_user_id` ownership (ADR 002). A user can belong to several; every user gets a personal one auto-created at signup. See `docs/CONTEXT.md`. |
 | **Membership / Role** *(decided, ADR 016, not implemented)* | Five org-wide roles (Admin/Developer/Designer/Product Manager/Tester), one per membership, applying across every project in that org. Capability grants are adjustable seed data. |
-| **Action item** *(decided, ADR 015; resolution mechanics partial)* | A requirement raised by `spec_grill` alongside the ADR (env var/secret/test request, `design_grill` handoff, new blocking subtask feature) that must resolve before Implementation can start. See `docs/CONTEXT.md`. |
-| **Agentic Review** *(decided, ADR 015, not implemented)* | A new job kind, gated between Testing and Manual Review, where an agent reviews another agent's diff against its ADR — read-only access, internal-only verdict. Per-project toggle, default on. See `docs/CONTEXT.md`. |
+| **Action item** *(decided and implemented, ADR 015)* | A requirement raised by `spec_grill` alongside the ADR (env var/secret/test request, `design_grill` handoff, new blocking subtask feature) that must resolve before Implementation can start. See `docs/CONTEXT.md`. |
+| **Agentic Review** *(decided and implemented, ADR 015)* | A new job kind, gated between Testing and Manual Review, where an agent reviews another agent's diff against its ADR — read-only access, internal-only verdict. Per-project toggle, default on. See `docs/CONTEXT.md`. |
 | **Allocation** *(proposed, not implemented)* | Org-admin-configured cap: infra (per-project Kubernetes ResourceQuota) or API (per-project provider access + monthly token cap). See `roadmap/open-questions.md` #15. |
 
 > Missing a term? Add a row (alphabetical-ish by importance) when you introduce

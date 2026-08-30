@@ -20,7 +20,8 @@ Playwright CLI tool instead.
 ## How Yggdrasil runs Pi
 
 - The **Orchestrator** launches a per-job-kind container built from
-  `agent-images/` (ADR 004) — `spec_grill`, `feature_build`, or `test_run` —
+  `agent-images/` (ADR 004) — `spec_grill`, `feature_build`, `test_run`,
+  `agentic_review`, or `design_grill` —
   each already containing Pi, its job-kind skill, and the shared
   `yggdrasil-contract` extension, then clones the target repo(s) with a
   short-lived scoped token.
@@ -47,16 +48,19 @@ Playwright CLI tool instead.
   `feature-grill` (every other feature, grill-with-docs-derived). The
   Orchestrator's initial prompt names exactly one per run. `feature_build` →
   an "implement" skill (unattended, no user interruption), `test_run` → a
-  "run-tests" skill (executes a markdown spec's `##` steps). `design_grill`
-  (ADR 014) gets a "design-grill" skill reusing `spec_grill`'s attach/RPC
-  machinery with a write-scoped token and design-specific contract tools.
+  "run-tests" skill (executes a markdown spec's `##` steps), `agentic_review`
+  gets a read-only "review" skill, and `design_grill` (ADR 014) gets a
+  "design-grill" skill reusing `spec_grill`'s attach/RPC machinery with a
+  write-scoped token and design-specific contract tools.
 - A single shared Pi **extension**, `yggdrasil-contract`, is loaded in every
   image's common base layer. It exposes structured tool calls in place of
   prose-based turn/completion signaling: `ask_user`/`submit_adr` (`spec_grill`),
-  `submit_build_result` (`feature_build`), `report_test_step`/
-  `submit_test_report` (`test_run`). `update_design_preview`/`submit_design`
-  (`design_grill`, ADR 014) are available in the shared extension. Each image restricts which of these are visible
-  to its skill via `allowed-tools`.
+  `submit_build_result`/`request_action_item` (`feature_build`),
+  `report_test_step`/`submit_test_report` (`test_run`),
+  `submit_review` (`agentic_review`), and
+  `update_design_preview`/`submit_design` (`design_grill`, ADR 014) are
+  available in the shared extension. Each image restricts which of these are
+  visible to its skill via `allowed-tools`.
 - **Tool allowlist** — beyond scoping the contract extension's own tools per
   image, the broader "which packages/tools Pi may install inside the
   container" knob (below) is a separate, still-open question.
@@ -72,10 +76,9 @@ Playwright CLI tool instead.
   resolved live at dispatch time — project first, then the owning user's
   default. Every dispatch site refuses to dispatch if neither resolves
   (ADR 007, `docs/adr/007-per-user-default-model-configuration.md`).
-  **Not yet implemented:** ADR 016 retires the per-user `user_secrets` tier
-  entirely in favor of an Organization-level default (`project_secrets` →
-  the project's org's config) — see
-  `docs/adr/016-organization-rbac-and-cluster-routing.md`.
+  ADR 016 retires the per-user `user_secrets` tier in favor of an
+  Organization-level default (`project_secrets` → the project's org's config)
+  — see `docs/adr/016-organization-rbac-and-cluster-routing.md`.
 - **Tool allowlist** — which packages/tools Pi may install inside the
   container. Still TODO beyond the contract extension's own `allowed-tools`
   scoping.
@@ -103,7 +106,7 @@ Playwright CLI tool instead.
   orphaned with no reattachment — deferred by ADR 006.
 - ~~CI/release process for `agent-images` (build, tag, push) — not yet
   designed.~~ **Resolved:** `agent-images/.github/workflows/build-images.yml`
-  builds and pushes the base + 3 per-job-kind images to GHCR on every push to
+  builds and pushes the base + 6 per-job-kind images to GHCR on every push to
   `main` (ADR 004).
 - Design persistence remains open (ADR 014 item 13); the current design
   session is represented by its job and curated snapshot events.

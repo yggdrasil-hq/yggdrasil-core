@@ -207,7 +207,7 @@ Constraints:
 - ~~**One target cluster per Orchestrator instance** means "bring your own
   cluster while using hosted SaaS" isn't supported yet.~~ Resolved by
   [ADR 016](016-organization-rbac-and-cluster-routing.md) (per-org cluster
-  config, no instance-wide default) — decided, not yet built.
+  config, no instance-wide default) — implemented in Track A.
 - **Single Orchestrator service** conflates ephemeral job execution and
   persistent deploy management in one codebase; if one grows disproportionately
   relative to the other, the internal module boundaries will need to become
@@ -221,7 +221,7 @@ Constraints:
 - ~~Multi-cluster credential routing for bring-your-own-cluster inside the
   managed SaaS offering.~~ Resolved by
   [ADR 016](016-organization-rbac-and-cluster-routing.md) (2026-08-30) —
-  decided, not yet built.
+  implemented in Track A.
 - Cluster/node-pool autoscaling strategy for bursty ephemeral job load.
 - Dedicated node pools as a paid isolation tier.
 - Buildpack/manifest-based auto-detection as an alternative to
