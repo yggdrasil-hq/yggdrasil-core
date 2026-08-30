@@ -8,8 +8,8 @@ keep short, link, don't duplicate.
 - **Submodule path:** `agent-images/`
 - **GitHub repo:** `yggdrasil-hq/yggdrasil-agent-images`
 - **Status:** Dockerfiles, skills, and the shared extension are scaffolded and
-  build cleanly. CI builds and pushes all five images (common base + the
-  four per-job-kind images below) to GitHub Container Registry on every push
+  build cleanly. CI builds and pushes all seven images (common base + the
+  six per-job-kind images below) to GitHub Container Registry on every push
   to `main`. Registry
   pull-secret provisioning for self-hosted installs (GHCR packages default to
   private) is documented in `docs/conventions/deploy.md`.

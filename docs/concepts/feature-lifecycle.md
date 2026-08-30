@@ -8,11 +8,13 @@
 > **Authoritative states, decided target model:** ADR 015
 > (`docs/adr/015-six-stage-feature-lifecycle.md`) — six stages (Spec → Action
 > Items → Implementation → Testing → Agentic Review → Manual Review).
-> **Implementation:** the state machine itself (B1 of the build plan) is built
-> in `api/`: `testing`/`agentic_review`/`returned`, `feature_action_items`,
-> build-success → `testing`, agentic `test_run` dispatch/report aggregation,
-> `returned` on test or human PR review, and "Resume implementation". The
-> non-agent `script_test_run` path remains separate B5 work.
+> **Implementation:** the state machine itself (B1 of the build plan) and the
+> non-agent script testing path (B5) are built across `api/`, `orchestrator/`,
+> and `agent-images/`:
+> `testing`/`agentic_review`/`returned`, `feature_action_items`,
+> build-success → `testing`, agentic and script `test_run` dispatch/report
+> aggregation, `returned` on test or human PR review, and "Resume
+> implementation".
 > Not touched by ADR 015: Org/RBAC (`roadmap/open-questions.md` #13) and
 > per-message grill resume/restart (`roadmap/open-questions.md` #17) remain
 > undecided.
@@ -144,8 +146,7 @@ covers `testing`, `agentic_review`, and `returned`.
   (before any build was attempted) remains undecided.
 - A closed-without-merge PR has no lifecycle representation (ADR 013,
   deliberately left open).
-- B5's `script_test_run` path and the remaining Agentic Review image/UI work
-  are still pending — see ADR 015's Follow-ups section for what's explicitly
-  out of scope (kickback-context growth cap,
+- The remaining Agentic Review image/UI work is still pending — see ADR 015's
+  Follow-ups section for what's explicitly out of scope (kickback-context growth cap,
   blocking-subtask recursion guard, Agentic Review Web UI beyond the
   Returned view).

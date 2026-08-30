@@ -48,9 +48,9 @@ webhook-driven `deploy`/`merged`/`changes_requested` automation (ADR 013).
   `docs/roadmap/adr-015-016-build-plan.md`, partially implemented. The state
   machine, `returned` state (replacing `changes_requested`),
   `feature_action_items`, and the Action Items persistence hook are in
-  (Slice B1). The job-kind slices B3-B6 (`request_action_item`,
-  `script_test_run`, on-demand `test_run`, `agentic_review`) and the Manual
-  Review UI (B7) are not yet built. See
+  (Slice B1). B5's `script_test_run` path is now built; the remaining
+  job-kind slices (`request_action_item`, on-demand `test_run`,
+  `agentic_review`) and the Manual Review UI (B7) remain incomplete. See
   `docs/concepts/feature-lifecycle.md`'s "Target model" section for the
   build-relevant breakdown per stage.
 
@@ -61,8 +61,8 @@ screen recording, test history UI. `test_run`'s job kind exists as a stub
 routed through the placeholder job path (`worker.go`'s `runAgentJob`), not
 the RPC-driven path `spec_grill`/`feature_build` use. ADR 015 (Phase 2, see
 above) adds further scope here once its Testing stage is built: `test_run`
-gains an on-demand/feature-branch trigger mode, and a wholly new non-agent
-job kind, `script_test_run`, is needed for Unit/Integration testing.
+gains an on-demand/feature-branch trigger mode. Unit/Integration testing now
+uses the non-agent `script_test_run` path from B5.
 
 ## Phase 4 — Polish — not started
 

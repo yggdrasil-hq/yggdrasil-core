@@ -80,21 +80,23 @@ in the Orchestrator itself.
 
 ### `script_test_run`
 
-> **Not yet implemented.** Decided by [ADR 015](../adr/015-six-stage-feature-lifecycle.md);
-> no job kind, image, or routing exists yet.
+Implemented by the B5 slice. This is a non-agent job: no Pi, skill,
+attach/RPC, or contract tools.
 
 - **Not agent-driven** — no Pi, no skill, no attach/RPC, no contract tools.
   A plain container running one of two optional scripts at a fixed path in
   the primary repo (structure standard, ADR 008 item 6): `test-unit.sh` /
   `test-integration.sh`. A script's mere presence is its enable/disable
-  toggle — no separate project setting.
+    toggle — no separate project setting. The API dispatches one probe for each
+    group; an absent script reports an empty successful group.
 - The script runs the project's actual test framework and writes its result
   to a canonical path in a fixed minimal JSON schema,
   `.yggdrasil/test-report.json` (`passed`/`failed`/`skipped`/`total`,
   optional `coveragePercent`, `failingTests`). Yggdrasil only ever reads that
   file — it never parses jest/JUnit/lcov/or any framework-specific format.
-- Dispatched automatically when a feature reaches the Testing stage, for
-  each script that exists in the primary repo.
+- Dispatched automatically when a feature reaches the Testing stage, once for
+  each group. The runner checks script presence after cloning the feature ref
+  and posts the canonical report through the existing internal event endpoint.
 
 ### `agentic_review`
 
@@ -162,12 +164,13 @@ the Design-persistence question is resolved.
 
 - Job kind: `spec_grill` | `feature_build` | `test_run` | `deploy` |
   `design_grill` (ADR 014; implemented); `script_test_run` |
-  `agentic_review` (ADR 015) — the latter two remain decided but not yet
+  `agentic_review` (ADR 015) — `agentic_review` remains decided but not yet
   implemented. `script_test_run` is
   the only job kind with no Pi/RPC involvement at all (alongside `deploy`).
 - Container image: resolved by the Orchestrator from one env var per job kind
   (`SPEC_GRILL_IMAGE` / `FEATURE_BUILD_IMAGE` / `TEST_RUN_IMAGE` /
-  `DESIGN_GRILL_IMAGE`), pointing at
+  `SCRIPT_TEST_RUN_IMAGE` / `AGENTIC_REVIEW_IMAGE` / `DESIGN_GRILL_IMAGE`),
+  pointing at
   an image built by `agent-images/` (ADR 004) — replaces the placeholder
   `JOB_PLACEHOLDER_IMAGE` used today.
 - Target repos (all linked) + persisted ref / branch name as applicable.
@@ -207,13 +210,14 @@ to the Web app over WebSocket.
   (write-scoped) and `ADR_MARKDOWN`/`FEATURE_BRANCH` job-pod env vars. B4
   extends it to `test_run` with `report_test_step` and
   `submit_test_report`; the API stores both progress and aggregate results
-  without parsing framework-specific output.
-  **Extended for the six-stage lifecycle by ADR 015 (Slice B1):** a
+  without parsing framework-specific output. Script jobs submit the same
+  canonical report event after validating `.yggdrasil/test-report.json`.
+  **Extended for the six-stage lifecycle by ADR 015 (Slices B1 and B5):** a
   `submit_build_result` success now lands a feature in `testing` (not
   `in_review`), and `submit_adr` carries an optional `actionItems` array
   (the Action Item batch, persisted at the `draft` → `spec_ready`
-  transition). B4 now dispatches feature-ref `test_run` rows; B5's
-  `script_test_run` path remains unbuilt.
+  transition). B4 now dispatches feature-ref `test_run` rows, and B5 adds
+  feature-ref `script_test_run` rows; both participate in the Testing gate.
 - Idempotency / retry / dedupe for dispatch and events (delivery guarantees for
   the Postgres-backed queue itself are decided in ADR 003). **Partially
   resolved for `spec_grill`/`project_init` by ADR 012**
