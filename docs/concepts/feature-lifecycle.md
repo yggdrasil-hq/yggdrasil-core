@@ -7,9 +7,12 @@
 > **Authoritative states, current behavior:** ADR 002 (`docs/adr/002-projects-features-tests.md`).
 > **Authoritative states, decided target model:** ADR 015
 > (`docs/adr/015-six-stage-feature-lifecycle.md`) — six stages (Spec → Action
-> Items → Implementation → Testing → Agentic Review → Manual Review),
-> **decided but not yet implemented**. This doc's "Current model" section
-> below is what's actually running; "Target model" is ADR 015's shape.
+> Items → Implementation → Testing → Agentic Review → Manual Review).
+> **Implementation:** the state machine itself (B1 of the build plan) is built
+> in `api/`: `testing`/`agentic_review`/`returned`, `feature_action_items`,
+> build-success → `testing`, agentic `test_run` dispatch/report aggregation,
+> `returned` on test or human PR review, and "Resume implementation". The
+> non-agent `script_test_run` path remains separate B5 work.
 > Not touched by ADR 015: Org/RBAC (`roadmap/open-questions.md` #13) and
 > per-message grill resume/restart (`roadmap/open-questions.md` #17) remain
 > undecided.
@@ -35,7 +38,8 @@ kind with their own single-phase flow — no ADR, no spec/build split. See
 | Phase | Job kind | Feature states | Output |
 |-------|----------|----------------|--------|
 | Spec | `spec_grill` | `draft` → `spec_ready` | ADR stored on feature record (API) |
-| Build | `feature_build` | `spec_ready` → `queued` → … → `merged` | Code + ADR commit on feature branch |
+| Build | `feature_build` | `spec_ready` → `queued` → `running` → `testing` → … | Code + ADR commit on feature branch |
+| Agentic Testing | `test_run` | `testing` → `agentic_review` / `in_review` | Feature-branch preview and structured step/report events |
 
 User must explicitly approve the ADR and click **Start build** to dispatch
 `feature_build`. Spec and build use **separate containers**.
@@ -43,23 +47,25 @@ User must explicitly approve the ADR and click **Start build** to dispatch
 ### States and transitions
 
 ```
-draft → spec_ready → queued → running → in_review → merged
-                         │        │          │
-                         │        ├──► failed └──► changes_requested → queued
-                         │        └──► cancelled
-                         └──► cancelled
+draft → spec_ready → queued → running → testing → agentic_review → in_review → merged
+                          │        │          │          │              │
+                          │        ├──► failed └──► returned ──(resume)→ queued
+                          │        └──► cancelled
+                          └──► cancelled
 ```
 
 | State | Meaning |
 |-------|---------|
 | `draft` | `spec_grill` in progress or awaiting user reply in grill chat. |
 | `spec_ready` | ADR generated; awaiting human review and build approval. |
-| `queued` | Build approved; waiting for Orchestrator capacity. |
+| `queued` | Build approved (with no unresolved Action Items); waiting for Orchestrator capacity. |
 | `running` | `feature_build` job active; events streaming. |
-| `in_review` | Build finished; draft PR ready for human review. |
-| `changes_requested` | Reviewer asked for changes; can re-run build. Set by the `pull_request_review` webhook (ADR 013) when a review is submitted with `state: "changes_requested"` on the feature's tracked PR, only while still `in_review`. |
+| `testing` | Auto-entered the instant a build succeeds; enabled agentic tests run against the feature branch here. |
+| `agentic_review` | (ADR 015) auto-entered when all enabled Testing passes, if the per-project toggle is on. |
+| `in_review` | Build + gates finished; draft PR ready for human review. |
+| `returned` | (ADR 015, replaced `changes_requested`) sent back to Implementation with a comment — from `test_failure`, `agentic_review`, or `human_review` (the ADR 013 webhook). Carries `return_reason`/`return_comment`; requires an explicit human "Resume implementation" click to redispatch. |
 | `merged` | PR merged. Set by the `pull_request` webhook (ADR 013) when the feature's tracked PR closes with `merged: true`. |
-| `failed` | Build job errored. |
+| `failed` | Build/job errored (includes infra-level Testing/Review container crashes — those are NOT `returned`, ADR 015 item 19). |
 | `cancelled` | Spec or build was stopped. |
 
 ### Project home buckets
@@ -67,10 +73,10 @@ draft → spec_ready → queued → running → in_review → merged
 | Bucket | States |
 |--------|--------|
 | **Planned** | `draft`, `spec_ready` |
-| **Being worked on** | `queued`, `running`, `in_review`, `changes_requested`, `failed` |
+| **Being worked on** | `queued`, `running`, `testing`, `agentic_review`, `in_review`, `returned`, `failed` |
 | **Completed** | `merged`, `cancelled` |
 
-## Target model (ADR 015, decided, not yet built)
+## Remaining target model (ADR 015)
 
 ### States and transitions
 
@@ -138,7 +144,8 @@ covers `testing`, `agentic_review`, and `returned`.
   (before any build was attempted) remains undecided.
 - A closed-without-merge PR has no lifecycle representation (ADR 013,
   deliberately left open).
-- ADR 015's target model is decided but unbuilt — see its own Follow-ups
-  section for what's explicitly out of scope (kickback-context growth cap,
+- B5's `script_test_run` path and the remaining Agentic Review image/UI work
+  are still pending — see ADR 015's Follow-ups section for what's explicitly
+  out of scope (kickback-context growth cap,
   blocking-subtask recursion guard, Agentic Review Web UI beyond the
   Returned view).

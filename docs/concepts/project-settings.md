@@ -8,24 +8,24 @@ per-feature/run overrides for the agent.
 > **Hosting, secrets injection mechanism:** ADR 003 (`docs/adr/003-orchestrator-kubernetes.md`).
 > **Organization-level model config/secrets/cluster, resolution order,
 > dispatch-site gating:** ADR 016
-> (`docs/adr/016-organization-rbac-and-cluster-routing.md`) — decided,
-> **not yet implemented**; retires ADR 007 (per-user default) outright.
+> (`docs/adr/016-organization-rbac-and-cluster-routing.md`) — implemented
+> (Track A): org-level model config and secrets are the fallback tier below a
+> project, and ADR 007 (per-user default) is retired outright.
 
 > **Proposed rework, not implemented:** `design/projects/detail/settings/*`
 > splits project settings into per-route pages (General / Secrets / Models,
 > currently one page in `web/`) — layout-only, no ADR needed. The org tier
 > above it (`design/settings/organization/*`) that Providers/Models/Secrets
-> inherit from is decided by ADR 016, also not yet implemented.
+> inherit from is decided by ADR 016 and implemented.
 
 ## Levels
 
-0. **Organization level** *(ADR 016, not yet implemented)* — every project's
+0. **Organization level** *(ADR 016, implemented)* — every project's
    Organization holds the fallback **model configuration**
    (`MODEL_BASE_URL`/`MODEL_API_KEY`/`MODEL_ID`) and org-level secrets.
    Resolved live at job-dispatch time for any project under that org that
    doesn't set its own — not copied in at project creation. Replaces ADR 007's
-   per-user account default entirely (no per-user tier exists once this
-   ships).
+   per-user account default entirely (no per-user tier exists).
 1. **Project level** — defaults applied to every feature and test in the project.
    For model configuration specifically: either none of the three keys are set
    (project fully inherits the org's) or all three are (fully custom) — no
@@ -34,9 +34,10 @@ per-feature/run overrides for the agent.
 2. **Per-feature / per-run** — individual features can override the model and
    some settings for a single run.
 
-**Currently implemented** (until ADR 016 ships): level 0 is a **per-user**
-account default (ADR 007), not an org one — see that ADR for the mechanics
-actually live today.
+**Currently implemented:** level 0 is the Org (`organization_secrets` /
+`organization_clusters`, admin-managed via `web/`'s `/settings/organization/*`).
+ADR 007's per-user account default no longer exists; `/settings/account` now
+points at the org's provider config rather than editing a user default.
 
 ## Repositories
 

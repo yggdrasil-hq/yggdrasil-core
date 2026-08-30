@@ -17,9 +17,9 @@ routing both decided same day)
 | **GitHub App installation** | Org or user grants the Yggdrasil GitHub App access to **selected repos**. GitHub allows one installation per (app, org/account) — multiple Yggdrasil projects on the same org **share** that installation; each project picks its own primary + sub-repos from the granted repo list. Adding repos later requires re-configuring the installation on GitHub. Lifecycle kept in sync via **installation webhooks** (`installation`, `installation_repositories`). |
 | **Job-scoped GitHub credential** | Short-lived installation access token minted by the API for one Orchestrator run, scoped to the project's linked repos. |
 | **Container access tier** | How much GitHub access a job kind gets inside its ephemeral container. `spec_grill`, `test_run`, and `agentic_review` (ADR 015, not yet built): clone + fetch only (read). `feature_build` and `design_grill`: read + write on all linked repos (ADR 014 §3). `spec_grill`'s installation token is minted `contents: read`-scoped (ADR 005 item 16, amended 2026-07-11) — token-level, not just operational (Orchestrator/tool allowlist). `test_run` is still tool-allowlist-only pending its own dispatch implementation; `feature_build` and `design_grill` get a full-permission (`contents: write` + `pull-requests: write`) token. `script_test_run` (ADR 015, not yet built) isn't Pi/RPC-driven at all, but still clones repos with a read-only token. |
-| **Action Item** | A requirement `spec_grill` surfaces alongside the ADR (ADR 015) that must be resolved before Implementation can start — env var/secret request, move to `design_grill`, a new blocking subtask feature, or a test request. Each type has its own resolution mechanic; see ADR 015 items 4-6. Not yet built. |
-| **Returned** (feature state) | Unified landing state (ADR 015, not yet built) when a feature is sent back to Implementation with a comment — from Testing failure, Agentic Review `changes_requested`, or Manual Review's human `changes_requested` (ADR 013 webhook). Carries `return_reason` and `return_comment`; requires an explicit human "Resume implementation" click before redispatching. Replaces today's `changes_requested` state. |
-| **Agentic Review** | New job kind (ADR 015, not yet built): an agent reviews a feature's diff against its approved ADR, read-only container access, producing an internal `approved`/`changes_requested` verdict — not a real GitHub PR review. Per-project toggle, default on. |
+| **Action Item** | A requirement `spec_grill` surfaces alongside the ADR (ADR 015) that must be resolved before Implementation can start — env var/secret request, move to `design_grill`, a new blocking subtask feature, or a test request. Each type has its own resolution mechanic; see ADR 015 items 4-6. Persistence + "Start build" gate built (B1); the resolution mechanics wiring is not yet built (B2). |
+| **Returned** (feature state) | Unified landing state (ADR 015, built in B1) when a feature is sent back to Implementation with a comment — from Testing failure, Agentic Review `changes_requested`, or Manual Review's human `changes_requested` (ADR 013 webhook). Carries `return_reason` and `return_comment`; requires an explicit human "Resume implementation" click before redispatching. Replaces today's `changes_requested` state. |
+| **Agentic Review** | New job kind (ADR 015, not yet built): an agent reviews a feature's diff against its approved ADR, read-only container access, producing an internal `approved`/`changes_requested` verdict — not a real GitHub PR review. Per-project toggle, default on (`projects.agentic_review_enabled`, built in B1). |
 | **`script_test_run`** | New, non-agent job kind (ADR 015, not yet built): runs a project's `test-unit.sh`/`test-integration.sh` (optional, structure-standard convention) in a plain container and reads a canonical `.yggdrasil/test-report.json`. No Pi, no skill, no attach/RPC. |
 | **Design** | A named, agent-authored, self-contained static HTML mockup (or folder of related mockups) living under a project's `designs/` directory, produced by a `design_grill` session (ADR 014). No app logic beyond self-contained vanilla `<script>` for interaction states — no framework, no build step, no network calls. Not (yet) a persisted DB entity — see `roadmap/open-questions.md` #12. |
 | **Feature branch** | Agent branch `yggdrasil/<feature-slug>-<id>`, created on every linked repo the build touches. Same name across repos for one feature. |
@@ -32,11 +32,11 @@ routing both decided same day)
 | **GitHub App bot** | The GitHub identity (`yggdrasil[bot]`) that authors commits and opens PRs for all job kinds. Attribution to humans is in Yggdrasil (acting user), not on GitHub. |
 | **Model configuration** | The `MODEL_BASE_URL`/`MODEL_API_KEY`/`MODEL_ID` bundle Pi uses as its OpenAI-chat-completions-compatible backend. Always all three together — never a subset. Not "agent configuration": Pi itself is fixed (ADR 004); only the model it talks to varies. |
 | **Account default (model configuration)** | A user's personal fallback model configuration, stored in `user_secrets`. Resolved live at job-dispatch time when a project has no model configuration of its own — not copied into the project at creation. Per-user, not per-instance. **Superseded by ADR 016** (not yet built): replaced by an Organization-level default once that ships. |
-| **Organization** | New entity (ADR 016, not yet built): a user can belong to several; every user gets a personal one auto-created at signup. Projects belong to exactly one Organization (`organization_id`, replacing `owner_user_id`). Deliberately decoupled from GitHub App installations (ADR 005) — not a 1:1 mirror of a GitHub org. Has its own hard gate, `pending_cluster` → `ready` (see Cluster config below), mirroring `project_init`'s gate. |
-| **Membership / Role** | New entity (ADR 016, not yet built): a user's membership in an Organization carries exactly one role — Admin, Developer, Designer, Product Manager, or Tester — applying org-wide (every project under that org), not per-project. Capability grants per role are adjustable seed data. |
-| **Invite link** | New mechanism (ADR 016, not yet built) for adding a member to an Organization: a token-based shareable URL (org + role baked in), not email or username — the auth model has no email at all (ADR 001/009). Whoever opens it and completes GitHub OAuth is added. |
-| **Organization secrets** | New concept (ADR 016, not yet built): a generic key/value store at the Organization level, inherited automatically by every project under it — mirrors `project_secrets`'s shape. A project-level key of the same name shadows the org-level one. |
-| **Cluster config** | New Organization-level setting (ADR 016, not yet built, supersedes ADR 003 §3-4): each Organization stores its own encrypted kubeconfig; the Orchestrator resolves a job's target cluster via its project's org at claim time. No instance-wide default/env var and no per-project override — whole-org granularity, hard-gated (an org with no cluster configured cannot create any project). |
+| **Organization** | New entity (ADR 016, Track A built in `api/`): a user can belong to several; every user gets a personal one auto-created at signup. Projects belong to exactly one Organization (`organization_id`, replacing `owner_user_id`). Deliberately decoupled from GitHub App installations (ADR 005) — not a 1:1 mirror of a GitHub org. Has its own hard gate, `pending_cluster` → `ready`, mirroring `project_init`'s gate; setting a cluster flips an org to `ready`. |
+| **Membership / Role** | New entity (ADR 016, built): a user's membership in an Organization carries exactly one role — Admin, Developer, Designer, Product Manager, or Tester — applying org-wide (every project under that org), not per-project. Capability grants per role are adjustable seed data in `role_capabilities`. |
+| **Invite link** | New mechanism (ADR 016, built) for adding a member to an Organization: a token-based shareable URL (org + role baked in), not email or username — the auth model has no email at all (ADR 001/009). Whoever opens it and completes GitHub OAuth is added. |
+| **Organization secrets** | New concept (ADR 016, built): a generic key/value store at the Organization level (`organization_secrets`), inherited automatically by every project under it — mirrors `project_secrets`'s shape. A project-level key of the same name shadows the org-level one. |
+| **Cluster config** | New Organization-level setting (ADR 016, built; supersedes ADR 003 §3-4): each Organization stores its own encrypted kubeconfig; the Orchestrator resolves a job's target cluster via its project's org at claim time (cached per-org clients, A2). No instance-wide default/env var and no per-project override — whole-org granularity, hard-gated (an org with no cluster configured cannot create any project). |
 
 ## Product
 
@@ -45,10 +45,11 @@ Orchestrator. Phase 1 is built end to end (auth, GitHub App repo access,
 project/feature CRUD, `spec_grill`→`feature_build` with Pi RPC integration,
 webhook-driven merge/changes-requested/deploy automation). Parts of Phase 2
 are also built (live agent chat/steering for `spec_grill`, build-progress UI,
-per-user/per-project model configuration); `design_grill` (ADR 014), the
-six-stage feature lifecycle rework (ADR 015), and Organization/RBAC/
-org-level config/cluster routing (ADR 016) are all decided but not yet
-implemented. `test_run` (Phase 3) and live preview tunnels remain unbuilt.
+per-org model configuration); `design_grill` (ADR 014) and the six-stage
+feature lifecycle job-kind slices for the manual back half (ADR 015) remain
+unbuilt, while Organization/RBAC/org-level config/cluster routing (ADR 016,
+Track A) is implemented. `test_run` (Phase 3) and live preview tunnels remain
+unbuilt.
 See `roadmap/phases.md` for the current build-order snapshot. Separately,
 `design/` still sketches a larger IA than any of the above has decided —
 usage/analytics/allocations surfaces, a landing redesign, per-message grill
@@ -176,9 +177,11 @@ hosting** ([`adr/003-orchestrator-kubernetes.md`](adr/003-orchestrator-kubernete
 ## Decided (per-user default model configuration) — superseded by ADR 016
 
 > **Superseded by [ADR 016](#decided-organization-rbac-org-level-config-and-cluster-routing)**
-> (2026-08-30), decided but **not yet built**: an Organization-level default
-> replaces this per-user one entirely once ADR 016 ships. Until then,
-> everything below remains what's actually implemented and live.
+> (2026-08-30), and **retired by the ADR 016 implementation** (Track A):
+> an Organization-level default has replaced this per-user one entirely
+> (`organization_secrets` + project → org resolution; the `user_secrets`
+> tier / `/settings/account` model editing is gone). What follows is the
+> historical decision, kept for the record.
 
 **ADR 007 — Per-user default model configuration**
 ([`adr/007-per-user-default-model-configuration.md`](adr/007-per-user-default-model-configuration.md))
@@ -357,9 +360,22 @@ Review** ([`adr/015-six-stage-feature-lifecycle.md`](adr/015-six-stage-feature-l
   (test failure, Agentic Review rejection, human PR review) behind one
   state + reason field; always requires an explicit human click to resume —
   no unattended retry loop.
-- **Implementation status:** decided/accepted, but **not yet built** — same
-  posture as ADR 014. Zero code exists in `api/`, `orchestrator/`,
-  `agent-images/`, or `web/` for any of this yet.
+- **Implementation status:** partially built (Track B, `docs/roadmap/adr-015-016-build-plan.md`).
+  Slices **B1-B3 + B6** are in: the six-stage state machine
+  (`testing`/`agentic_review`/`returned`, `changes_requested` retired),
+  `feature_action_items` with the secret-auto-resolve/subtask-merge/test
+  resolution paths, build-success → `testing`, `returned` re-entry on human
+  PR review, the "Resume implementation" endpoint, and "Start build" gating
+  on resolved Action Items; the `request_action_item` kickback contract
+  (orchestrator curated event + API `draft` reset + fresh `spec_grill`
+  re-dispatch) and the `submit_review` contract (orchestrator event + API
+  `approved`→`in_review` / `changes_requested`→`returned`), plus the
+  `script_test_run`/`agentic_review` job-kind routing and image config. The
+  Web Action Items + returned/resume UI is in. **Not yet built:** B4
+  (on-demand `test_run` with `ref`), the `agent-images/` Docker
+  images/skills/contract tools for `request_action_item`/`submit_review`/
+  `script_test_run`, B5's report schema + Testing tab, and the Agentic
+  Review / Manual Review tab UIs.
 
 ## Decided (Organization, RBAC, org-level config, and cluster routing)
 
@@ -393,8 +409,15 @@ per-org cluster routing**
   must explicitly configure its own cluster (hard gate,
   `pending_cluster` → `ready`, mirroring `project_init`'s gate) before
   creating any project. Whole-org granularity — no per-project override.
-- **Implementation status:** decided/accepted, but **not yet built** — same
-  posture as ADR 014/015. Zero code exists anywhere for any of this yet.
+- **Implementation status:** substantially built (Track A, `docs/roadmap/adr-015-016-build-plan.md`).
+  A1-A4 land in `api/` (Organization entity, memberships/invites/roles +
+  capability matrix, per-org encrypted kubeconfig + cluster gate,
+  `organization_id` project ownership, org-level model/secrets config), A2
+  lands in `orchestrator/` (dynamic cached per-org Kubernetes client
+  resolution, `KUBECONFIG_HOST_PATH`/bundled-k3s removed) and `deploy/`, and
+  A5 lands in `web/` (org settings pages, org switcher links, invite-accept,
+  account model section made read-only). The deployment env templates no
+  longer mount a per-instance kubeconfig.
 
 ## Proposed (surfaced by `design/`, not yet decided)
 

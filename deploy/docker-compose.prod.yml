@@ -131,12 +131,9 @@ services:
       APPS_BASE_DOMAIN: ${APPS_BASE_DOMAIN}
       INGRESS_CLASS_NAME: ${INGRESS_CLASS_NAME:-ingress-nginx}
       CERT_ISSUER_NAME: ${CERT_ISSUER_NAME:-letsencrypt-prod}
-      # The orchestrator's own process runs here in Compose, but per ADR 003
-      # it no longer drives a local Docker socket — it targets one external
-      # Kubernetes cluster (bundled k3s or an existing cluster) via kubeconfig.
-      KUBECONFIG: /root/.kube/config
-    volumes:
-      - ${KUBECONFIG_HOST_PATH:-./kube/config}:/root/.kube/config:ro
+      # Per ADR 016 the orchestrator resolves each job's target Kubernetes
+      # cluster dynamically from the organization's stored kubeconfig (via the
+      # API) — there is no mounted per-instance kubeconfig file anymore.
     depends_on:
       postgres:
         condition: service_healthy

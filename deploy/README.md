@@ -53,14 +53,15 @@ trusts `X-Forwarded-*` headers.
 ```bash
 # Edit deploy/.env — set LANDING_HOST, APP_HOST, DOCS_HOST, API_HOST,
 # ORCHESTRATOR_HOST, PREVIEW_HOST, APPS_BASE_DOMAIN, INGRESS_CLASS_NAME,
-# CERT_ISSUER_NAME, KUBECONFIG_HOST_PATH, INTERNAL_API_TOKEN
+# CERT_ISSUER_NAME, INTERNAL_API_TOKEN
 docker compose -f deploy/docker-compose.prod.yml up --build -d
 ```
 
-The orchestrator targets one external Kubernetes cluster, not a Docker socket
-(ADR 003) — before starting, drop a kubeconfig for that cluster at the path
-named by `KUBECONFIG_HOST_PATH` (bundled k3s or your own existing cluster; see
-`../orchestrator/docs/overview/setup.md`).
+Per ADR 016 there is no per-instance Kubernetes cluster or mounted kubeconfig
+anymore — each Organization configures its own cluster (stored as an encrypted
+kubeconfig in the API's database), and the orchestrator resolves a job's
+target cluster dynamically from that. Configure each org's cluster via the web
+UI before creating projects.
 
 ## Self-hosting without cloning submodules
 

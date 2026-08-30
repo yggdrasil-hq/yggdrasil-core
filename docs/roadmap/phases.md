@@ -28,10 +28,11 @@ webhook-driven `deploy`/`merged`/`changes_requested` automation (ADR 013).
   creation — both implemented (`feature_build` opens draft PRs; webhooks
   drive `merged`/`changes_requested`).
 - ✅ `queued`/`running` build-progress UI (ADR 011).
-- ⬜ **Organization, RBAC, team invitations** (ADR 016) — decided but not
-  implemented. New Organization entity (replaces `owner_user_id`), five
-  org-wide roles, shareable-link invites (no email in this product, ADR
-  001/009), org-level provider/secret config (retires ADR 007), and per-org
+- ✅ **Organization, RBAC, team invitations** (ADR 016) — implemented
+  (Track A of `docs/roadmap/adr-015-016-build-plan.md`): Organization entity
+  replaces `owner_user_id` on projects (`organization_id`), five org-wide
+  roles with an adjustable capability matrix, shareable-link invites (no
+  email), org-level provider/secret config (retires ADR 007), and per-org
   Kubernetes cluster routing (supersedes ADR 003 §3-4, removes the
   `KUBECONFIG_HOST_PATH` instance-wide default). See
   `docs/adr/016-organization-rbac-and-cluster-routing.md`.
@@ -40,11 +41,14 @@ webhook-driven `deploy`/`merged`/`changes_requested` automation (ADR 013).
   exists).
 - ⬜ `design_grill` (ADR 014) — decided but not implemented in any of
   `orchestrator/`, `agent-images/`, or `web/`.
-- ⬜ **Six-stage feature lifecycle** (ADR 015: Spec → Action Items →
-  Implementation → Testing → Agentic Review → Manual Review) — decided but
-  not implemented. Supersedes the "Full feature state machine" row above
-  once built. Two new job kinds (`agentic_review`, `script_test_run`);
-  extends `spec_grill`/`feature_build`/`test_run`. See
+- 🚧 **Six-stage feature lifecycle** (ADR 015: Spec → Action Items →
+  Implementation → Testing → Agentic Review → Manual Review) — Track B of
+  `docs/roadmap/adr-015-016-build-plan.md`, partially implemented. The state
+  machine, `returned` state (replacing `changes_requested`),
+  `feature_action_items`, and the Action Items persistence hook are in
+  (Slice B1). The job-kind slices B3-B6 (`request_action_item`,
+  `script_test_run`, on-demand `test_run`, `agentic_review`) and the Manual
+  Review UI (B7) are not yet built. See
   `docs/concepts/feature-lifecycle.md`'s "Target model" section for the
   build-relevant breakdown per stage.
 

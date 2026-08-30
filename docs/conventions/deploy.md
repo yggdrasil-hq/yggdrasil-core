@@ -60,17 +60,18 @@ in `deploy/.env`. TLS is **terminated upstream**; nginx trusts `X-Forwarded-*`.
 
 ## Orchestrator
 
-The Orchestrator no longer talks to a local Docker socket. Per ADR 003
-(`../adr/003-orchestrator-kubernetes.md`), it targets **one Kubernetes cluster**:
-
-- **Self-hosted:** a bundled **k3s** cluster by default (started alongside the
-  Compose stack), or an existing cluster the operator points it at via
-  kubeconfig.
-- **Managed:** Yggdrasil's own shared multi-tenant cluster.
+The Orchestrator no longer talks to a local Docker socket. Per ADR 003 it
+targets Kubernetes for job execution and project hosting, and per ADR 016
+(`../adr/016-organization-rbac-and-cluster-routing.md`) there is **no
+per-instance default cluster**: every Organization configures its own cluster
+(kubeconfig stored encrypted in the API's database), and the Orchestrator
+resolves each job's target cluster dynamically via its
+project → organization (ADR 016 item 13). There is no bundled k3s and no
+mounted `KUBECONFIG_HOST_PATH` anymore.
 
 The Orchestrator's own process still runs as a container in this Compose stack
-(or the managed equivalent) — it's the *target* cluster it manages, not the
-cluster it runs in, that changed.
+(or the managed equivalent) — it's the per-org *target* clusters it manages,
+not the cluster it runs in, that moved to dynamic resolution.
 
 ## Kubernetes cluster (project hosting)
 
@@ -98,7 +99,7 @@ deployment) live in the target cluster, one **namespace per project**:
     there's no runtime dependency between the two services for this.
   - **Local dev:** neither the domain nor the ingress port is reachable out
     of the box — `APPS_BASE_DOMAIN`'s placeholder default (`yggdrasil.local`)
-    resolves nowhere, and nothing publishes the bundled k3s cluster's
+    resolves nowhere, and nothing publishes the locally-configured cluster's
     Traefik ingress to the host by default. See
     `../../orchestrator/docs/overview/setup.md`'s "Reaching a project's
     deployment locally" for the full recipe (nip.io wildcard DNS +

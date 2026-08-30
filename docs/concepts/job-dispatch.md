@@ -66,19 +66,17 @@ in the Orchestrator itself.
 
 ### `test_run`
 
-- Clone all linked repos at ref **`main`**.
-- Build app, expose **ephemeral preview tunnel**, tear down after run.
-- Input: test markdown spec (`##` sections = subtasks).
-- Agent executes steps in order; output **test report** artefact (per-step pass/fail,
-  screenshots, optional screen recording).
-- Skip dispatch if a previous run for the same test is still active.
-- Runs as a **temporary deployment** in the project's namespace (ADR 003) —
-  separate from the project's always-on primary deployment, so tests never
-  interfere with live project data.
-- **Not yet implemented (ADR 015):** gains a `ref` field and an on-demand
-  (non-cron) trigger source — when dispatched as the Testing stage's Agentic
-  group, it targets an ephemeral deployment of the **feature's own branch**,
-  not `main`.
+- Scheduled runs default to ref **`main`**; a feature-stage run persists the
+  feature ref `yggdrasil/<feature-slug>-<id>`.
+- Input includes the selected test's markdown, linked repositories, a
+  read-scoped GitHub token, and the requested ref.
+- The Orchestrator checks out the existing ref without creating a new branch,
+  exposes a temporary deployment, and injects its preview URL.
+- The agent executes `##` sections in order, emitting non-terminal
+  `report_test_step` events and exactly one terminal `submit_test_report`.
+- Feature-stage dispatch is one run per enabled test and is idempotent while
+  active. Reports are persisted structurally; a failing report returns the
+  feature with reason `test_failure`.
 
 ### `script_test_run`
 
@@ -172,7 +170,7 @@ in the Orchestrator itself.
   (`SPEC_GRILL_IMAGE` / `FEATURE_BUILD_IMAGE` / `TEST_RUN_IMAGE`), pointing at
   an image built by `agent-images/` (ADR 004) — replaces the placeholder
   `JOB_PLACEHOLDER_IMAGE` used today.
-- Target repos (all linked) + ref / branch name as applicable.
+- Target repos (all linked) + persisted ref / branch name as applicable.
 - Short-lived **GitHub App installation token** (minted by API from project's
   installation). See [`github-app.md`](github-app.md).
 - Kind-specific payload (ADR, test markdown, build commands from project config).
@@ -206,8 +204,16 @@ to the Web app over WebSocket.
   by ADR 010** (`docs/adr/010-feature-build-rpc-wiring.md`): a single
   terminating `submit_build_result` event (no `ask_user`-equivalent — the
   implement skill runs unattended), plus `TARGET_REPOS`/`GITHUB_TOKEN`
-  (write-scoped) and `ADR_MARKDOWN`/`FEATURE_BRANCH` job-pod env vars. Not
-  yet extended to `test_run`.
+  (write-scoped) and `ADR_MARKDOWN`/`FEATURE_BRANCH` job-pod env vars. B4
+  extends it to `test_run` with `report_test_step` and
+  `submit_test_report`; the API stores both progress and aggregate results
+  without parsing framework-specific output.
+  **Extended for the six-stage lifecycle by ADR 015 (Slice B1):** a
+  `submit_build_result` success now lands a feature in `testing` (not
+  `in_review`), and `submit_adr` carries an optional `actionItems` array
+  (the Action Item batch, persisted at the `draft` → `spec_ready`
+  transition). B4 now dispatches feature-ref `test_run` rows; B5's
+  `script_test_run` path remains unbuilt.
 - Idempotency / retry / dedupe for dispatch and events (delivery guarantees for
   the Postgres-backed queue itself are decided in ADR 003). **Partially
   resolved for `spec_grill`/`project_init` by ADR 012**
