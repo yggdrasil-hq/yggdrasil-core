@@ -404,6 +404,41 @@ per-org cluster routing**
   account model section made read-only). The deployment env templates no
   longer mount a per-instance kubeconfig.
 
+## Decided (`web`/`landing` visual parity with `design/`)
+
+**ADR 017 — Bring `web/` and `landing/` visually in line with `design/`**
+([`adr/017-web-visual-parity-with-design.md`](adr/017-web-visual-parity-with-design.md))
+
+- `design/` is now source-of-truth-for-IA for `web/`/`landing/` themselves,
+  not just for `docusaurus/` (extends that existing precedent). Every route
+  in `design/README.md`'s map gets a matching real page, including routes
+  backing still-undecided concepts (usage/analytics/allocations,
+  deployments Staging) — built as **static/mock only**, no new backend, no
+  resolution of `roadmap/open-questions.md` #9/#15.
+- Already-functional pages (Organization/RBAC, six-stage feature lifecycle)
+  get **drift reconciliation**, including matching `design/`'s literal route
+  structure (e.g. the feature detail page's six stages become real
+  sub-routes, not just tabs within one route).
+- Styling: `design/shared/tokens.css` ported into `web/`'s existing Tailwind
+  config — no raw CSS copy, no second styling system.
+- **Implementation status:** built, pending review/commit (2026-08-31). Item
+  4's Tailwind token port was already done as a side effect of the ADR
+  015/016 build (`web/tailwind.config.ts` already had every token). Item 1's
+  route-map gap-filling landed: all 9 static/mock pages (hub-level
+  deployments/usage/analytics/infrastructure/allocations, project-level
+  deployments/usage/analytics), reachable via a new "Monitoring" sidebar nav
+  group. Item 3's drift reconciliation landed on both fronts: the
+  Organization/RBAC pages' sidebar-first IA (the hub shell was still the
+  deprecated top-bar pattern; now rewritten to match `design/shared/shell.css`
+  everywhere), and the feature detail page's six real sub-routes (replacing
+  the old single-route status-conditional-panels design). `landing/`'s
+  redesign also landed, including bootstrapping Tailwind there from scratch
+  (it had none). Along the way, drift-reconciliation work surfaced and fixed
+  two pre-existing bugs unrelated to this ADR: an ambiguous-SQL-column crash
+  in `api/`'s organization/project repositories (any multi-org user, or any
+  project load, would 500) and broken invite links (missing base-path
+  prefix). Not yet committed.
+
 ## Proposed (surfaced by `design/`, not yet decided)
 
 `design/` (the meta-repo wireframe directory, see
@@ -485,5 +520,6 @@ authoritative detail on each point.
 | 014 | [`design_grill` — agent-authored live HTML mockup sessions](adr/014-design-grill-live-mockups.md) |
 | 015 | [Six-stage feature lifecycle — Action Items, Testing, and Agentic Review](adr/015-six-stage-feature-lifecycle.md) |
 | 016 | [Organization entity, RBAC, org-level provider/secret config, and per-org cluster routing](adr/016-organization-rbac-and-cluster-routing.md) |
+| 017 | [Bring `web/` and `landing/` visually in line with `design/`](adr/017-web-visual-parity-with-design.md) |
 
 → [`adr/README.md`](adr/README.md)

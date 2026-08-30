@@ -23,18 +23,18 @@ source-of-truth state — everything comes from the API.
 - **API WebSocket** — live run/agent events.
 - Never talks to the Orchestrator directly.
 
-## Proposed IA
+## `design/` as source of truth for IA
 
-`design/` (meta repo root) holds the current wireframed page/route inventory
-for this app — a materially larger surface than what `web/` implements today
-(usage/analytics/allocations pages and more remain undecided — plus the
-six-stage feature lifecycle pages and the org-level settings pages, both of
-which are now implemented for ADR 015 and ADR 016 respectively).
-It's the source of truth for where the IA is headed, not for what's live.
-See `design/README.md`'s route map, `docs/adr/015-six-stage-feature-lifecycle.md`,
-`docs/adr/016-organization-rbac-and-cluster-routing.md`, and
-`docs/CONTEXT.md`'s "Proposed (surfaced by `design/`)" section before
-assuming a route described there exists in `web/`.
+`design/` (meta repo root) holds the wireframed page/route inventory for
+this app. Per [ADR 017](../adr/017-web-visual-parity-with-design.md),
+`web/` is now expected to visually and structurally match every route in
+`design/README.md`'s map — including static/mock pages for concepts that
+are still product-undecided (usage/analytics/allocations, deployments
+Staging; see `roadmap/open-questions.md` #9/#15) — not just the parts
+already backed by real functionality (Organization/RBAC per ADR 016,
+six-stage feature lifecycle per ADR 015). A page existing and looking right
+does **not** imply its underlying concept is decided or wired to real data —
+check the ADRs before assuming otherwise.
 
 ## Deep docs
 

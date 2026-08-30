@@ -6,6 +6,12 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "--directory", "design", "4173"],
       "port": 4173
+    },
+    {
+      "name": "web-dev",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd web && npm run dev"],
+      "port": 3000
     }
   ]
 }

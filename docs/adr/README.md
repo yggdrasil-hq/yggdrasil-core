@@ -38,6 +38,7 @@ Each ADR is numbered sequentially: `NNN-short-title.md`.
 | [014](014-design-grill-live-mockups.md) | `design_grill` — agent-authored live HTML mockup sessions | Accepted |
 | [015](015-six-stage-feature-lifecycle.md) | Six-stage feature lifecycle — Action Items, Testing, and Agentic Review | Accepted |
 | [016](016-organization-rbac-and-cluster-routing.md) | Organization entity, RBAC, org-level provider/secret config, and per-org cluster routing | Accepted |
+| [017](017-web-visual-parity-with-design.md) | Bring `web/` and `landing/` visually in line with `design/` | Accepted |
 
 When adding an ADR, update this index, add a routing row in root `CLAUDE.md`, and
 link from `docs/CONTEXT.md` if the decision affects suite-wide context.
