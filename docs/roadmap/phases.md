@@ -6,8 +6,12 @@ which phase a feature belongs to.
 
 > Status (2026-08-30): Phase 1 is complete. Phase 2 is partially built (see
 > below). Phase 3 (testing) and the rest of Phase 4 haven't started. ADR 014
-> (`design_grill`) was decided out of the original phase plan and isn't built
-> yet either — see `docs/CONTEXT.md`'s ADR 014 entry.
+> (`design_grill`), ADR 015 (six-stage feature lifecycle), and ADR 016
+> (Organization/RBAC/org-level config/cluster routing) were all decided out
+> of the original phase plan and aren't built yet either — see
+> `docs/CONTEXT.md`'s ADR 014/015/016 entries. For ADR 015/016 specifically,
+> [`adr-015-016-build-plan.md`](adr-015-016-build-plan.md) breaks the actual
+> build into ordered, independently-shippable slices.
 
 ## Phase 1 — Foundation ✅ done
 
@@ -24,27 +28,43 @@ webhook-driven `deploy`/`merged`/`changes_requested` automation (ADR 013).
   creation — both implemented (`feature_build` opens draft PRs; webhooks
   drive `merged`/`changes_requested`).
 - ✅ `queued`/`running` build-progress UI (ADR 011).
-- ⬜ RBAC, team invitations — not started (no team/org entity exists yet,
-  per this doc's glossary). Proposed shape now sketched in
-  `design/settings/organization/` — not decided, see `docs/CONTEXT.md`.
+- ⬜ **Organization, RBAC, team invitations** (ADR 016) — decided but not
+  implemented. New Organization entity (replaces `owner_user_id`), five
+  org-wide roles, shareable-link invites (no email in this product, ADR
+  001/009), org-level provider/secret config (retires ADR 007), and per-org
+  Kubernetes cluster routing (supersedes ADR 003 §3-4, removes the
+  `KUBECONFIG_HOST_PATH` instance-wide default). See
+  `docs/adr/016-organization-rbac-and-cluster-routing.md`.
 - ⬜ Live preview tunnel for ephemeral job runs — designed in ADR 003 but not
   implemented in `orchestrator/` (no preview/temporary-deployment code
   exists).
 - ⬜ `design_grill` (ADR 014) — decided but not implemented in any of
   `orchestrator/`, `agent-images/`, or `web/`.
+- ⬜ **Six-stage feature lifecycle** (ADR 015: Spec → Action Items →
+  Implementation → Testing → Agentic Review → Manual Review) — decided but
+  not implemented. Supersedes the "Full feature state machine" row above
+  once built. Two new job kinds (`agentic_review`, `script_test_run`);
+  extends `spec_grill`/`feature_build`/`test_run`. See
+  `docs/concepts/feature-lifecycle.md`'s "Target model" section for the
+  build-relevant breakdown per stage.
 
 ## Phase 3 — Testing — not started
 
 Test suite manager, cron scheduling, Orchestrator test runner, report generation,
 screen recording, test history UI. `test_run`'s job kind exists as a stub
 routed through the placeholder job path (`worker.go`'s `runAgentJob`), not
-the RPC-driven path `spec_grill`/`feature_build` use.
+the RPC-driven path `spec_grill`/`feature_build` use. ADR 015 (Phase 2, see
+above) adds further scope here once its Testing stage is built: `test_run`
+gains an on-demand/feature-branch trigger mode, and a wholly new non-agent
+job kind, `script_test_run`, is needed for Unit/Integration testing.
 
 ## Phase 4 — Polish — not started
 
 Pi extension uploads, per-feature model override, token budgets, notification
 preferences, audit (logging/trails). Per-user default model configuration
-(ADR 007) and per-project override already exist, ahead of this phase.
+(ADR 007) and per-project override already exist, ahead of this phase — ADR
+007 is retired by ADR 016 (Phase 2, see above) once that ships, replaced by
+an Organization-level default; per-project override is unaffected.
 Token budgets' proposed shape is sketched in `design/allocations/api`;
 consumption reporting (`design/usage`, `design/analytics`) is a related but
 distinct, equally unbuilt feature — not decided, see `docs/CONTEXT.md`.

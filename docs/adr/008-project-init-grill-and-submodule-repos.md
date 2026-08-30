@@ -1,7 +1,8 @@
 # ADR 008: `project_init` grill workflow, structure standard, and submodule sub-repos
 
 **Status:** Accepted
-**Date:** 2026-07-11
+**Date:** 2026-07-11 (amended 2026-08-30 by ADR 015 item 10 — structure standard
+gains two optional scripts, `test-unit.sh`/`test-integration.sh`)
 **Deciders:** Product/design session (grill-me)
 **Builds on:** [ADR 002](002-projects-features-tests.md) (projects/features/tests),
 [ADR 003](003-orchestrator-kubernetes.md) (Orchestrator Kubernetes compute, Helm

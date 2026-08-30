@@ -27,9 +27,12 @@ source-of-truth state — everything comes from the API.
 
 `design/` (meta repo root) holds the current wireframed page/route inventory
 for this app — a materially larger surface than what `web/` implements today
-(org-level settings, a six-stage feature lifecycle, usage/analytics/
-allocations pages, and more). It's the source of truth for where the IA is
-headed, not for what's live. See `design/README.md`'s route map and
+(usage/analytics/allocations pages and more remain undecided — plus the
+six-stage feature lifecycle pages and the org-level settings pages, both of
+which are now decided, ADR 015 and ADR 016 respectively, but not yet built).
+It's the source of truth for where the IA is headed, not for what's live.
+See `design/README.md`'s route map, `docs/adr/015-six-stage-feature-lifecycle.md`,
+`docs/adr/016-organization-rbac-and-cluster-routing.md`, and
 `docs/CONTEXT.md`'s "Proposed (surfaced by `design/`)" section before
 assuming a route described there exists in `web/`.
 

@@ -71,12 +71,16 @@ Playwright CLI tool instead.
 - **Model** — OpenAI-chat-completions-compatible only, for now.
   `MODEL_BASE_URL`/`MODEL_API_KEY`/`MODEL_ID`, stored encrypted, decrypted
   server-side by the API, and injected as job PodSpec env vars — the same
-  delivery path already used for the scoped GitHub token (ADR 004). Editable in
-  the Web app: a per-user account default (`user_secrets`) and an optional
-  per-project override (`project_secrets`), resolved live at dispatch time —
-  project first, then the owning user's default. Every dispatch site refuses
-  to dispatch if neither resolves (ADR 007,
-  `docs/adr/007-per-user-default-model-configuration.md`).
+  delivery path already used for the scoped GitHub token (ADR 004). Currently
+  implemented: editable in the Web app as a per-user account default
+  (`user_secrets`) and an optional per-project override (`project_secrets`),
+  resolved live at dispatch time — project first, then the owning user's
+  default. Every dispatch site refuses to dispatch if neither resolves
+  (ADR 007, `docs/adr/007-per-user-default-model-configuration.md`).
+  **Not yet implemented:** ADR 016 retires the per-user `user_secrets` tier
+  entirely in favor of an Organization-level default (`project_secrets` →
+  the project's org's config) — see
+  `docs/adr/016-organization-rbac-and-cluster-routing.md`.
 - **Tool allowlist** — which packages/tools Pi may install inside the
   container. Still TODO beyond the contract extension's own `allowed-tools`
   scoping.

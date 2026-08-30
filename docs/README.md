@@ -56,6 +56,7 @@ doc is relevant before reading the body — that's how we keep context small.
 | Doc | Read this when |
 |-----|----------------|
 | [`roadmap/phases.md`](roadmap/phases.md) | You need the planned build order / current phase. |
+| [`roadmap/adr-015-016-build-plan.md`](roadmap/adr-015-016-build-plan.md) | You're implementing ADR 015 or ADR 016 and need the ordered, independently-shippable slice breakdown. |
 | [`roadmap/open-questions.md`](roadmap/open-questions.md) | You hit an undecided design question. |
 
 ## conventions/ — how we work

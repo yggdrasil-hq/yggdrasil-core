@@ -12,9 +12,11 @@ spec, the event stream back, or scheduled test runs.
 
 | Trigger | Job kind |
 |---------|----------|
-| Feature created (title only) | `spec_grill` |
-| User approves ADR and clicks Start build | `feature_build` |
-| Test cron schedule fires | `test_run` |
+| Feature created (title only), or Implementation kicks back (ADR 015) | `spec_grill` |
+| User approves ADR and clicks Start build, or human resumes from `returned` (ADR 015) | `feature_build` |
+| Test cron schedule fires, or a feature reaches the Testing stage (ADR 015, Agentic group) | `test_run` |
+| A feature reaches the Testing stage (ADR 015, Unit/Integration groups) | `script_test_run` |
+| Testing stage passes (ADR 015) | `agentic_review` |
 | PR merged to primary repo's `main` | `deploy` |
 | Design session started (name + description) | `design_grill` |
 
@@ -36,9 +38,15 @@ in the Orchestrator itself.
   one of the two `spec_grill` skills (`project-init` vs. `feature-grill`)
   per run, never left to model inference.
 - Agent explores codebase, runs grill-me conversation with user.
-- Output: ADR markdown → persisted on feature record in API.
+- Output: ADR markdown, plus an optional **Action Items** batch on the same
+  `submit_adr` call (ADR 015 item 4) → persisted on feature record in API.
 - Feature transitions: `draft` → `spec_ready`.
 - Container torn down on completion.
+- **Not yet implemented (ADR 015):** when dispatched as a kickback from a
+  blocked `feature_build` (`request_action_item`, below), the payload also
+  carries the previous approved ADR, a grill-transcript summary, and the
+  kickback reason, so the run picks up from where it left off instead of
+  re-exploring from scratch.
 
 ### `feature_build`
 
@@ -48,6 +56,13 @@ in the Orchestrator itself.
   opens draft PR on primary repo.
 - Optional preview tunnel during build.
 - Feature transitions: `spec_ready` → `queued` → `running` → `in_review` → …
+  (current); `spec_ready` → `queued` → `running` → `testing` → … (ADR 015
+  target, not yet implemented).
+- **Not yet implemented (ADR 015):** a new terminal tool,
+  `request_action_item`, called instead of `submit_build_result` when the
+  agent is blocked on something only a human/another job can supply
+  (distinct from a generic crash, which is unchanged) — kicks the feature
+  back to a fresh `spec_grill` run rather than `failed`.
 
 ### `test_run`
 
@@ -60,6 +75,47 @@ in the Orchestrator itself.
 - Runs as a **temporary deployment** in the project's namespace (ADR 003) —
   separate from the project's always-on primary deployment, so tests never
   interfere with live project data.
+- **Not yet implemented (ADR 015):** gains a `ref` field and an on-demand
+  (non-cron) trigger source — when dispatched as the Testing stage's Agentic
+  group, it targets an ephemeral deployment of the **feature's own branch**,
+  not `main`.
+
+### `script_test_run`
+
+> **Not yet implemented.** Decided by [ADR 015](../adr/015-six-stage-feature-lifecycle.md);
+> no job kind, image, or routing exists yet.
+
+- **Not agent-driven** — no Pi, no skill, no attach/RPC, no contract tools.
+  A plain container running one of two optional scripts at a fixed path in
+  the primary repo (structure standard, ADR 008 item 6): `test-unit.sh` /
+  `test-integration.sh`. A script's mere presence is its enable/disable
+  toggle — no separate project setting.
+- The script runs the project's actual test framework and writes its result
+  to a canonical path in a fixed minimal JSON schema,
+  `.yggdrasil/test-report.json` (`passed`/`failed`/`skipped`/`total`,
+  optional `coveragePercent`, `failingTests`). Yggdrasil only ever reads that
+  file — it never parses jest/JUnit/lcov/or any framework-specific format.
+- Dispatched automatically when a feature reaches the Testing stage, for
+  each script that exists in the primary repo.
+
+### `agentic_review`
+
+> **Not yet implemented.** Decided by [ADR 015](../adr/015-six-stage-feature-lifecycle.md);
+> no job kind, image, skill, or curated-event handling exists yet.
+
+- Same attach/RPC machinery as `spec_grill` (ADR 006), same precedent
+  `design_grill` set in ADR 014. **Read-only** installation token
+  (`contents: read`) — reviews a diff, doesn't write code.
+- Dispatched automatically once all enabled Testing groups pass, if the
+  project's `agentic_review_enabled` toggle (default on) is set.
+- Input: all linked repos at the feature branch, the approved ADR, and the
+  Testing stage's report(s).
+- Output: new terminal tool `submit_review({verdict, comment})` — an
+  **internal** verdict relayed as a curated event, not a real GitHub PR
+  review (deliberately, to avoid colliding with ADR 013's
+  `pull_request_review` webhook, which is the human Manual Review signal).
+- `approved` → `in_review`. `changes_requested` → `returned`
+  (`reason: agentic_review`).
 
 ### `design_grill`
 
@@ -109,7 +165,9 @@ in the Orchestrator itself.
 ## Job spec (common fields)
 
 - Job kind: `spec_grill` | `feature_build` | `test_run` | `deploy` (implemented);
-  `design_grill` (ADR 014, decided but not yet implemented — see above).
+  `design_grill` (ADR 014), `script_test_run` | `agentic_review` (ADR 015) —
+  all three decided but not yet implemented (see above). `script_test_run` is
+  the only job kind with no Pi/RPC involvement at all (alongside `deploy`).
 - Container image: resolved by the Orchestrator from one env var per job kind
   (`SPEC_GRILL_IMAGE` / `FEATURE_BUILD_IMAGE` / `TEST_RUN_IMAGE`), pointing at
   an image built by `agent-images/` (ADR 004) — replaces the placeholder

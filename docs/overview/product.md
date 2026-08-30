@@ -52,16 +52,20 @@ See `overview/architecture.md` for how they talk to each other.
 GitHub App repo access, project/feature CRUD, the two-phase feature workflow
 (`spec_grill` → ADR review → `feature_build` → PR) with live Pi RPC
 integration, and webhook-driven merge/deploy automation are all implemented
-end to end. `design_grill` (live design-session mockups, ADR 014) is decided
-but not yet built. Testing (Phase 3), RBAC/team invitations, and live preview
-tunnels remain unbuilt. See `roadmap/phases.md` for the current build-order
-snapshot and `roadmap/open-questions.md` for undecided design points.
+end to end. `design_grill` (live design-session mockups, ADR 014), a
+six-stage feature lifecycle rework — Spec → Action Items → Implementation →
+Testing → Agentic Review → Manual Review (ADR 015) — and an Organization/
+RBAC/org-level-config/cluster-routing model (ADR 016) are all decided but
+not yet built. Testing (Phase 3) and live preview tunnels remain unbuilt.
+See `roadmap/phases.md` for the current build-order snapshot and
+`roadmap/open-questions.md` for undecided design points.
 
 `design/` (meta repo root — see `conventions/design-wireframes.md`) is the
 current source of truth for where the Web app's IA is headed next, and it's
-substantially larger than what's described above: an Organization/RBAC
-entity, a six-stage feature lifecycle, org-level provider/model/secret
-management, and new usage/analytics/allocations/infrastructure surfaces.
-**None of it is decided or implemented** — it's wireframes only. See
+still larger than what's described above: new usage/analytics/allocations/
+infrastructure surfaces and a landing-page redesign remain **undecided** —
+wireframes only. (Organization/RBAC and the six-stage feature lifecycle,
+both also originally sketched in `design/`, are the two exceptions — now
+decided, ADR 016 and ADR 015, just not built — see above.) See
 `docs/CONTEXT.md`'s "Proposed (surfaced by `design/`)" section for the full
-rollup before assuming any of it is real.
+rollup of what's still undecided before assuming any of it is real.

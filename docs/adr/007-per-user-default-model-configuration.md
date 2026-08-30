@@ -1,7 +1,7 @@
 # ADR 007: Per-user default model configuration
 
-**Status:** Accepted
-**Date:** 2026-07-10
+**Status:** Superseded by [ADR 016](016-organization-rbac-and-cluster-routing.md)
+**Date:** 2026-07-10 (superseded 2026-08-30 by ADR 016)
 **Deciders:** Product/design session (grill-with-docs)
 **Amends:** [ADR 002](002-projects-features-tests.md) (action queue table, project creation flow)
 
@@ -13,13 +13,12 @@
 > default model config itself) is unaffected. See
 > [ADR 012](012-spec-grill-retry-state-reset.md#follow-ups-out-of-scope-for-this-adr).
 
-> **`design/settings/organization/providers` and `.../secrets` propose
-> superseding this ADR entirely** with org-level, admin-managed provider/
-> model/secret config once an Organization entity exists — this ADR's central
-> premise ("no team/org entity yet") would no longer hold. Not decided or
-> built. See `docs/CONTEXT.md`'s "Proposed" section and
-> `docs/roadmap/open-questions.md` #16. Until then, the per-user default
-> described below is what's actually implemented.
+> **Superseded by [ADR 016](016-organization-rbac-and-cluster-routing.md)**,
+> decided but **not yet built**: org-level, admin-managed provider/model/
+> secret config replaces this ADR's per-user default entirely, once an
+> Organization entity exists (ADR 016) — this ADR's central premise ("no
+> team/org entity yet") no longer holds. Until ADR 016 is actually built,
+> the per-user default described below remains what's implemented and live.
 
 ## Context
 

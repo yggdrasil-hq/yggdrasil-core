@@ -8,9 +8,22 @@ site.
 - **GitHub repo:** `yggdrasil-hq/yggdrasil-docusaurus`
 - **Status:** scaffolded and built — content sections: **Getting Started**
   (quick start), **Using Yggdrasil** (projects, features, agent runs,
-  reviewing PRs, tests, notifications), **Self-Hosting** (overview, web, api,
-  orchestrator, running from published images), **Reference** (glossary).
-  Own CI workflow publishes to GHCR (see `docs/conventions/deploy.md`).
+  reviewing PRs, tests, notifications, organization & settings, monitoring),
+  **Self-Hosting** (overview, web, api, orchestrator, running from published
+  images), **Reference** (glossary). Own CI workflow publishes to GHCR (see
+  `docs/conventions/deploy.md`).
+
+> **Content reflects `design/`'s proposed IA:** as of 2026-08-30, the
+> "Using Yggdrasil" pages describe the six-stage feature lifecycle and
+> organizations/roles (both now decided, ADR 015 and ADR 016 respectively,
+> but still not built) and monitoring surfaces sketched in `design/` (still
+> undecided — see `docs/CONTEXT.md`'s "Proposed" section) — written in the
+> product's intended voice, with inline notes on what's live today vs.
+> designed-but-not-built.
+> This is a deliberate departure from strict "docs match shipped code": the
+> product owner has designated `design/` as source of truth for where the
+> product is headed, and asked the user-facing docs to read that way now
+> rather than only after each piece ships.
 - **Stack:** Docusaurus.
 
 ## Important distinction

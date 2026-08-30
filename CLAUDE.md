@@ -57,6 +57,8 @@ requests and streaming progress back in real time. See
 | Authentication / login / sessions / GitHub OAuth (identity) | `docs/concepts/authentication.md` → ADR `docs/adr/009-github-only-authentication.md` (amends `docs/adr/001-authentication.md`) |
 | GitHub App / repo install / webhooks / permissions / repo sync / job tokens | `docs/concepts/github-app.md` → ADR `docs/adr/005-github-app-repository-access.md` → ADR `docs/adr/013-pr-merge-webhooks.md` (PR merge / changes-requested webhook events) |
 | Projects / features / tests / project home / notifications | ADR `docs/adr/002-projects-features-tests.md` → `docs/concepts/feature-lifecycle.md`, `docs/concepts/job-dispatch.md` |
+| Six-stage feature lifecycle / Action Items / Testing gate / Agentic Review / `returned` state | ADR `docs/adr/015-six-stage-feature-lifecycle.md` (decided, not yet built) → `docs/concepts/feature-lifecycle.md`'s "Target model" section |
+| Organization / RBAC / roles / invites / org-level provider-secret config / per-org Kubernetes cluster routing | ADR `docs/adr/016-organization-rbac-and-cluster-routing.md` (decided, not yet built) |
 | `project_init` grill workflow / child-project structure standard (setup.sh/run.sh/Helm/docs) / submodule sub-repos | ADR `docs/adr/008-project-init-grill-and-submodule-repos.md` |
 | The Pi agent (how the agent itself runs)                | `docs/concepts/pi-agent.md`            |
 | Pi RPC transport / how the Orchestrator drives Pi (attach, event relay, mid-run replies) | ADR `docs/adr/006-pi-rpc-orchestrator-integration.md` (spec_grill) → ADR `docs/adr/010-feature-build-rpc-wiring.md` (feature_build) → ADR `docs/adr/011-feature-build-running-state.md` (queued→running) → ADR `docs/adr/012-spec-grill-retry-state-reset.md` (retry status reset, live retry feedback) |
@@ -68,6 +70,7 @@ requests and streaming progress back in real time. See
 | How the API dispatches jobs to the Orchestrator         | `docs/concepts/job-dispatch.md`        |
 | Project / per-feature settings & config                 | `docs/concepts/project-settings.md`    |
 | What we're building now / build order                   | `docs/roadmap/phases.md`               |
+| Implementing ADR 015 or ADR 016 specifically / which slice to build next | `docs/roadmap/adr-015-016-build-plan.md` |
 | Undecided design questions                              | `docs/roadmap/open-questions.md`       |
 | Repo/submodule layout & git workflow                    | `docs/conventions/repo-structure.md`   |
 | Branching, commits, PR conventions                      | `docs/conventions/branching-and-git.md`|

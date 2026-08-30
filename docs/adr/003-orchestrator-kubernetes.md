@@ -1,8 +1,19 @@
 # ADR 003: Orchestrator compute — Kubernetes-based job execution and project hosting
 
-**Status:** Accepted
-**Date:** 2026-07-08
+**Status:** Accepted (cluster-targeting section superseded by ADR 016)
+**Date:** 2026-07-08 (cluster targeting superseded 2026-08-30 by ADR 016)
 **Deciders:** Product/design session (grill-me)
+
+> **Superseded:** "Compute substrate" item 3-4 below (bundled-k3s-by-default
+> auto-selection, one cluster per Orchestrator instance via the
+> `KUBECONFIG_HOST_PATH` env var) is superseded by
+> [ADR 016](016-organization-rbac-and-cluster-routing.md) — decided, **not
+> yet built**. The env var and instance-wide default are removed outright;
+> every Organization must explicitly configure its own cluster before
+> creating any project, with no platform-default fallback. Everything else
+> in this ADR (namespace-per-project isolation, sandboxed RuntimeClass,
+> primary/temporary deployment model, Helm/Dockerfile build contract, job
+> dispatch transport) is unaffected.
 
 ## Context
 
@@ -193,8 +204,10 @@ Constraints:
   meaningfully more infrastructure than the Docker-socket-only design
   previously drafted in `deploy.md` — a heavier self-hosted footprint than
   originally scoped.
-- **One target cluster per Orchestrator instance** means "bring your own
-  cluster while using hosted SaaS" isn't supported yet.
+- ~~**One target cluster per Orchestrator instance** means "bring your own
+  cluster while using hosted SaaS" isn't supported yet.~~ Resolved by
+  [ADR 016](016-organization-rbac-and-cluster-routing.md) (per-org cluster
+  config, no instance-wide default) — decided, not yet built.
 - **Single Orchestrator service** conflates ephemeral job execution and
   persistent deploy management in one codebase; if one grows disproportionately
   relative to the other, the internal module boundaries will need to become
@@ -205,8 +218,10 @@ Constraints:
 - Migration/rollback safety net for primary deployment deploys — likely a
   staging branch + staging deployment gate before promoting to primary. Not
   yet designed; tracked as a new open question.
-- Multi-cluster credential routing for bring-your-own-cluster inside the
-  managed SaaS offering. Tracked as a new open question.
+- ~~Multi-cluster credential routing for bring-your-own-cluster inside the
+  managed SaaS offering.~~ Resolved by
+  [ADR 016](016-organization-rbac-and-cluster-routing.md) (2026-08-30) —
+  decided, not yet built.
 - Cluster/node-pool autoscaling strategy for bursty ephemeral job load.
 - Dedicated node pools as a paid isolation tier.
 - Buildpack/manifest-based auto-detection as an alternative to

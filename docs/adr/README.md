@@ -23,12 +23,12 @@ Each ADR is numbered sequentially: `NNN-short-title.md`.
 | ADR | Title | Status |
 |-----|-------|--------|
 | [001](001-authentication.md) | Authentication and user identity | Partially superseded by 009 |
-| [002](002-projects-features-tests.md) | Projects, features, tests, and project UX | Accepted |
-| [003](003-orchestrator-kubernetes.md) | Orchestrator compute — Kubernetes-based job execution and project hosting | Accepted |
+| [002](002-projects-features-tests.md) | Projects, features, tests, and project UX | Partially superseded by 015, 016 |
+| [003](003-orchestrator-kubernetes.md) | Orchestrator compute — Kubernetes-based job execution and project hosting | Partially superseded by 016 |
 | [004](004-agent-base-containers.md) | Agent base container images (Pi integration) | Accepted |
 | [005](005-github-app-repository-access.md) | GitHub App for repository access | Accepted |
 | [006](006-pi-rpc-orchestrator-integration.md) | Pi RPC integration in the Orchestrator | Accepted |
-| [007](007-per-user-default-model-configuration.md) | Per-user default model configuration | Accepted |
+| [007](007-per-user-default-model-configuration.md) | Per-user default model configuration | Superseded by 016 |
 | [008](008-project-init-grill-and-submodule-repos.md) | `project_init` grill workflow, structure standard, and submodule sub-repos | Accepted |
 | [009](009-github-only-authentication.md) | GitHub-only authentication (remove username/password) | Accepted |
 | [010](010-feature-build-rpc-wiring.md) | Extending Pi RPC wiring to `feature_build` | Accepted |
@@ -36,6 +36,8 @@ Each ADR is numbered sequentially: `NNN-short-title.md`.
 | [012](012-spec-grill-retry-state-reset.md) | `spec_grill` retry status reset and live retry feedback | Accepted |
 | [013](013-pr-merge-webhooks.md) | PR-merge and review-status webhook events | Accepted |
 | [014](014-design-grill-live-mockups.md) | `design_grill` — agent-authored live HTML mockup sessions | Accepted |
+| [015](015-six-stage-feature-lifecycle.md) | Six-stage feature lifecycle — Action Items, Testing, and Agentic Review | Accepted |
+| [016](016-organization-rbac-and-cluster-routing.md) | Organization entity, RBAC, org-level provider/secret config, and per-org cluster routing | Accepted |
 
 When adding an ADR, update this index, add a routing row in root `CLAUDE.md`, and
 link from `docs/CONTEXT.md` if the decision affects suite-wide context.

@@ -1,17 +1,22 @@
 # ADR 002: Projects, features, tests, and project UX
 
-**Status:** Accepted  
-**Date:** 2026-06-22 (amended 2026-06-28 by ADR 005; amended 2026-07-10 by ADR 007)  
+**Status:** Accepted (feature lifecycle section superseded by ADR 015; project
+ownership model superseded by ADR 016)  
+**Date:** 2026-06-22 (amended 2026-06-28 by ADR 005; amended 2026-07-10 by ADR 007;
+feature lifecycle superseded 2026-08-30 by ADR 015; project ownership
+superseded 2026-08-30 by ADR 016)  
 **Deciders:** Product/design session (grill-me)
 
-> **`design/` proposes a superseding rework** of this ADR's feature lifecycle
-> — six stages (Spec → Action Items → Implementation → Testing → Agentic
-> Review → Manual Review) replacing the `draft → spec_ready → … → merged`
-> flow below — and treats projects as belonging to an **Organization** rather
-> than `owner_user_id`. Neither is decided or built. See
-> `docs/CONTEXT.md`'s "Proposed (surfaced by `design/`)" section and
-> `docs/roadmap/open-questions.md` #13–14. Everything below remains the
-> accepted, implemented model.
+> **Superseded:** the "Feature workflow" and "Feature lifecycle states"
+> sections below (the `draft → spec_ready → queued → running → in_review →
+> merged` model and the `changes_requested` state) are superseded by
+> [ADR 015](015-six-stage-feature-lifecycle.md) — decided (six stages: Spec →
+> Action Items → Implementation → Testing → Agentic Review → Manual Review),
+> **not yet built**. Project ownership (`owner_user_id`) is superseded by
+> [ADR 016](016-organization-rbac-and-cluster-routing.md) — projects now
+> belong to an **Organization**, decided, **not yet built**. Everything else
+> in this ADR (repos/linking, tests, action queue, notifications, job kinds
+> table) remains the accepted, implemented model, unaffected.
 
 ## Context
 
