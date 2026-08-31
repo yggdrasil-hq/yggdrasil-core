@@ -79,6 +79,14 @@ update the token.
 | PATCH | `/api/settings/account` | session | Update display name |
 
 Session cookie: `Path=/`, `HttpOnly`, `SameSite=Lax`, `Secure` in production.
+In a subdomain deploy (web and api on different hosts), the API also needs
+`SESSION_COOKIE_DOMAIN` set to the shared parent domain (e.g. `.example.com`)
+so the cookie is visible to the web host, not just the api host that issued
+it — otherwise the Web app's Next.js middleware (which checks the session by
+forwarding the browser's `Cookie` header to the API) never sees it and
+redirects every request back to `/login`, even right after a successful
+GitHub sign-in. Unset in dev, where web and api share one origin via
+path-based nginx routing.
 
 ## Web routes
 

@@ -76,6 +76,11 @@ services:
       # OAuth redirects must point at the real public hosts.
       APP_PUBLIC_URL: https://${APP_HOST}
       API_PUBLIC_URL: https://${API_HOST}
+      # Shared parent domain of APP_HOST/API_HOST (e.g. ".example.com") so the
+      # session cookie set by the api host is visible to the web host too —
+      # without it, the Next.js middleware's session check can never see the
+      # cookie and every request bounces back to /login.
+      SESSION_COOKIE_DOMAIN: ${SESSION_COOKIE_DOMAIN}
       # Must match the orchestrator's own APPS_BASE_DOMAIN exactly (ADR 003
       # §15) — the two are set independently, kept in sync via this shared
       # root .env value.

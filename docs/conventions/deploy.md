@@ -156,7 +156,11 @@ submodule's `.env.example` for the full, commented list):
 - **api** — `PORT`, `DATABASE_URL` (Postgres), `S3_ENDPOINT`/`S3_ACCESS_KEY`/`S3_SECRET_KEY`/`S3_BUCKET`/`S3_REGION`, `SESSION_SECRET`,
   `APP_PUBLIC_URL`/`API_PUBLIC_URL`, `GITHUB_CLIENT_ID`/`GITHUB_CLIENT_SECRET` (sign-in, ADR 009 — required),
   `SECRETS_ENCRYPTION_KEY` (32-byte base64, `openssl rand -base64 32`), `INTERNAL_API_TOKEN` (shared with orchestrator),
-  `APPS_BASE_DOMAIN` (must match the orchestrator's value exactly).
+  `APPS_BASE_DOMAIN` (must match the orchestrator's value exactly),
+  `SESSION_COOKIE_DOMAIN` (subdomain deploys only — the shared parent domain
+  of `APP_HOST`/`API_HOST`, e.g. `.example.com`; omitting it leaves the
+  session cookie scoped to the api host only, so the web app's middleware
+  never sees it and every request bounces back to `/login`).
 - **web** — `NEXT_PUBLIC_API_BASE_URL` (browser-facing API path/URL), `API_INTERNAL_URL` (server-side, reaches `api` directly), `NEXT_PUBLIC_BASE_PATH` (empty for a subdomain deploy).
 - **orchestrator** — `PORT`, `DATABASE_URL` (same Postgres as api, shared `jobs` table), `KUBECONFIG` (unset to use in-cluster config), `API_INTERNAL_URL`/`INTERNAL_API_TOKEN` (shared with api), `APPS_BASE_DOMAIN`/`INGRESS_CLASS_NAME`/`CERT_ISSUER_NAME`, and the per-job-kind images (`SPEC_GRILL_IMAGE`/`FEATURE_BUILD_IMAGE`/`TEST_RUN_IMAGE`/`DESIGN_GRILL_IMAGE`, from `ghcr.io/yggdrasil-hq/yggdrasil-agent-images` — also private by default, so the target cluster needs an `imagePullSecret` too).
 - **landing** — none.
@@ -177,6 +181,7 @@ services:
       S3_BUCKET: yggdrasil
       S3_REGION: us-east-1
       SESSION_SECRET: change-me
+      SESSION_COOKIE_DOMAIN: .example.com
       APP_PUBLIC_URL: https://app.example.com
       API_PUBLIC_URL: https://api.example.com
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
