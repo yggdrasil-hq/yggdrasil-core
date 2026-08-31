@@ -32,6 +32,10 @@ docker compose -f deploy/docker-compose.dev.yml up --build
 
 Open http://localhost:8080
 
+The landing dev container is self-contained and intentionally does not mount
+the landing source or `node_modules`; rebuild it with `--build` after landing
+source or dependency changes.
+
 | Path | Service |
 |------|---------|
 | `/` | Landing |

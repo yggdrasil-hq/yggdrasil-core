@@ -15,11 +15,21 @@ services:
     volumes:
       - ./nginx/prod.conf.template:/etc/nginx/templates/default.conf.template:ro
     depends_on:
-      - landing
-      - web
-      - docusaurus
-      - api
-      - orchestrator
+      landing:
+        condition: service_started
+        restart: true
+      web:
+        condition: service_started
+        restart: true
+      docusaurus:
+        condition: service_started
+        restart: true
+      api:
+        condition: service_started
+        restart: true
+      orchestrator:
+        condition: service_started
+        restart: true
 
   postgres:
     image: postgres:16-alpine

@@ -230,13 +230,17 @@ point `*_PUBLIC_URL` at the real public hostnames.
 
 ## Dev hot reload
 
-Bind-mount source; named volumes for `node_modules` (Node), Go module cache,
-and each app's framework build-output dir (`.next` for web/landing,
-`.docusaurus`/`build` for docusaurus). The build-output dirs need their own
-volumes too, not just `node_modules` — dev containers run as root, and
-without a volume there the framework's dev/build process writes those dirs
-straight onto the bind-mounted host source tree, leaving them root-owned and
-breaking host-side builds/`rm` until manually chowned.
+Bind-mount source for services that support hot reload; named volumes for
+`node_modules` (Node), Go module cache, and each app's framework build-output
+dir (`.next` for web, `.docusaurus`/`build` for docusaurus). The landing dev
+service is the exception: it is self-contained and must be rebuilt after
+source or dependency changes.
+
+The build-output dirs need their own volumes too, not just `node_modules` —
+dev containers run as root, and without a volume there the framework's
+dev/build process writes those dirs straight onto the bind-mounted host source
+tree, leaving them root-owned and breaking host-side builds/`rm` until
+manually chowned.
 
 ## Open / TODO
 
