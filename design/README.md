@@ -45,6 +45,8 @@ page.
 | Route | File |
 |-------|------|
 | `/` | `landing/index.html` |
+| `/terms` | `landing/terms/index.html` (placeholder legal copy — not lawyer-reviewed) |
+| `/privacy` | `landing/privacy/index.html` (placeholder legal copy — not lawyer-reviewed) |
 
 ### App (`web/` repo)
 

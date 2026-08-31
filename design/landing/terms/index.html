@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Terms of Service — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    body { overflow-x: hidden; }
+
+    .mkt-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+    .mkt-bg::before { content: ""; position: absolute; inset: 0; background: radial-gradient(52% 30% at 50% -6%, rgba(47, 212, 198, 0.09), transparent 70%); }
+    /* Grain dithers the dark radial gradient — without it the glow bands visibly. */
+    .mkt-grain { position: absolute; inset: 0; opacity: 0.35; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+    .mkt-nav { position: sticky; top: 0; z-index: 40; background: rgba(8, 11, 17, 0.72); backdrop-filter: blur(14px) saturate(1.3); -webkit-backdrop-filter: blur(14px) saturate(1.3); }
+    .mkt-nav::after { content: ""; display: block; height: 1px; background: linear-gradient(90deg, transparent, rgba(47, 212, 198, 0.28) 30%, rgba(79, 155, 240, 0.22) 70%, transparent); }
+    .mkt-nav-inner { max-width: 1200px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .mkt-nav-actions { display: flex; align-items: center; gap: 10px; }
+
+    .legal { max-width: 760px; margin: 0 auto; padding: clamp(48px, 7vw, 80px) 24px 96px; }
+    .legal .kicker { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--bifrost); }
+    .legal h1 { margin-top: 12px; font-size: clamp(30px, 4.4vw, 44px); letter-spacing: -0.025em; }
+    .legal .updated { margin-top: 10px; font-size: 13px; color: var(--shadow); font-family: var(--font-mono); }
+    .legal .intro { margin-top: 20px; padding: 16px 18px; border: 1px solid var(--rime-soft); border-radius: var(--radius-card); background: var(--surface-01); font-size: 14px; line-height: 1.6; color: var(--mist); }
+    .legal h2 { margin-top: 44px; font-size: 20px; letter-spacing: -0.015em; }
+    .legal h2 .num { color: var(--bifrost); font-family: var(--font-mono); font-size: 15px; margin-right: 10px; }
+    .legal p { margin-top: 12px; font-size: 14px; line-height: 1.7; color: var(--mist); }
+    .legal ul { margin: 12px 0 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
+    .legal li { font-size: 14px; line-height: 1.65; color: var(--mist); }
+    .legal li::marker { color: var(--bifrost); }
+    .legal a { color: var(--frostfire); border-bottom: 1px solid rgba(191, 233, 238, 0.3); }
+    .legal a:hover { color: var(--bifrost); border-bottom-color: var(--bifrost); }
+    .legal .divider { margin-top: 44px; height: 1px; background: linear-gradient(90deg, transparent, var(--rime), transparent); }
+
+    .mkt-footer { position: relative; padding: 32px 24px; }
+    .mkt-footer::before { content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: min(1200px, calc(100% - 48px)); height: 1px; background: linear-gradient(90deg, transparent, var(--rime) 25%, var(--rime) 75%, transparent); }
+    .mkt-footer-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--shadow); }
+    .mkt-footer-inner nav { display: flex; gap: 20px; }
+    .mkt-footer-inner nav a { color: var(--mist); }
+    .mkt-footer-inner nav a:hover { color: var(--frostfire); }
+  </style>
+</head>
+<body>
+  <div class="design-note"><b>Wireframe</b> · maps to a proposed <span class="mono">/terms</span> route in the <span class="mono">landing/</span> repo (added in landing pass #8, does not exist there yet) · <b>placeholder legal copy</b> — plain-language, deliberately generic, and <b>not lawyer-reviewed</b>; no legal entity, governing law, or jurisdiction has been decided, so those clauses name none. Grounded where it touches product claims: GitHub-only sign-in (ADR 001/009), scoped GitHub App tokens (ADR 005), server-side-only secret decryption (ADR 003 §16/007), self-hosting (conventions/deploy.md). The "Trademarks" section's "Yggdrasil project" attribution is placeholder wording pending an entity decision. Replace all of this with reviewed counsel text before any real launch.</div>
+
+  <div class="mkt-bg" aria-hidden="true"><div class="mkt-grain"></div></div>
+
+  <header class="mkt-nav">
+    <div class="mkt-nav-inner">
+      <a href="/landing/index.html" class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></a>
+      <div class="mkt-nav-actions">
+        <a class="btn btn-ghost" href="/landing/index.html">Home</a>
+        <a class="btn btn-primary" href="https://app.yggdrasil.cfd">Open the app</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="legal">
+    <div class="kicker">Legal</div>
+    <h1>Terms of Service</h1>
+    <div class="updated">Last updated: September 1, 2026</div>
+
+    <p class="intro">These Terms of Service ("Terms") govern your use of Yggdrasil — the web application at app.yggdrasil.cfd, the documentation at docs.yggdrasil.cfd, and this website. By using Yggdrasil, you agree to these Terms. If you do not agree, do not use the service.</p>
+
+    <h2><span class="num">01</span>The service</h2>
+    <p>Yggdrasil is an AI-orchestrated software development platform. You describe features in plain language; AI coding agents plan, build, test, and open pull requests against repositories you connect, running inside isolated, ephemeral environments. Yggdrasil is under active development and provided on an early-access basis — functionality may change, break, or be withdrawn without notice.</p>
+
+    <h2><span class="num">02</span>Accounts and GitHub sign-in</h2>
+    <p>Yggdrasil uses GitHub as its only identity provider. There is no separate Yggdrasil account or password. You are responsible for the security of your GitHub account, and for all activity that occurs under it on Yggdrasil. You must be legally capable of entering into these Terms to use the service.</p>
+
+    <h2><span class="num">03</span>Your code and content</h2>
+    <p>You retain all rights to the repositories, code, specifications, and other content you bring to Yggdrasil. By connecting a repository, you grant Yggdrasil the limited rights needed to operate the service on your behalf — reading and writing repository contents through the scoped, short-lived access tokens you authorize, running builds and tests against your code, and displaying results back to you. Code produced by agents in your projects belongs to you, subject to the licenses of any third-party dependencies it uses.</p>
+
+    <h2><span class="num">04</span>Acceptable use</h2>
+    <p>You agree not to use Yggdrasil to:</p>
+    <ul>
+      <li>build, test, or distribute malware, or software designed to harm, defraud, or gain unauthorized access to systems or data;</li>
+      <li>violate any applicable law, or the rights (including intellectual-property rights) of any third party;</li>
+      <li>connect repositories or supply credentials you are not authorized to use;</li>
+      <li>probe, disrupt, or circumvent the isolation, permission scoping, or other security mechanisms of the service; or</li>
+      <li>resell or provide the hosted service to third parties without permission.</li>
+    </ul>
+
+    <h2><span class="num">05</span>Your keys, your infrastructure</h2>
+    <p>Yggdrasil lets you supply your own model-provider API keys and, where configured, run on your own infrastructure. You are responsible for those accounts — their costs, their terms, and their security. Secrets you store in Yggdrasil are encrypted at rest and decrypted only server-side, but you remain responsible for what you choose to store and for rotating credentials you believe are compromised.</p>
+
+    <h2><span class="num">06</span>Self-hosted deployments</h2>
+    <p>If you run Yggdrasil on your own infrastructure, these Terms apply to your use of the software; you are solely responsible for the operation, security, and compliance of your deployment and of any workloads it runs.</p>
+
+    <h2><span class="num">07</span>Third-party services</h2>
+    <p>Yggdrasil depends on services it does not control — GitHub for identity and repository hosting, and the model providers you configure for agent inference. Your use of those services is governed by their own terms, and Yggdrasil is not responsible for their availability, conduct, or output.</p>
+
+    <h2><span class="num">08</span>AI-generated output</h2>
+    <p>Agent output is generated by machine-learning models and is provided for your review. Yggdrasil's process is designed so that changes are reviewed and tested before merging, but you are responsible for the code you approve and merge. Yggdrasil does not warrant that agent-produced code is correct, secure, non-infringing, or fit for any purpose.</p>
+
+    <h2><span class="num">09</span>Disclaimers</h2>
+    <p>The service is provided "as is" and "as available", without warranties of any kind, express or implied, including merchantability, fitness for a particular purpose, and non-infringement. To the maximum extent permitted by law, Yggdrasil will not be liable for any indirect, incidental, special, consequential, or punitive damages, or for lost profits, data, or goodwill, arising from your use of the service.</p>
+
+    <h2><span class="num">10</span>Termination</h2>
+    <p>You may stop using Yggdrasil at any time and disconnect the GitHub App from your repositories. We may suspend or terminate access to the hosted service if you materially breach these Terms or where necessary to protect the service or other users. Sections that by their nature should survive termination (including 03, 08, 09, and 11) survive it.</p>
+
+    <h2><span class="num">11</span>Trademarks and other legal notices</h2>
+    <p>Yggdrasil, the Yggdrasil logo, and the Yggdrasil mark are trademarks of the Yggdrasil project. You may not use them in a way that suggests affiliation or endorsement without prior written permission — this includes product names, domain names, and logos. GitHub is a trademark of GitHub, Inc. Kubernetes is a trademark of the Linux Foundation. All other trademarks are the property of their respective owners. Third-party open-source components used by Yggdrasil are licensed under their own terms.</p>
+
+    <h2><span class="num">12</span>Changes to these Terms</h2>
+    <p>We may update these Terms from time to time. Material changes will be announced on this page with an updated "Last updated" date; continued use of the service after a change takes effect constitutes acceptance.</p>
+
+    <h2><span class="num">13</span>Contact</h2>
+    <p>Questions about these Terms can be raised on <a href="https://github.com/yggdrasil-hq/yggdrasil-core">GitHub</a>.</p>
+
+    <div class="divider"></div>
+    <p style="margin-top: 20px;">See also the <a href="/landing/privacy/index.html">Privacy Policy</a>.</p>
+  </main>
+
+  <footer class="mkt-footer">
+    <div class="mkt-footer-inner">
+      <span>&copy; 2026 Yggdrasil. All rights reserved.</span>
+      <nav>
+        <a href="/landing/index.html">Home</a>
+        <a href="https://docs.yggdrasil.cfd">Docs</a>
+        <a href="/landing/terms/index.html">Terms</a>
+        <a href="/landing/privacy/index.html">Privacy</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

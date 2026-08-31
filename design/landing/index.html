@@ -13,12 +13,52 @@
     body { overflow-x: hidden; }
     .mktw { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 
+    /* Ambient page background: aurora washes + faint grid + grain. Fixed and
+       inert; everything sits above it. */
+    .mkt-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+    .mkt-bg::before {
+      content: ""; position: absolute; inset: 0;
+      background:
+        radial-gradient(52% 38% at 50% -6%, rgba(47, 212, 198, 0.13), transparent 70%),
+        radial-gradient(38% 30% at 82% 12%, rgba(79, 155, 240, 0.10), transparent 70%),
+        radial-gradient(44% 34% at 12% 32%, rgba(47, 212, 198, 0.05), transparent 70%),
+        radial-gradient(60% 40% at 50% 108%, rgba(79, 155, 240, 0.07), transparent 70%);
+    }
+    .mkt-bg::after {
+      content: ""; position: absolute; inset: 0; opacity: 0.5;
+      background-image:
+        linear-gradient(rgba(191, 233, 238, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(191, 233, 238, 0.025) 1px, transparent 1px);
+      background-size: 56px 56px;
+      mask-image: radial-gradient(70% 52% at 50% 0%, black 30%, transparent 100%);
+      -webkit-mask-image: radial-gradient(70% 52% at 50% 0%, black 30%, transparent 100%);
+    }
+    .mkt-grain { position: absolute; inset: 0; opacity: 0.35; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+    /* Shared motion vocabulary */
+    .mkt-reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+    .mkt-reveal.is-in { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) {
+      .mkt-reveal { opacity: 1; transform: none; transition: none; }
+      * { animation-duration: 0.001s !important; animation-iteration-count: 1 !important; }
+    }
+
+    .btn { transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease, color 0.18s ease; }
+    .btn-primary { background: linear-gradient(180deg, #3ee2d4, var(--bifrost) 55%, #26bdb0); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 8px 24px rgba(47, 212, 198, 0.28); }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) inset, 0 12px 32px rgba(47, 212, 198, 0.4); }
+    .btn-outline:hover { border-color: var(--bifrost); color: var(--frostfire); transform: translateY(-1px); }
+    .btn-ghost:hover { color: var(--frost); }
+
     /* Nav */
-    .mkt-nav { position: sticky; top: 0; z-index: 40; border-bottom: 1px solid var(--rime-soft); background: rgba(8, 11, 17, 0.82); backdrop-filter: blur(10px); }
+    .mkt-nav { position: sticky; top: 0; z-index: 40; background: rgba(8, 11, 17, 0.72); backdrop-filter: blur(14px) saturate(1.3); -webkit-backdrop-filter: blur(14px) saturate(1.3); }
+    .mkt-nav::after { content: ""; display: block; height: 1px; background: linear-gradient(90deg, transparent, rgba(47, 212, 198, 0.28) 30%, rgba(79, 155, 240, 0.22) 70%, transparent); }
     .mkt-nav-inner { max-width: 1200px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .mkt-nav .logo { filter: drop-shadow(0 0 14px rgba(47, 212, 198, 0.25)); }
     .mkt-nav-links { display: flex; align-items: center; gap: 28px; }
-    .mkt-nav-links a { font-size: 14px; color: var(--mist); }
+    .mkt-nav-links a { position: relative; font-size: 14px; color: var(--mist); padding: 4px 0; transition: color 0.18s ease; }
+    .mkt-nav-links a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: 0; height: 1px; background: var(--bifrost); transition: right 0.22s ease; }
     .mkt-nav-links a:hover { color: var(--frost); }
+    .mkt-nav-links a:hover::after { right: 0; }
     .mkt-nav-actions { display: flex; align-items: center; gap: 10px; }
 
     @media (max-width: 720px) {
@@ -26,48 +66,87 @@
     }
 
     /* Hero */
-    .mkt-hero { padding: clamp(64px, 10vw, 120px) 24px clamp(48px, 8vw, 96px); text-align: center; }
-    .mkt-eyebrow { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 14px; border-radius: var(--radius-pill); border: 1px solid var(--rime); background: var(--surface-01); font-size: 12px; color: var(--mist); }
-    .mkt-eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--bifrost); box-shadow: 0 0 0 3px rgba(47, 212, 198, 0.18); }
-    .mkt-hero h1 { margin: 24px auto 0; max-width: 20ch; font-family: var(--font-sans); font-size: clamp(38px, 6.4vw, 68px); font-weight: 600; letter-spacing: -0.035em; line-height: 1.04; color: var(--frost); }
-    .mkt-hero h1 .accent { color: var(--bifrost); }
-    .mkt-hero .sub { margin: 20px auto 0; max-width: 620px; font-size: clamp(15px, 1.6vw, 18px); line-height: 1.55; color: var(--mist); }
-    .mkt-cta-row { margin-top: 32px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
-    .btn-lg { height: 48px; padding: 0 24px; font-size: 15px; border-radius: var(--radius-sm); }
+    .mkt-hero { position: relative; padding: clamp(72px, 11vw, 136px) 24px clamp(48px, 8vw, 96px); text-align: center; }
+    .mkt-eyebrow { display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 15px; border-radius: var(--radius-pill); border: 1px solid rgba(47, 212, 198, 0.3); background: linear-gradient(180deg, rgba(47, 212, 198, 0.09), rgba(47, 212, 198, 0.03)); font-size: 12px; letter-spacing: 0.02em; color: var(--frostfire); box-shadow: 0 0 24px rgba(47, 212, 198, 0.12), inset 0 1px 0 rgba(191, 233, 238, 0.08); }
+    .mkt-eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--bifrost); box-shadow: 0 0 0 3px rgba(47, 212, 198, 0.18); animation: mkt-pulse 2.4s ease-in-out infinite; }
+    .mkt-hero h1 { margin: 26px auto 0; max-width: 20ch; font-family: var(--font-sans); font-size: clamp(40px, 6.6vw, 72px); font-weight: 600; letter-spacing: -0.035em; line-height: 1.03; background: linear-gradient(180deg, var(--frost) 55%, rgba(159, 176, 192, 0.82)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .mkt-hero h1 .accent { position: relative; background: linear-gradient(120deg, #3ee2d4, var(--bifrost) 45%, var(--aurora)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .mkt-hero h1 .accent::after { content: ""; position: absolute; left: 2%; right: 2%; bottom: 0.02em; height: 0.09em; border-radius: 999px; background: linear-gradient(90deg, rgba(47, 212, 198, 0.7), rgba(79, 155, 240, 0.55)); filter: blur(0.5px); opacity: 0.85; }
+    .mkt-hero .sub { margin: 22px auto 0; max-width: 620px; font-size: clamp(15px, 1.6vw, 18px); line-height: 1.6; color: var(--mist); }
+    .mkt-cta-row { margin-top: 34px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .btn-lg { height: 50px; padding: 0 26px; font-size: 15px; border-radius: 10px; }
 
     /* Hero mockup */
-    .mkt-mockup-wrap { position: relative; margin: clamp(48px, 8vw, 88px) auto 0; max-width: 760px; }
-    .mkt-mockup-glow { position: absolute; inset: -60px; background: radial-gradient(closest-side, rgba(47, 212, 198, 0.16), transparent 70%); filter: blur(10px); z-index: 0; pointer-events: none; }
-    .mkt-mockup { position: relative; z-index: 1; border-radius: var(--radius-panel); border: 1px solid var(--rime); background: var(--surface-01); overflow: hidden; text-align: left; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(191, 233, 238, 0.06); }
-    .mkt-chrome { display: flex; align-items: center; gap: 16px; padding: 12px 16px; border-bottom: 1px solid var(--rime-soft); background: var(--surface-02); }
+    .mkt-mockup-wrap { position: relative; margin: clamp(52px, 8vw, 92px) auto 0; max-width: 800px; perspective: 1400px; }
+    .mkt-mockup-glow { position: absolute; inset: -70px -40px; background: radial-gradient(closest-side, rgba(47, 212, 198, 0.18), rgba(79, 155, 240, 0.07) 55%, transparent 75%); filter: blur(12px); z-index: 0; pointer-events: none; }
+    .mkt-mockup { position: relative; z-index: 1; border-radius: var(--radius-panel); border: 1px solid rgba(74, 96, 118, 0.55); background: linear-gradient(180deg, rgba(21, 28, 38, 0.92), rgba(14, 19, 27, 0.96)); overflow: hidden; text-align: left; box-shadow: 0 32px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(8, 11, 17, 0.6), inset 0 1px 0 rgba(191, 233, 238, 0.09); transform: rotateX(1.6deg); }
+    .mkt-mockup::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(115deg, transparent 42%, rgba(191, 233, 238, 0.045) 50%, transparent 58%); pointer-events: none; }
+    .mkt-chrome { display: flex; align-items: center; gap: 16px; padding: 12px 16px; border-bottom: 1px solid var(--rime-soft); background: rgba(28, 37, 49, 0.55); }
     .mkt-chrome .dots { display: flex; gap: 6px; flex-shrink: 0; }
-    .mkt-chrome .dots span { width: 9px; height: 9px; border-radius: 50%; background: var(--rime); }
-    .mkt-chrome .url { flex: 1; height: 24px; border-radius: var(--radius-pill); background: var(--surface-01); border: 1px solid var(--rime-soft); display: flex; align-items: center; padding: 0 12px; font-family: var(--font-mono); font-size: 11px; color: var(--shadow); }
+    .mkt-chrome .dots span { width: 9px; height: 9px; border-radius: 50%; background: var(--rime); box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.35); }
+    .mkt-chrome .dots span:first-child { background: rgba(224, 108, 117, 0.55); }
+    .mkt-chrome .dots span:nth-child(2) { background: rgba(226, 161, 60, 0.5); }
+    .mkt-chrome .dots span:nth-child(3) { background: rgba(70, 194, 133, 0.5); }
+    .mkt-chrome .url { flex: 1; height: 26px; border-radius: var(--radius-pill); background: rgba(8, 11, 17, 0.6); border: 1px solid var(--rime-soft); display: flex; align-items: center; gap: 7px; padding: 0 12px; font-family: var(--font-mono); font-size: 11px; color: var(--shadow); }
+    .mkt-chrome .url .lock { color: var(--bifrost); font-size: 9px; }
     .mkt-mockup-body { padding: 20px; }
     .mkt-mockup-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
     .mkt-mockup-title-row h3 { font-size: 15px; color: var(--frost); }
-    .mkt-mockup-body .bubble { width: 88%; border: 1px solid var(--rime-soft); background: var(--surface-02); border-radius: var(--radius-sm); padding: 12px; margin-top: 10px; }
+    .mkt-mockup-body .bubble { width: 88%; border: 1px solid var(--rime-soft); background: linear-gradient(180deg, rgba(28, 37, 49, 0.6), rgba(21, 28, 38, 0.75)); border-radius: 10px; padding: 12px 14px; margin-top: 10px; box-shadow: inset 0 1px 0 rgba(191, 233, 238, 0.04); }
     .mkt-mockup-body .bubble:first-of-type { margin-top: 0; }
-    .mkt-mockup-body .bubble .who { font-size: 10px; color: var(--shadow); font-weight: 500; margin-bottom: 4px; }
-    .mkt-mockup-body .bubble.user { margin-left: auto; background: var(--surface-03); border-color: var(--rime); }
-    .mkt-mockup-body .bubble p { color: var(--mist); font-size: 13px; line-height: 1.5; margin: 0; }
+    .mkt-mockup-body .bubble .who { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--shadow); font-weight: 500; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .mkt-mockup-body .bubble .who::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--bifrost); }
+    .mkt-mockup-body .bubble.user .who::before { background: var(--aurora); }
+    .mkt-mockup-body .bubble.user { margin-left: auto; background: linear-gradient(180deg, rgba(28, 37, 49, 0.9), rgba(28, 37, 49, 0.7)); border-color: var(--rime); }
+    .mkt-mockup-body .bubble p { color: var(--mist); font-size: 13px; line-height: 1.55; margin: 0; }
     .mkt-mockup-body .bubble p b { color: var(--frost); font-weight: 500; }
+    .mkt-mockup-status { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 12px 20px; border-top: 1px solid var(--rime-soft); background: rgba(8, 11, 17, 0.45); }
+    .mkt-status-chip { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: var(--radius-pill); border: 1px solid var(--rime-soft); font-family: var(--font-mono); font-size: 10px; color: var(--mist); }
+    .mkt-status-chip .d { width: 5px; height: 5px; border-radius: 50%; }
+    .mkt-status-chip.ok { border-color: rgba(70, 194, 133, 0.35); color: #7fd4a8; }
+    .mkt-status-chip.ok .d { background: var(--st-approved); }
+    .mkt-status-chip.run { border-color: rgba(79, 155, 240, 0.35); color: #8dbdf5; }
+    .mkt-status-chip.run .d { background: var(--aurora); animation: mkt-pulse 1.8s ease-in-out infinite; }
+    .mkt-status-chip.idle .d { background: var(--shadow); }
 
-    /* Section shell */
-    .mkt-section { padding: clamp(56px, 8vw, 96px) 24px; border-top: 1px solid var(--rime-soft); }
-    .mkt-section-head { max-width: 620px; margin: 0 auto 48px; text-align: center; }
-    .mkt-section-head .kicker { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--bifrost); }
-    .mkt-section-head h2 { margin-top: 10px; font-size: clamp(26px, 3.4vw, 38px); font-weight: 600; letter-spacing: -0.02em; color: var(--frost); }
-    .mkt-section-head p { margin-top: 12px; font-size: 15px; color: var(--mist); line-height: 1.55; }
+    /* Floating annotation cards around the mockup */
+    .mkt-float { position: absolute; z-index: 2; display: flex; align-items: center; gap: 9px; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--rime); background: rgba(21, 28, 38, 0.88); backdrop-filter: blur(8px); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(191, 233, 238, 0.07); font-size: 12px; color: var(--mist); white-space: nowrap; }
+    .mkt-float b { display: block; font-size: 12px; font-weight: 600; color: var(--frost); }
+    .mkt-float span { font-size: 11px; color: var(--shadow); }
+    .mkt-float .ic { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0; font-size: 12px; }
+    .mkt-float.f1 { top: 42%; right: 100%; margin-right: -46px; animation: mkt-float 7s ease-in-out infinite; }
+    .mkt-float.f1 .ic { background: rgba(70, 194, 133, 0.14); color: var(--st-approved); }
+    .mkt-float.f2 { bottom: 22%; left: 100%; margin-left: -46px; animation: mkt-float 8s ease-in-out 1.2s infinite; }
+    .mkt-float.f2 .ic { background: rgba(79, 155, 240, 0.14); color: var(--aurora); }
+    @keyframes mkt-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+    @media (max-width: 1080px) {
+      .mkt-float { display: none; }
+    }
 
-    /* Steps */
-    .mkt-steps { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    .mkt-step { border: 1px solid var(--rime-soft); border-radius: var(--radius-card); padding: 24px; background: var(--surface-01); }
-    .mkt-step .n { font-family: var(--font-mono); font-size: 13px; color: var(--bifrost); }
-    .mkt-step h3 { margin-top: 14px; font-size: 16px; color: var(--frost); }
-    .mkt-step p { margin-top: 8px; font-size: 13px; line-height: 1.55; color: var(--mist); }
+    /* Section shell — gradient hairline dividers instead of flat borders */
+    .mkt-section { position: relative; padding: clamp(64px, 8.5vw, 112px) 24px; }
+    .mkt-section::before { content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: min(1200px, calc(100% - 48px)); height: 1px; background: linear-gradient(90deg, transparent, var(--rime) 25%, var(--rime) 75%, transparent); }
+    .mkt-section-head { max-width: 640px; margin: 0 auto 56px; text-align: center; }
+    .mkt-section-head .kicker { display: inline-flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--bifrost); }
+    .mkt-section-head .kicker::before, .mkt-section-head .kicker::after { content: ""; width: 28px; height: 1px; background: linear-gradient(90deg, transparent, rgba(47, 212, 198, 0.5)); }
+    .mkt-section-head .kicker::after { background: linear-gradient(90deg, rgba(47, 212, 198, 0.5), transparent); }
+    .mkt-section-head h2 { margin-top: 14px; font-size: clamp(27px, 3.5vw, 40px); font-weight: 600; letter-spacing: -0.02em; background: linear-gradient(180deg, var(--frost) 60%, rgba(159, 176, 192, 0.85)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .mkt-section-head p { margin-top: 14px; font-size: 15px; color: var(--mist); line-height: 1.6; }
+
+    /* Steps — connected pipeline */
+    .mkt-steps { position: relative; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .mkt-step { position: relative; border: 1px solid var(--rime-soft); border-radius: var(--radius-card); padding: 26px 24px; background: linear-gradient(180deg, rgba(14, 19, 27, 0.9), rgba(14, 19, 27, 0.55)); box-shadow: inset 0 1px 0 rgba(191, 233, 238, 0.04); transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease; }
+    .mkt-step::before { content: ""; position: absolute; top: 0; left: 24px; right: 24px; height: 1px; background: linear-gradient(90deg, rgba(47, 212, 198, 0.45), transparent); opacity: 0; transition: opacity 0.25s ease; }
+    .mkt-step:hover { transform: translateY(-4px); border-color: var(--rime); box-shadow: 0 18px 44px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(191, 233, 238, 0.06); }
+    .mkt-step:hover::before { opacity: 1; }
+    .mkt-step .n { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(47, 212, 198, 0.35); background: rgba(47, 212, 198, 0.07); font-family: var(--font-mono); font-size: 12px; color: var(--bifrost); box-shadow: 0 0 18px rgba(47, 212, 198, 0.12); }
+    .mkt-step h3 { margin-top: 16px; font-size: 16px; color: var(--frost); }
+    .mkt-step p { margin-top: 8px; font-size: 13px; line-height: 1.6; color: var(--mist); }
+    .mkt-step .arrow { position: absolute; top: 30px; right: -17px; z-index: 2; color: var(--shadow); font-size: 12px; }
+    .mkt-step:nth-child(3n) .arrow, .mkt-step:last-child .arrow { display: none; }
     @media (max-width: 900px) {
       .mkt-steps { grid-template-columns: 1fr 1fr; }
+      .mkt-step .arrow { display: none; }
     }
     @media (max-width: 560px) {
       .mkt-steps { grid-template-columns: 1fr; }
@@ -75,13 +154,21 @@
 
     /* Features */
     .mkt-features { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    .mkt-feature { border: 1px solid var(--rime-soft); border-radius: var(--radius-card); padding: 24px; }
-    .mkt-feature .icon { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--surface-02); border: 1px solid var(--rime); color: var(--bifrost); font-family: var(--font-mono); font-size: 14px; }
+    .mkt-feature { position: relative; border: 1px solid var(--rime-soft); border-radius: var(--radius-card); padding: 26px 24px; background: linear-gradient(180deg, rgba(14, 19, 27, 0.65), rgba(14, 19, 27, 0.3)); transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease; overflow: hidden; }
+    .mkt-feature::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(320px 160px at 50% 0%, rgba(47, 212, 198, 0.07), transparent 70%); opacity: 0; transition: opacity 0.25s ease; pointer-events: none; }
+    .mkt-feature:hover { transform: translateY(-4px); border-color: rgba(47, 212, 198, 0.32); box-shadow: 0 18px 44px rgba(0, 0, 0, 0.4); }
+    .mkt-feature:hover::after { opacity: 1; }
+    .mkt-feature .icon { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(180deg, rgba(28, 37, 49, 0.9), rgba(21, 28, 38, 0.9)); border: 1px solid var(--rime); color: var(--bifrost); font-family: var(--font-mono); font-size: 14px; box-shadow: inset 0 1px 0 rgba(191, 233, 238, 0.07), 0 0 20px rgba(47, 212, 198, 0.08); transition: box-shadow 0.25s ease, border-color 0.25s ease; }
+    .mkt-feature:hover .icon { border-color: rgba(47, 212, 198, 0.4); box-shadow: inset 0 1px 0 rgba(191, 233, 238, 0.09), 0 0 26px rgba(47, 212, 198, 0.22); }
+    /* Color-emoji glyphs (lock/key) render yellow and clash with the palette —
+       tint them toward teal. Applied to an inner span so the icon box's own
+       border/glow stays unfiltered. */
+    .em-tint { filter: grayscale(1) sepia(1) hue-rotate(125deg) saturate(2.4) brightness(1.15); }
     .mkt-feature .icon.live { position: relative; }
     .mkt-feature .icon.live .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--bifrost); animation: mkt-pulse 1.8s ease-in-out infinite; }
     @keyframes mkt-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(47, 212, 198, 0.35); } 50% { box-shadow: 0 0 0 6px rgba(47, 212, 198, 0); } }
     .mkt-feature h3 { margin-top: 16px; font-size: 16px; color: var(--frost); }
-    .mkt-feature p { margin-top: 8px; font-size: 13px; line-height: 1.55; color: var(--mist); }
+    .mkt-feature p { margin-top: 8px; font-size: 13px; line-height: 1.6; color: var(--mist); }
     @media (max-width: 900px) {
       .mkt-features { grid-template-columns: 1fr 1fr; }
     }
@@ -91,41 +178,50 @@
 
     /* Not-a-PM-tool */
     .mkt-compare { max-width: 880px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .mkt-compare-col { border-radius: var(--radius-card); padding: 24px; }
-    .mkt-compare-col.no { border: 1px solid var(--rime-soft); }
-    .mkt-compare-col.yes { border: 1px solid var(--rime); background: var(--surface-01); }
-    .mkt-compare-col .label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+    .mkt-compare-col { position: relative; border-radius: var(--radius-card); padding: 28px 26px; overflow: hidden; }
+    .mkt-compare-col.no { border: 1px solid var(--rime-soft); background: rgba(14, 19, 27, 0.35); }
+    .mkt-compare-col.yes { border: 1px solid rgba(47, 212, 198, 0.3); background: linear-gradient(180deg, rgba(47, 212, 198, 0.05), rgba(14, 19, 27, 0.7)); box-shadow: 0 0 40px rgba(47, 212, 198, 0.07), inset 0 1px 0 rgba(191, 233, 238, 0.06); }
+    .mkt-compare-col.yes::before { content: ""; position: absolute; top: 0; left: 26px; right: 26px; height: 1px; background: linear-gradient(90deg, transparent, rgba(47, 212, 198, 0.6), transparent); }
+    .mkt-compare-col .label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
     .mkt-compare-col.no .label { color: var(--shadow); }
     .mkt-compare-col.yes .label { color: var(--bifrost); }
-    .mkt-compare-col ul { margin: 14px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
-    .mkt-compare-col li { font-size: 14px; line-height: 1.5; padding-left: 20px; position: relative; }
+    .mkt-compare-col ul { margin: 16px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .mkt-compare-col li { font-size: 14px; line-height: 1.55; padding-left: 24px; position: relative; }
     .mkt-compare-col.no li { color: var(--shadow); }
     .mkt-compare-col.yes li { color: var(--mist); }
-    .mkt-compare-col.no li::before { content: "–"; position: absolute; left: 0; color: var(--shadow); }
-    .mkt-compare-col.yes li::before { content: "+"; position: absolute; left: 0; color: var(--bifrost); }
+    .mkt-compare-col li::before { position: absolute; left: 0; top: 0; width: 16px; height: 16px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; line-height: 16px; text-align: center; margin-top: 3px; }
+    .mkt-compare-col.no li::before { content: "–"; color: var(--shadow); border: 1px solid var(--rime-soft); }
+    .mkt-compare-col.yes li::before { content: "+"; color: var(--niflheim); background: var(--bifrost); font-weight: 600; box-shadow: 0 0 12px rgba(47, 212, 198, 0.35); }
     @media (max-width: 640px) {
       .mkt-compare { grid-template-columns: 1fr; }
     }
 
-    /* Final CTA band */
-    .mkt-cta-band { text-align: center; padding: clamp(64px, 9vw, 100px) 24px; border-top: 1px solid var(--rime-soft); }
-    .mkt-cta-band h2 { font-size: clamp(28px, 4vw, 44px); font-weight: 600; letter-spacing: -0.025em; color: var(--frost); max-width: 18ch; margin: 0 auto; }
-    .mkt-cta-band p { margin-top: 12px; font-size: 15px; color: var(--mist); }
+    /* Final CTA band — enclosed glowing panel */
+    .mkt-cta-band { padding: clamp(64px, 9vw, 110px) 24px; }
+    .mkt-cta-panel { position: relative; max-width: 880px; margin: 0 auto; text-align: center; padding: clamp(48px, 7vw, 80px) 32px; border-radius: 20px; border: 1px solid rgba(47, 212, 198, 0.25); background: linear-gradient(180deg, rgba(21, 28, 38, 0.75), rgba(14, 19, 27, 0.9)); overflow: hidden; box-shadow: 0 32px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(191, 233, 238, 0.08); }
+    .mkt-cta-panel::before { content: ""; position: absolute; inset: -40% -20% auto; height: 130%; background: radial-gradient(48% 60% at 50% 0%, rgba(47, 212, 198, 0.16), transparent 70%), radial-gradient(36% 50% at 72% 8%, rgba(79, 155, 240, 0.1), transparent 70%); pointer-events: none; }
+    .mkt-cta-panel::after { content: ""; position: absolute; top: 0; left: 15%; right: 15%; height: 1px; background: linear-gradient(90deg, transparent, rgba(47, 212, 198, 0.7), rgba(79, 155, 240, 0.5), transparent); }
+    .mkt-cta-panel h2 { position: relative; font-size: clamp(28px, 4vw, 44px); font-weight: 600; letter-spacing: -0.025em; max-width: 18ch; margin: 0 auto; background: linear-gradient(180deg, var(--frost) 60%, rgba(159, 176, 192, 0.85)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .mkt-cta-panel p { position: relative; margin-top: 14px; font-size: 15px; color: var(--mist); }
+    .mkt-cta-panel .mkt-cta-row { position: relative; }
 
     /* Footer */
-    .mkt-footer { border-top: 1px solid var(--rime-soft); padding: 40px 24px; }
+    .mkt-footer { position: relative; padding: 48px 24px 40px; }
+    .mkt-footer::before { content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: min(1200px, calc(100% - 48px)); height: 1px; background: linear-gradient(90deg, transparent, var(--rime) 25%, var(--rime) 75%, transparent); }
     .mkt-footer-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
-    .mkt-footer-brand p { margin-top: 10px; max-width: 32ch; font-size: 13px; color: var(--shadow); }
+    .mkt-footer-brand p { margin-top: 12px; max-width: 32ch; font-size: 13px; line-height: 1.6; color: var(--shadow); }
     .mkt-footer-cols { display: flex; gap: 56px; flex-wrap: wrap; }
     .mkt-footer-col .heading { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--shadow); }
-    .mkt-footer-col ul { margin: 12px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
-    .mkt-footer-col a { font-size: 13px; color: var(--mist); }
-    .mkt-footer-col a:hover { color: var(--frost); }
-    .mkt-footer-bottom { max-width: 1200px; margin: 32px auto 0; padding-top: 20px; border-top: 1px solid var(--rime-soft); font-size: 12px; color: var(--shadow); }
+    .mkt-footer-col ul { margin: 14px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 9px; }
+    .mkt-footer-col a { font-size: 13px; color: var(--mist); transition: color 0.18s ease; }
+    .mkt-footer-col a:hover { color: var(--frostfire); }
+    .mkt-footer-bottom { max-width: 1200px; margin: 36px auto 0; padding-top: 20px; border-top: 1px solid var(--rime-soft); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--shadow); }
   </style>
 </head>
 <body>
-  <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/</span> (landing/app/page.tsx) — a different child repo (<span class="mono">landing/</span>, Next.js) from the <span class="mono">web/</span> app wireframes elsewhere in this directory, kept in <span class="mono">design/landing/</span> on purpose (see design/README.md) · the real page today is just a logo + one-line tagline splash — this is a full proposed redesign, not yet built · nav anchors ("How it works", "Features") scroll within this page for real; "Continue with GitHub" and "Sign in" link into the actual /login wireframe; no pricing/signup claims are made since none is decided yet (see docs/roadmap/open-questions.md) · <b>positioning rework #2</b>: dropped "grilled" from public copy (kept internally as spec_grill, just not user-facing); reframed around safety/security — "not AI slop" — instead of "opinionated." Claims grounded in what's real today: isolated per-job containers, scoped/short-lived GitHub App tokens (ADR 005), secrets encrypted at rest and decrypted only server-side (ADR 003 §16/007), real temporary preview deployments + Helm-managed always-on deploys (ADR 003), self-hosting (conventions/deploy.md). <b>Not yet real</b> — presented here as the intended flow, not a current claim: the standalone "Agent review" step (today build finishes straight into human-reviewable `in_review`, feature-lifecycle.md, no separate agent-self-review phase); team/RBAC permissions (product.md: "RBAC/team invitations... remain unbuilt," so "permission-scoped" here refers only to the real GitHub App/job-token scoping, not a user-facing permissions UI). The user's further stated direction — grill sessions recursively breaking a feature into sub-tasks, each independently grilled/designed/built/reviewed/previewed/merged — isn't reflected on the page at all yet; no such recursive/sub-task model exists in ADR 002's feature model today. Also <b>not yet real</b>: per-environment secret tiering (prod/staging/preview/dev each getting only the secrets that tier needs) — today there's one project-level secret set injected wherever a deployment runs (ADR 003 §16), no tiering by environment; "staging" is explicitly named as a deferred concept in ADR 003 itself. Pod-level isolation itself is accurate (Orchestrator provisions one ephemeral Kubernetes pod per job, ADR 003/pi-agent.md) — only the per-environment secret split is aspirational. Revisit this note against docs/overview/product.md, docs/roadmap/open-questions.md, ADR 003, and project-settings.md before any of these claims go live. <b>Pass #3</b>: trimmed the hero subhead and two section intros (were trying to enumerate every pillar in one sentence); swapped the "Purpose-built skills per job" card for "Automated test suites" — testing (`test_run`, markdown specs, cron schedule, job-dispatch.md) is real and was dropped by accident in pass #2's security-grid rewrite. <b>Pass #4</b>: "isolated pod" → "isolated environment" everywhere in public copy (still technically a Kubernetes pod underneath — kept in the "Isolated environments" card's body as supporting detail, ADR 003/pi-agent.md); "reviewed twice" → "reviewed and tested" throughout, since testing is now a named pillar and "twice" undersold it as repetition rather than two different kinds of check. The one PR-review-specific card keeps describing agent-then-human review without claiming "tested" itself, since that's what the separate test-suites card is for. <b>Pass #5</b>: reordered the 6 steps — collapsed the separate "Agent review"/"Your review" steps into one "Agent &amp; user review" step, and gave the freed slot to "Automated tests" as step 04, before review. <b>Not yet real</b>: today `test_run` fires on its own cron schedule against whatever's currently deployed (job-dispatch.md: "Test cron schedule fires → test_run") — it isn't triggered per-feature as a gate between build and review the way this step now implies. Treat this step as the intended future pipeline, not current behavior, until test_run is wired into the per-feature flow. <b>Pass #6</b>: added the "No lock-in" section (BYOK/BYOI/BYOG) between Security &amp; control and Safe by default. Reworked the requested "BYOT / bring your own team" into "BYOG / bring your own GitHub" instead — "bring your own team" doesn't hold up as a claim (a team isn't a resource you plug into the product the way keys/infra are; it's just who's using it), whereas GitHub identity/repo access genuinely is bring-your-own (GitHub-only auth, ADR 001/009; GitHub App repo access, ADR 005) and echoes the existing "no separate account to create" CTA copy. BYOK and BYOI restate points already made elsewhere (the model-provider feature, and the self-hosted card/bullet) — intentional here, framed as a "no lock-in" summary rather than new claims, but worth watching for repetition fatigue if the page keeps growing.</div>
+  <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/</span> (landing/app/page.tsx) — a different child repo (<span class="mono">landing/</span>, Next.js) from the <span class="mono">web/</span> app wireframes elsewhere in this directory, kept in <span class="mono">design/landing/</span> on purpose (see design/README.md) · the real page today is just a logo + one-line tagline splash — this is a full proposed redesign, not yet built · nav anchors ("How it works", "Features") scroll within this page for real; "Continue with GitHub" and "Sign in" link into the actual /login wireframe; no pricing/signup claims are made since none is decided yet (see docs/roadmap/open-questions.md) · <b>positioning rework #2</b>: dropped "grilled" from public copy (kept internally as spec_grill, just not user-facing); reframed around safety/security — "not AI slop" — instead of "opinionated." Claims grounded in what's real today: isolated per-job containers, scoped/short-lived GitHub App tokens (ADR 005), secrets encrypted at rest and decrypted only server-side (ADR 003 §16/007), real temporary preview deployments + Helm-managed always-on deploys (ADR 003), self-hosting (conventions/deploy.md). <b>Not yet real</b> — presented here as the intended flow, not a current claim: the standalone "Agent review" step (today build finishes straight into human-reviewable `in_review`, feature-lifecycle.md, no separate agent-self-review phase); team/RBAC permissions (product.md: "RBAC/team invitations... remain unbuilt," so "permission-scoped" here refers only to the real GitHub App/job-token scoping, not a user-facing permissions UI). The user's further stated direction — grill sessions recursively breaking a feature into sub-tasks, each independently grilled/designed/built/reviewed/previewed/merged — isn't reflected on the page at all yet; no such recursive/sub-task model exists in ADR 002's feature model today. Also <b>not yet real</b>: per-environment secret tiering (prod/staging/preview/dev each getting only the secrets that tier needs) — today there's one project-level secret set injected wherever a deployment runs (ADR 003 §16), no tiering by environment; "staging" is explicitly named as a deferred concept in ADR 003 itself. Pod-level isolation itself is accurate (Orchestrator provisions one ephemeral Kubernetes pod per job, ADR 003/pi-agent.md) — only the per-environment secret split is aspirational. Revisit this note against docs/overview/product.md, docs/roadmap/open-questions.md, ADR 003, and project-settings.md before any of these claims go live. <b>Pass #3</b>: trimmed the hero subhead and two section intros (were trying to enumerate every pillar in one sentence); swapped the "Purpose-built skills per job" card for "Automated test suites" — testing (`test_run`, markdown specs, cron schedule, job-dispatch.md) is real and was dropped by accident in pass #2's security-grid rewrite. <b>Pass #4</b>: "isolated pod" → "isolated environment" everywhere in public copy (still technically a Kubernetes pod underneath — kept in the "Isolated environments" card's body as supporting detail, ADR 003/pi-agent.md); "reviewed twice" → "reviewed and tested" throughout, since testing is now a named pillar and "twice" undersold it as repetition rather than two different kinds of check. The one PR-review-specific card keeps describing agent-then-human review without claiming "tested" itself, since that's what the separate test-suites card is for. <b>Pass #5</b>: reordered the 6 steps — collapsed the separate "Agent review"/"Your review" steps into one "Agent &amp; user review" step, and gave the freed slot to "Automated tests" as step 04, before review. <b>Not yet real</b>: today `test_run` fires on its own cron schedule against whatever's currently deployed (job-dispatch.md: "Test cron schedule fires → test_run") — it isn't triggered per-feature as a gate between build and review the way this step now implies. Treat this step as the intended future pipeline, not current behavior, until test_run is wired into the per-feature flow. <b>Pass #6</b>: added the "No lock-in" section (BYOK/BYOI/BYOG) between Security &amp; control and Safe by default. Reworked the requested "BYOT / bring your own team" into "BYOG / bring your own GitHub" instead — "bring your own team" doesn't hold up as a claim (a team isn't a resource you plug into the product the way keys/infra are; it's just who's using it), whereas GitHub identity/repo access genuinely is bring-your-own (GitHub-only auth, ADR 001/009; GitHub App repo access, ADR 005) and echoes the existing "no separate account to create" CTA copy. BYOK and BYOI restate points already made elsewhere (the model-provider feature, and the self-hosted card/bullet) — intentional here, framed as a "no lock-in" summary rather than new claims, but worth watching for repetition fatigue if the page keeps growing. <b>Pass #7 (visual polish only — zero copy/claim changes)</b>: the page read as flat/low-effort, so this pass is purely presentational: layered fixed aurora/grid/grain background (`.mkt-bg`, inert, pure CSS + inline-SVG noise, no network); gradient headline + accent underline; glowing gradient primary buttons with hover lift; richer hero mockup (colored traffic lights, padlock in the URL pill, sender dots on chat bubbles, a status footer strip whose chips — "preview live", "tests passed", "draft PR" — restate claims already made by existing cards, grounded in ADR 003 previews / test_run / ADR 005 draft PRs); two floating annotation cards beside the mockup ("Tests passed", "Preview deployed") that likewise repeat existing claims, hidden under 1080px; step cards became a numbered pipeline with inter-card arrows + hover states; feature cards got hover glow/lift and icon treatments; compare "is" column gets a teal glow with +/− badges; final CTA sits in an enclosed glowing panel; gradient hairlines replace flat section borders; scroll-reveal via a tiny inline IntersectionObserver (presentational only, no server, honors prefers-reduced-motion — within the design-wireframes.md "trivial inline script" boundary). All colors derive from the existing tokens.css palette — no new tokens introduced. <b>Pass #8 (content + wiring)</b>: the product is now hosted, so external links are real — nav/footer link to <span class="mono">github.com/yggdrasil-hq/yggdrasil-core</span>, <span class="mono">docs.yggdrasil.cfd</span>, and <span class="mono">app.yggdrasil.cfd</span>; all auth CTAs ("Sign in", "Get started", "Continue with GitHub") now point at the hosted app rather than the <span class="mono">/login</span> wireframe (the app itself renders the GitHub sign-in). Copy polish, zero new claims: hero eyebrow "Secure AI development — not AI slop" → "Secure, self-hosted AI development" and the subhead rewritten as the describe→plan→build→test→review journey (dropped the second "AI slop" repetition flagged as a fatigue risk in pass #6 — the compare section still carries the strictness positioning); security-section intro re-rhythmed as three sentences. Added <span class="mono">/terms</span> and <span class="mono">/privacy</span> landing routes (footer "Legal" column) — <b>placeholder legal copy, not lawyer-reviewed</b>, see those pages' own design-notes — plus a trademark line in the footer bottom ("trademarks of the Yggdrasil project" is itself placeholder wording; no legal entity is decided).</div>
+
+  <div class="mkt-bg" aria-hidden="true"><div class="mkt-grain"></div></div>
 
   <header class="mkt-nav">
     <div class="mkt-nav-inner">
@@ -133,29 +229,39 @@
       <nav class="mkt-nav-links">
         <a href="#how-it-works">How it works</a>
         <a href="#features">Features</a>
+        <a href="https://docs.yggdrasil.cfd">Docs</a>
+        <a href="https://github.com/yggdrasil-hq/yggdrasil-core">GitHub</a>
       </nav>
       <div class="mkt-nav-actions">
-        <a class="btn btn-ghost" href="/login/index.html">Sign in</a>
-        <a class="btn btn-primary" href="/login/index.html">Get started</a>
+        <a class="btn btn-ghost" href="https://app.yggdrasil.cfd">Sign in</a>
+        <a class="btn btn-primary" href="https://app.yggdrasil.cfd">Get started</a>
       </div>
     </div>
   </header>
 
   <section class="mkt-hero">
-    <span class="mkt-eyebrow"><span class="dot"></span> Secure AI development — not AI slop</span>
-    <h1>AI-built code you can actually <span class="accent">trust</span>.</h1>
-    <p class="sub">No unreviewed AI slop. Every feature is planned, built in an isolated environment, reviewed and tested before it merges — self-hosted, on your own infrastructure.</p>
-    <div class="mkt-cta-row">
-      <a class="btn btn-primary btn-lg" href="/login/index.html">Continue with GitHub</a>
+    <span class="mkt-eyebrow mkt-reveal"><span class="dot"></span> Secure, self-hosted AI development</span>
+    <h1 class="mkt-reveal">AI-built code you can actually <span class="accent">trust</span>.</h1>
+    <p class="sub mkt-reveal">Describe a feature in plain language. An agent plans it with you, builds it in an isolated environment, and delivers a tested pull request for your review — all on infrastructure you control.</p>
+    <div class="mkt-cta-row mkt-reveal">
+      <a class="btn btn-primary btn-lg" href="https://app.yggdrasil.cfd">Continue with GitHub</a>
       <a class="btn btn-outline btn-lg" href="#how-it-works">See how it works</a>
     </div>
 
-    <div class="mkt-mockup-wrap">
+    <div class="mkt-mockup-wrap mkt-reveal">
       <div class="mkt-mockup-glow"></div>
+      <div class="mkt-float f1">
+        <span class="ic">&#10003;</span>
+        <span><b>Tests passed</b><span>12 scenarios, 0 regressions</span></span>
+      </div>
+      <div class="mkt-float f2">
+        <span class="ic">&#9648;</span>
+        <span><b>Preview deployed</b><span>temporary, per run</span></span>
+      </div>
       <div class="mkt-mockup">
         <div class="mkt-chrome">
           <span class="dots"><span></span><span></span><span></span></span>
-          <span class="url">app.yggdrasil.dev/projects/acme-storefront/features/saved-payment-methods</span>
+          <span class="url"><span class="lock em-tint">&#128274;</span>app.yggdrasil.cfd/projects/acme-storefront/features/saved-payment-methods</span>
         </div>
         <div class="mkt-mockup-body">
           <div class="mkt-mockup-title-row">
@@ -175,43 +281,49 @@
             <p>Got it. I'll use a Stripe <b>SetupIntent</b> to tokenize the card and store only the payment method id + last4/brand. Writing the ADR now.</p>
           </div>
         </div>
+        <div class="mkt-mockup-status">
+          <span class="mkt-status-chip ok"><span class="d"></span>preview live</span>
+          <span class="mkt-status-chip ok"><span class="d"></span>tests 12/12</span>
+          <span class="mkt-status-chip run"><span class="d"></span>isolated environment</span>
+          <span class="mkt-status-chip idle"><span class="d"></span>draft PR pending review</span>
+        </div>
       </div>
     </div>
   </section>
 
   <section class="mkt-section" id="how-it-works">
-    <div class="mkt-section-head">
+    <div class="mkt-section-head mkt-reveal">
       <div class="kicker">How it works</div>
       <h2>Six checkpoints between a description and production</h2>
       <p>Nothing skips a step. Nothing merges unreviewed or untested.</p>
     </div>
     <div class="mkt-steps">
-      <div class="mkt-step">
-        <div class="n">01</div>
+      <div class="mkt-step mkt-reveal">
+        <div class="n">01</div><span class="arrow">&#9654;</span>
         <h3>Describe</h3>
         <p>Give the feature a title and any context. That's the entire ask.</p>
       </div>
-      <div class="mkt-step">
-        <div class="n">02</div>
+      <div class="mkt-step mkt-reveal">
+        <div class="n">02</div><span class="arrow">&#9654;</span>
         <h3>Plan &amp; design review</h3>
         <p>You lead the planning. Scope, edge cases, and constraints get written up as a decision record before a single line of code is touched.</p>
       </div>
-      <div class="mkt-step">
+      <div class="mkt-step mkt-reveal">
         <div class="n">03</div>
         <h3>Agent builds</h3>
         <p>Approved plans get built unattended, inside an isolated environment with no access beyond what that job needs.</p>
       </div>
-      <div class="mkt-step">
-        <div class="n">04</div>
+      <div class="mkt-step mkt-reveal">
+        <div class="n">04</div><span class="arrow">&#9654;</span>
         <h3>Automated tests</h3>
         <p>Test scenarios run against the build automatically, catching regressions before anyone has to go looking for them.</p>
       </div>
-      <div class="mkt-step">
-        <div class="n">05</div>
+      <div class="mkt-step mkt-reveal">
+        <div class="n">05</div><span class="arrow">&#9654;</span>
         <h3>Agent &amp; user review</h3>
         <p>The agent checks its diff against the approved plan first. Then everything lands as a real pull request against a live preview — your team reviews it, requests changes, or sends it back.</p>
       </div>
-      <div class="mkt-step">
+      <div class="mkt-step mkt-reveal">
         <div class="n">06</div>
         <h3>Merge</h3>
         <p>Merge when it's ready. Deployment to your target environment is automated from there.</p>
@@ -220,53 +332,53 @@
   </section>
 
   <section class="mkt-section" id="features">
-    <div class="mkt-section-head">
+    <div class="mkt-section-head mkt-reveal">
       <div class="kicker">Security &amp; control</div>
       <h2>Built to keep unsafe changes out</h2>
-      <p>Every job is isolated, every credential is scoped, every change reviewed and tested.</p>
+      <p>Every job runs in isolation. Every credential is scoped to its task. Every change is reviewed and tested before it ships.</p>
     </div>
     <div class="mkt-features">
-      <div class="mkt-feature">
+      <div class="mkt-feature mkt-reveal">
         <span class="icon">&#10697;</span>
         <h3>Isolated environments, every run</h3>
         <p>Each job runs in its own ephemeral Kubernetes pod, torn down when it finishes. Nothing persists, nothing leaks between runs, projects, or teams.</p>
       </div>
-      <div class="mkt-feature">
-        <span class="icon">&#128272;</span>
+      <div class="mkt-feature mkt-reveal">
+        <span class="icon"><span class="em-tint">&#128272;</span></span>
         <h3>Scoped, short-lived permissions</h3>
         <p>Repo access is granted per installation. Jobs get short-lived tokens scoped to exactly what they're doing — never a standing, all-access credential.</p>
       </div>
-      <div class="mkt-feature">
-        <span class="icon">&#128273;</span>
+      <div class="mkt-feature mkt-reveal">
+        <span class="icon"><span class="em-tint">&#128273;</span></span>
         <h3>Secrets, permissioned per environment</h3>
         <p>Encrypted at rest, decrypted only server-side. Production credentials stay out of preview and dev runs — each environment gets exactly the access it needs.</p>
       </div>
-      <div class="mkt-feature">
+      <div class="mkt-feature mkt-reveal">
         <span class="icon mono" style="font-size:11px;">ADR</span>
         <h3>A decision record for every feature</h3>
         <p>Every design review ends in a written ADR, committed alongside the code it justifies. Nothing ships without a paper trail.</p>
       </div>
-      <div class="mkt-feature">
+      <div class="mkt-feature mkt-reveal">
         <span class="icon mono" style="font-size:11px;">PR</span>
         <h3>Reviewed by the agent, then by you</h3>
         <p>The agent checks its own diff against the plan. Then every change lands as a draft PR your team reads, comments on, and approves.</p>
       </div>
-      <div class="mkt-feature">
+      <div class="mkt-feature mkt-reveal">
         <span class="icon">&#9648;</span>
         <h3>Preview environments, automatically</h3>
         <p>Every run gets its own temporary deployment, so you can see the change working before you approve it — not just read a diff.</p>
       </div>
-      <div class="mkt-feature">
+      <div class="mkt-feature mkt-reveal">
         <span class="icon">&#9650;</span>
         <h3>Automated deployments</h3>
         <p>Approved changes deploy through the same pipeline every time — no manual steps, no drift between environments.</p>
       </div>
-      <div class="mkt-feature">
+      <div class="mkt-feature mkt-reveal">
         <span class="icon">&#8962;</span>
         <h3>Self-hosted, top to bottom</h3>
         <p>Run it on your own Kubernetes cluster, or a bundled dev environment. Your code, your containers, your infrastructure.</p>
       </div>
-      <div class="mkt-feature">
+      <div class="mkt-feature mkt-reveal">
         <span class="icon">&#9201;</span>
         <h3>Automated test suites</h3>
         <p>Markdown test scenarios run against your deployment on a schedule, catching regressions before your team does.</p>
@@ -275,23 +387,23 @@
   </section>
 
   <section class="mkt-section">
-    <div class="mkt-section-head">
+    <div class="mkt-section-head mkt-reveal">
       <div class="kicker">No lock-in</div>
       <h2>Your keys. Your infra. Your GitHub.</h2>
       <p>Nothing here runs on an account, a cluster, or a model provider you don't already control.</p>
     </div>
     <div class="mkt-features" style="grid-template-columns: repeat(3, 1fr); max-width: 960px;">
-      <div class="mkt-feature">
+      <div class="mkt-feature mkt-reveal">
         <span class="icon mono" style="font-size:10px;">BYOK</span>
         <h3>Bring your own keys</h3>
         <p>Connect OpenRouter, Anthropic, OpenAI, or a custom endpoint. Your API keys, your model choices, per job.</p>
       </div>
-      <div class="mkt-feature">
+      <div class="mkt-feature mkt-reveal">
         <span class="icon mono" style="font-size:10px;">BYOI</span>
         <h3>Bring your own infra</h3>
         <p>Run it on your own Kubernetes cluster, or a bundled dev environment. Nothing lives on infrastructure you don't control.</p>
       </div>
-      <div class="mkt-feature">
+      <div class="mkt-feature mkt-reveal">
         <span class="icon mono" style="font-size:10px;">BYOG</span>
         <h3>Bring your own GitHub</h3>
         <p>Sign in with the GitHub identity and repos you already have. No new account, no new access model to manage.</p>
@@ -300,13 +412,13 @@
   </section>
 
   <section class="mkt-section">
-    <div class="mkt-section-head">
+    <div class="mkt-section-head mkt-reveal">
       <div class="kicker">Safe by default</div>
       <h2>No unreviewed code. No standing access. No surprises.</h2>
       <p>Isolated, reviewed and tested, merged on your terms — without dictating your stack.</p>
     </div>
     <div class="mkt-compare">
-      <div class="mkt-compare-col no">
+      <div class="mkt-compare-col no mkt-reveal">
         <div class="label">Yggdrasil is not</div>
         <ul>
           <li>A code editor or IDE replacement</li>
@@ -315,7 +427,7 @@
           <li>Opinionated about your tech stack</li>
         </ul>
       </div>
-      <div class="mkt-compare-col yes">
+      <div class="mkt-compare-col yes mkt-reveal">
         <div class="label">Yggdrasil is</div>
         <ul>
           <li>A quality enforcement system for AI-built code</li>
@@ -328,10 +440,12 @@
   </section>
 
   <section class="mkt-cta-band">
-    <h2>Ready to ship AI-built code you can trust?</h2>
-    <p>Sign in with GitHub — no separate account to create.</p>
-    <div class="mkt-cta-row">
-      <a class="btn btn-primary btn-lg" href="/login/index.html">Continue with GitHub</a>
+    <div class="mkt-cta-panel mkt-reveal">
+      <h2>Ready to ship AI-built code you can trust?</h2>
+      <p>Sign in with GitHub — no separate account to create.</p>
+      <div class="mkt-cta-row">
+        <a class="btn btn-primary btn-lg" href="https://app.yggdrasil.cfd">Continue with GitHub</a>
+      </div>
     </div>
   </section>
 
@@ -347,12 +461,47 @@
           <ul>
             <li><a href="#how-it-works">How it works</a></li>
             <li><a href="#features">Features</a></li>
-            <li><a href="/login/index.html">Sign in</a></li>
+            <li><a href="https://app.yggdrasil.cfd">Open the app</a></li>
+          </ul>
+        </div>
+        <div class="mkt-footer-col">
+          <div class="heading">Resources</div>
+          <ul>
+            <li><a href="https://docs.yggdrasil.cfd">Documentation</a></li>
+            <li><a href="https://github.com/yggdrasil-hq/yggdrasil-core">GitHub</a></li>
+          </ul>
+        </div>
+        <div class="mkt-footer-col">
+          <div class="heading">Legal</div>
+          <ul>
+            <li><a href="/landing/terms/index.html">Terms of Service</a></li>
+            <li><a href="/landing/privacy/index.html">Privacy Policy</a></li>
           </ul>
         </div>
       </div>
     </div>
-    <p class="mkt-footer-bottom mktw" style="padding:0;">&copy; 2026 Yggdrasil.</p>
+    <div class="mkt-footer-bottom">
+      <span>&copy; 2026 Yggdrasil. All rights reserved. Yggdrasil and the Yggdrasil mark are trademarks of the Yggdrasil project.</span>
+      <span class="mono" style="font-size:11px;">Secure, self-hosted AI development</span>
+    </div>
   </footer>
+
+  <script>
+    // Presentational scroll-reveal only — no data, no network. Honors
+    // prefers-reduced-motion via the CSS fallback (elements render visible).
+    (function () {
+      var els = document.querySelectorAll(".mkt-reveal");
+      if (!("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        els.forEach(function (el) { el.classList.add("is-in"); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add("is-in"); io.unobserve(e.target); }
+        });
+      }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+      els.forEach(function (el) { io.observe(el); });
+    })();
+  </script>
 </body>
 </html>

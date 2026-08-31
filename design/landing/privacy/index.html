@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Privacy Policy — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    body { overflow-x: hidden; }
+
+    .mkt-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+    .mkt-bg::before { content: ""; position: absolute; inset: 0; background: radial-gradient(52% 30% at 50% -6%, rgba(47, 212, 198, 0.09), transparent 70%); }
+    /* Grain dithers the dark radial gradient — without it the glow bands visibly. */
+    .mkt-grain { position: absolute; inset: 0; opacity: 0.35; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+    .mkt-nav { position: sticky; top: 0; z-index: 40; background: rgba(8, 11, 17, 0.72); backdrop-filter: blur(14px) saturate(1.3); -webkit-backdrop-filter: blur(14px) saturate(1.3); }
+    .mkt-nav::after { content: ""; display: block; height: 1px; background: linear-gradient(90deg, transparent, rgba(47, 212, 198, 0.28) 30%, rgba(79, 155, 240, 0.22) 70%, transparent); }
+    .mkt-nav-inner { max-width: 1200px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .mkt-nav-actions { display: flex; align-items: center; gap: 10px; }
+
+    .legal { max-width: 760px; margin: 0 auto; padding: clamp(48px, 7vw, 80px) 24px 96px; }
+    .legal .kicker { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--bifrost); }
+    .legal h1 { margin-top: 12px; font-size: clamp(30px, 4.4vw, 44px); letter-spacing: -0.025em; }
+    .legal .updated { margin-top: 10px; font-size: 13px; color: var(--shadow); font-family: var(--font-mono); }
+    .legal .intro { margin-top: 20px; padding: 16px 18px; border: 1px solid var(--rime-soft); border-radius: var(--radius-card); background: var(--surface-01); font-size: 14px; line-height: 1.6; color: var(--mist); }
+    .legal h2 { margin-top: 44px; font-size: 20px; letter-spacing: -0.015em; }
+    .legal h2 .num { color: var(--bifrost); font-family: var(--font-mono); font-size: 15px; margin-right: 10px; }
+    .legal p { margin-top: 12px; font-size: 14px; line-height: 1.7; color: var(--mist); }
+    .legal ul { margin: 12px 0 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
+    .legal li { font-size: 14px; line-height: 1.65; color: var(--mist); }
+    .legal li::marker { color: var(--bifrost); }
+    .legal li b { color: var(--frost); font-weight: 500; }
+    .legal a { color: var(--frostfire); border-bottom: 1px solid rgba(191, 233, 238, 0.3); }
+    .legal a:hover { color: var(--bifrost); border-bottom-color: var(--bifrost); }
+    .legal .divider { margin-top: 44px; height: 1px; background: linear-gradient(90deg, transparent, var(--rime), transparent); }
+
+    .mkt-footer { position: relative; padding: 32px 24px; }
+    .mkt-footer::before { content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: min(1200px, calc(100% - 48px)); height: 1px; background: linear-gradient(90deg, transparent, var(--rime) 25%, var(--rime) 75%, transparent); }
+    .mkt-footer-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--shadow); }
+    .mkt-footer-inner nav { display: flex; gap: 20px; }
+    .mkt-footer-inner nav a { color: var(--mist); }
+    .mkt-footer-inner nav a:hover { color: var(--frostfire); }
+  </style>
+</head>
+<body>
+  <div class="design-note"><b>Wireframe</b> · maps to a proposed <span class="mono">/privacy</span> route in the <span class="mono">landing/</span> repo (added in landing pass #8, does not exist there yet) · <b>placeholder legal copy</b> — plain-language, deliberately generic, and <b>not lawyer-reviewed</b>; no legal entity, data-protection officer, or jurisdiction has been decided, so none is named and no GDPR/CCPA-specific machinery is claimed. Grounded where it touches product behavior: GitHub-only sign-in and what the GitHub App can access (ADR 001/009/005), secrets encrypted at rest and decrypted only server-side (ADR 003 §16/007), per-job ephemeral environments (ADR 003/pi-agent.md), prompts/code flowing to the model providers the user configures (BYOK), self-hosting (conventions/deploy.md). Replace with reviewed counsel text before any real launch.</div>
+
+  <div class="mkt-bg" aria-hidden="true"><div class="mkt-grain"></div></div>
+
+  <header class="mkt-nav">
+    <div class="mkt-nav-inner">
+      <a href="/landing/index.html" class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></a>
+      <div class="mkt-nav-actions">
+        <a class="btn btn-ghost" href="/landing/index.html">Home</a>
+        <a class="btn btn-primary" href="https://app.yggdrasil.cfd">Open the app</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="legal">
+    <div class="kicker">Legal</div>
+    <h1>Privacy Policy</h1>
+    <div class="updated">Last updated: September 1, 2026</div>
+
+    <p class="intro">This policy explains what information Yggdrasil handles when you use the hosted service at app.yggdrasil.cfd, and the choices you have. The short version: we collect what the service needs to operate — your GitHub identity, the repositories you connect, and the jobs you run — and nothing is sold or shared for advertising.</p>
+
+    <h2><span class="num">01</span>Information we collect</h2>
+    <ul>
+      <li><b>GitHub account information.</b> When you sign in with GitHub we receive your GitHub username, display name, avatar, and the identifiers needed to authenticate you. Yggdrasil has no separate password of its own.</li>
+      <li><b>Repository access and metadata.</b> When you install the GitHub App on a repository, Yggdrasil receives the repository metadata and the scoped access GitHub grants it. Repository contents are checked out inside isolated, per-job environments to run builds and tests.</li>
+      <li><b>Project and job data.</b> The projects, feature descriptions, specifications, chat messages, job logs, and test results you create while using the service.</li>
+      <li><b>Secrets you store.</b> Model-provider API keys and project secrets you save are encrypted at rest and decrypted only server-side, when a job that needs them runs.</li>
+      <li><b>Operational data.</b> Standard service logs (timestamps, request metadata, error traces) used to keep the service running and debug failures.</li>
+    </ul>
+
+    <h2><span class="num">02</span>How we use it</h2>
+    <p>We use this information solely to operate the service: authenticating you, dispatching and running agent jobs against your repositories, streaming progress back to you, deploying previews you request, and diagnosing failures. We do not sell your data, and we do not use your code or content for advertising.</p>
+
+    <h2><span class="num">03</span>Where your code goes</h2>
+    <p>Agent jobs run inside isolated, ephemeral environments that are torn down when the job finishes. To generate code, relevant portions of your repository and your instructions are sent to the model provider you have configured for your project (for example OpenRouter, Anthropic, or OpenAI) under your own API keys. Those providers process that data under their own terms and privacy policies — review them before connecting a provider.</p>
+
+    <h2><span class="num">04</span>Third-party services</h2>
+    <ul>
+      <li><b>GitHub</b> — identity, repository hosting, and pull requests. Governed by GitHub's own privacy statement.</li>
+      <li><b>Model providers you configure</b> — inference for agent runs, under your keys and their terms.</li>
+    </ul>
+    <p>Yggdrasil does not embed third-party analytics or advertising trackers.</p>
+
+    <h2><span class="num">05</span>Self-hosted deployments</h2>
+    <p>If you run Yggdrasil on your own infrastructure, your code, secrets, and job data stay on systems you operate — this policy applies only to the hosted service. The operator of a self-hosted deployment is responsible for its own privacy practices.</p>
+
+    <h2><span class="num">06</span>Retention and deletion</h2>
+    <p>Project and job data is retained while your account is active so you can review the history of what was built and why. Ephemeral job environments are destroyed when a job completes. If you disconnect the GitHub App, Yggdrasil loses the access it granted. You can request deletion of your account data via the contact below.</p>
+
+    <h2><span class="num">07</span>Security</h2>
+    <p>Security is a design constraint of the product itself: jobs run in isolated environments with no access beyond what each job needs, repository access uses scoped and short-lived tokens rather than standing credentials, and stored secrets are encrypted at rest and decrypted only server-side. No system is perfectly secure, but the architecture is built to limit the blast radius of any single component.</p>
+
+    <h2><span class="num">08</span>Your choices</h2>
+    <ul>
+      <li>Uninstall the GitHub App from any repository at any time to revoke Yggdrasil's access to it.</li>
+      <li>Remove stored secrets and provider keys from your project settings at any time.</li>
+      <li>Request a copy or deletion of your account data via the contact below.</li>
+    </ul>
+
+    <h2><span class="num">09</span>Changes to this policy</h2>
+    <p>We may update this policy from time to time. Material changes will be announced on this page with an updated "Last updated" date.</p>
+
+    <h2><span class="num">10</span>Contact</h2>
+    <p>Questions about privacy can be raised on <a href="https://github.com/yggdrasil-hq/yggdrasil-core">GitHub</a>.</p>
+
+    <div class="divider"></div>
+    <p style="margin-top: 20px;">See also the <a href="/landing/terms/index.html">Terms of Service</a>.</p>
+  </main>
+
+  <footer class="mkt-footer">
+    <div class="mkt-footer-inner">
+      <span>&copy; 2026 Yggdrasil. All rights reserved.</span>
+      <nav>
+        <a href="/landing/index.html">Home</a>
+        <a href="https://docs.yggdrasil.cfd">Docs</a>
+        <a href="/landing/terms/index.html">Terms</a>
+        <a href="/landing/privacy/index.html">Privacy</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>
