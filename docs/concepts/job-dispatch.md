@@ -37,6 +37,13 @@ in the Orchestrator itself.
   1) alongside the title — the Orchestrator's initial prompt names exactly
   one of the two `spec_grill` skills (`project-init` vs. `feature-grill`)
   per run, never left to model inference.
+- Payload also includes `projectName`/`projectDescription` — the project's
+  own name/description as entered by the user at creation time (distinct
+  from the feature's own `title`, which for `project_init` is the fixed,
+  non-descriptive string `"Project initialization"`). The Orchestrator
+  surfaces these at the top of the initial prompt, for every `spec_grill`
+  run (not just `project_init`), so the agent starts from what the user
+  already said instead of re-deriving purpose from the repo alone.
 - Agent explores codebase, runs grill-me conversation with user.
 - Output: ADR markdown, plus an optional **Action Items** batch on the same
   `submit_adr` call (ADR 015 item 4) → persisted on feature record in API.

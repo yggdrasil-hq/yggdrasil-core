@@ -77,6 +77,17 @@ git submodules the way yggdrasil-core itself nests its own component repos
    (stating repo paths explicitly instead of relying on the model to
    rediscover them).
 
+   > **Update (2026-09-17):** "no user-supplied title text to lean on" is
+   > narrower than it should have been — the *feature* title carries no
+   > signal for `project_init`, but the *project's* own name/description
+   > (entered by the user at creation time, on the `projects` table) do and
+   > were being discarded. `FeatureSpec` now also carries
+   > `ProjectName`/`ProjectDescription`, and `buildSpecGrillPrompt` surfaces
+   > them at the top of the prompt for every `spec_grill` run (not just
+   > `project_init`) when present, framed as a starting point for the agent
+   > to confirm/refine rather than settled fact. See
+   > `docs/concepts/job-dispatch.md`'s `spec_grill` section.
+
 ### Two skills replace `grill-with-docs`
 
 3. **New:** `agent-images/spec_grill/skills/project-init/SKILL.md`. Interview
