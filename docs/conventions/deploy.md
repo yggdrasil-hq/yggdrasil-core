@@ -79,9 +79,10 @@ Per-project workloads (ephemeral job runs and each project's always-on primary
 deployment) live in the target cluster, one **namespace per project**:
 
 - **Ingress:** in-cluster ingress-nginx (or Traefik) + cert-manager with a
-  wildcard Let's Encrypt certificate. Local dev uses `k3d`'s bundled
-  **Traefik** and a `selfSigned` `ClusterIssuer` (no real domain/reachable
-  IP available locally for real ACME) — see
+  wildcard Let's Encrypt certificate. Local dev brings its own cluster (a
+  native k3s install's bundled **Traefik** works with no extra setup) plus a
+  `selfSigned` `ClusterIssuer` (no real domain/reachable IP available locally
+  for real ACME) — see
   `../../orchestrator/docs/overview/setup.md`. The Orchestrator's ingress
   class and cert issuer are env-configurable
   (`INGRESS_CLASS_NAME`/`CERT_ISSUER_NAME`), so a self-hosted/managed

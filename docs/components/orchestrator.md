@@ -8,9 +8,13 @@ keep short, link, don't duplicate.
 - **Submodule path:** `orchestrator/`
 - **GitHub repo:** `yggdrasil-hq/yggdrasil-orchestrator`
 - **Status:** added
-- **Compute substrate:** **Kubernetes** (one target cluster per Orchestrator
-  instance — bundled k3s by default for self-hosted, or an existing cluster via
-  kubeconfig). See ADR 003 (`docs/adr/003-orchestrator-kubernetes.md`).
+- **Compute substrate:** **Kubernetes** — no bundled or instance-wide cluster;
+  each Organization configures its own target cluster (encrypted kubeconfig),
+  and the Orchestrator resolves each job's cluster dynamically via its
+  project's org (ADR 016 item 13, superseding ADR 003 §3-4's original
+  bundled-k3s-by-default design). See ADR 003
+  (`docs/adr/003-orchestrator-kubernetes.md`) and ADR 016
+  (`docs/adr/016-organization-rbac-and-cluster-routing.md`).
 - **Key property:** the Orchestrator process itself is stateless (no in-memory
   state between runs, in-process crash-safe) — but per ADR 003 it now manages
   durable **per-project** Kubernetes state (each project's always-on primary

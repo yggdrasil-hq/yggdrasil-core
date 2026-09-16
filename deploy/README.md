@@ -9,10 +9,13 @@ single-node prod machine.
 - Submodules checked out (`git clone --recurse-submodules`)
 
 The Orchestrator targets Kubernetes, not a Docker socket (ADR 003). Dev compose
-(below) bundles a disposable single-node k3s cluster for this automatically —
-no separate cluster setup needed. See `../orchestrator/docs/overview/setup.md`
-for the cert-manager step (still manual) and how to point at your own cluster
-instead.
+does **not** bundle a cluster — per ADR 016, every Organization configures its
+own target cluster (an encrypted kubeconfig, entered via the web UI), and the
+Orchestrator resolves each job's cluster dynamically from that. Bring your own
+cluster (a local k3s/k3d/kind install, or anything reachable) and register it
+against an Organization before creating a project — see
+`../orchestrator/docs/overview/setup.md` for the cert-manager step and
+kubeconfig-reachability notes.
 
 ## Setup
 
@@ -44,10 +47,6 @@ source or dependency changes.
 | `/api` | API |
 | `/orchestrator` | Orchestrator |
 | `/preview/<run-id>/` | Agent previews (stub until orchestrator registers upstreams) |
-
-The Kubernetes dashboard (Headlamp) isn't routed through nginx — open it
-directly at http://localhost:4466 to inspect pods/logs/events on the bundled
-dev k3s cluster.
 
 ## Prod (env-driven subdomains)
 
