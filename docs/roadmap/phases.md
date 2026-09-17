@@ -16,9 +16,10 @@ which phase a feature belongs to.
 > ordered, independently-shippable slices.
 >
 > What remains is the residual scope and the follow-ups surfaced *by* this work,
-> tracked as issues #10/#12 (WebSocket relay), #19 (feature-branch image build),
-> #20 (preview access control), #21 (schedule-interval validation) and #22
-> (`screenshotPath` dead pointer) — not unbuilt planned phases.
+> tracked as issues #19 (feature-branch image build), #20 (preview access
+> control), #21 (schedule-interval validation), #22 (`screenshotPath` dead
+> pointer) and the test-suite manager's residual semantics — not unbuilt planned
+> phases. Every open question is resolved; ADR 019 closed the last two (#7, #11).
 
 ## Phase 1 — Foundation ✅ done
 
@@ -30,7 +31,9 @@ webhook-driven `deploy`/`merged`/`changes_requested` automation (ADR 013).
 ## Phase 2 — Team & Preview — partially built
 
 - ✅ Agent chat/steering — implemented for `spec_grill` (live `ask_user`
-  turns, `agent_text` streaming) via the attach/RPC machinery (ADR 006).
+  turns, `agent_text` streaming) via the attach/RPC machinery (ADR 006), now
+  **relayed over a WebSocket** with token-level streaming (ADR 019). The REST
+  poll remains as the fallback and as the only state path.
 - ✅ Full feature state machine (`concepts/feature-lifecycle.md`) and auto PR
   creation — both implemented (`feature_build` opens draft PRs; webhooks
   drive `merged`/`changes_requested`).

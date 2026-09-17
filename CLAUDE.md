@@ -71,6 +71,7 @@ requests and streaming progress back in real time. See
 | Token usage / cost per job / usage & analytics pages | ADR `docs/adr/023-token-usage-tracking.md` |
 | Ephemeral preview deployments / preview URLs / `job_previews` | ADR `docs/adr/003-orchestrator-kubernetes.md` §10/§15/§17 |
 | Restarting a grill conversation from an earlier message | ADR `docs/adr/024-per-message-grill-resume.md` |
+| Live agent events over WebSocket / streaming tokens / the relay & its fallback | ADR `docs/adr/019-live-event-relay.md` |
 | Scheduled `test_run` / cron for tests / test run history | ADR `docs/adr/026-test-run-scheduling.md` |
 | Making `web/`/`landing/` visually match `design/` (mock pages for undecided concepts, route/drift reconciliation) | ADR `docs/adr/017-web-visual-parity-with-design.md` |
 | `project_init` grill workflow / child-project structure standard (setup.sh/run.sh/Helm/docs) / submodule sub-repos | ADR `docs/adr/008-project-init-grill-and-submodule-repos.md` |

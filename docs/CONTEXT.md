@@ -4,12 +4,12 @@
 before diving into code or docs. For details, follow the links — do not treat this
 file as the full spec.
 
-Last updated: 2026-09-18 (open-issue burn-down waves 1-5 complete: ADRs 020-030
-all implemented — design persistence, branch conflicts, deploy rollback, token
-usage, per-message grill restart, Pi extension uploads, test scheduling, screen
-recording, notification preferences, audit logging, allocation caps — plus the
-per-feature model tier, the `spec_grill` full-page chat, and ephemeral preview
-deployments)
+Last updated: 2026-09-18 (open-issue burn-down waves 1-6 complete; **every open
+question resolved** and ADRs 019-030 all implemented — live event relay, design
+persistence, branch conflicts, deploy rollback, token usage, per-message grill
+restart, Pi extension uploads, test scheduling, screen recording, notification
+preferences, audit logging, allocation caps — plus the per-feature model tier,
+the `spec_grill` full-page chat, and ephemeral preview deployments)
 
 ## Glossary
 
@@ -756,6 +756,43 @@ amended 2026-09-17 by issue #5
   there is no decided mechanism for the API/Orchestrator to expose live cluster
   metrics, so that page stays a mock.
 
+## Decided (live event relay)
+
+**ADR 019 — Live job-event relay** ([`adr/019-live-event-relay.md`](adr/019-live-event-relay.md))
+
+- Resolves open questions #7 and #11 together. The chat wire path is
+  **Web → API WebSocket** — one hop on the existing session cookie, no
+  orchestrator subdomain and no direct socket to Pi in the container.
+- **The 2s poll is replaced, not removed.** The socket is a *change signal*, not
+  a state channel: a frame triggers a coalesced re-read of the same REST endpoint
+  the poll already used. Live, the interval relaxes to 30 s as a safety floor; if
+  the socket never connects, refuses a subscription, or gives up after repeated
+  failures, polling returns to 2 s. That read is also the entire missed-event
+  story — `job_events` is append-only and `GET .../events` already replays it, so
+  there is no per-connection cursor.
+- Fan-out is Postgres `LISTEN`/`NOTIFY`, **not** an in-process emitter — with
+  more than one API replica an in-process emitter would relay only the events the
+  same process happened to write, failing silently and reproducibly in production
+  only. Stored events and streaming deltas ride two channels on one dedicated
+  listener connection.
+- **Token-level streaming is implemented** (item 13), in three parts: the
+  Orchestrator translates Pi's `message_update` `text_delta` into a **non-terminal**
+  `agent_text_delta` and forwards it live; the API accepts it on its own schema,
+  branched **before** the stored-event schema so `jobEventSchema` stays
+  authoritative for what can become a row, and relays it **without persisting**
+  (one row per token would bloat the append-only table and the catch-up read);
+  the Web accumulates deltas into a growing bubble and **discards the buffer when
+  the authoritative `agent_text` arrives**, so the two paths cannot drift.
+- Authorisation **mirrors the REST read exactly** — project via org membership,
+  then the feature *within* that project, both collapsing to one refusal so a
+  project/feature the caller cannot see is not distinguished from one that does
+  not exist. Re-checked on every `subscribe`, never cached.
+- Bounds accepted and stated: a revoked membership takes effect on the next
+  reconnect, not mid-socket; only the grill page is converted (the build-progress
+  and testing surfaces still poll); and **deltas are not coalesced** — one HTTP
+  POST per chunk, so a long stream lengthens its turn. Coalescing is the first
+  follow-up and should land before this sees real traffic.
+
 ## Proposed (surfaced by `design/`, not yet decided)
 
 `design/` (the meta-repo wireframe directory, see
@@ -838,6 +875,7 @@ authoritative detail on each point.
 | 016 | [Organization entity, RBAC, org-level provider/secret config, and per-org cluster routing](adr/016-organization-rbac-and-cluster-routing.md) |
 | 017 | [Bring `web/` and `landing/` visually in line with `design/`](adr/017-web-visual-parity-with-design.md) |
 | 018 | [Multi-provider model configuration and per-job-kind defaults](adr/018-multi-provider-model-config.md) |
+| 019 | [Live job-event relay (WebSocket)](adr/019-live-event-relay.md) |
 | 020 | [Design persistence and browse/history](adr/020-design-persistence.md) |
 | 021 | [Parallel-feature branch conflicts](adr/021-parallel-feature-branch-conflicts.md) |
 | 022 | [Primary deployment rollback safety net](adr/022-deployment-rollback.md) |

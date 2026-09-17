@@ -8,7 +8,7 @@ bridge — keep it short and link, don't duplicate.
 - **Submodule path:** `api/`
 - **GitHub repo:** `yggdrasil-hq/yggdrasil-api`
 - **Status:** added
-- **Stack:** Express + TypeScript, REST + WebSocket (planned), PostgreSQL, MinIO/S3
+- **Stack:** Express + TypeScript, REST + WebSocket, PostgreSQL, MinIO/S3
   for artefacts.
 
 ## Responsibility
@@ -20,7 +20,7 @@ and delivers real-time events to the Web app.
 
 ## Talks to
 
-- **Web** — serves REST + WebSocket.
+- **Web** — serves REST + WebSocket (ADR 019: the live job-event relay, session-cookie authenticated).
 - **Orchestrator** — dispatches job specs (see `concepts/job-dispatch.md`), receives
   streamed run events.
 - **GitHub** — OAuth (identity), GitHub App (installations, webhooks), mints
