@@ -65,12 +65,16 @@ sites, with an admin-only read view at `/settings/organization/audit`.
 
 ✅ Per-feature model override — implemented as an amendment to ADR 018: a third,
 narrowest resolution tier (feature → project → organization) mirroring the
-project tier's catalog-selection and custom-triplet paths. Note the Orchestrator
-still resolves at project/org tier until it forwards `featureId` to the internal
-job-spec endpoint, so this is not fully wired end to end yet.
+project tier's catalog-selection and custom-triplet paths. Now wired end to end:
+the Orchestrator forwards a job's `featureId` to the internal job-spec endpoint,
+so a feature's own model actually reaches the job pod.
+
+✅ Notification preferences — implemented (ADR 027): per-user rows keyed by
+(organization, notification kind) plus a per-project mute, applied at creation
+time with a default of notify. UI in account and project settings.
 
 ⬜ Pi extension uploads, token budgets (reporting half in progress under
-open question #15), notification preferences.
+open question #15).
 
 Per-user default model configuration (ADR 007) and per-project override already
 exist, ahead of this phase — ADR 007 is retired by ADR 016 (Phase 2, see above),

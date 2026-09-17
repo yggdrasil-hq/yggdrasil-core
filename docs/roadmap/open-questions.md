@@ -6,7 +6,6 @@ these — surface them.**
 
 | # | Question | Affects |
 |---|----------|---------|
-| 5 | **Branch conflicts** when two features are developed in parallel. | Orchestrator, feature-lifecycle |
 | 7 | **Agent chat wire path** — Web → API vs orchestrator subdomain vs direct preview WebSocket to Pi in container. | Orchestrator, API, Web, nginx |
 | 9 | **Primary deployment migration/rollback safety net** — ADR 003 shipped auto-deploy-on-merge with no safety net; likely needs a staging branch + staging deployment gate before promoting to primary. `design/deployments` and its project-level equivalent mock a Staging row against this exact question — still unresolved, least-grounded of the three rows shown. | Orchestrator, feature-lifecycle, project-settings |
 | 11 | **spec_grill polling → WebSocket migration** — replace the Web app's 2s REST polling of `GET /features/:id/events` with a WebSocket-based live relay for real interactivity (agent "thinking" states, streaming tokens, instant delivery); relates to #7's wire-path question but is specifically about leaving polling, not which topology to use. Cross-ref `api/CLAUDE.md`'s "WebSocket (planned)" line. | Web, API |
@@ -22,7 +21,10 @@ these — surface them.**
 > routing), #13 (Organization/RBAC entity), and #16 (org-level provider/
 > secret config) were all resolved together by
 > [ADR 016](../adr/016-organization-rbac-and-cluster-routing.md) and removed
-> from this list — decided and implemented.
+> from this list — decided and implemented. **Question #5 (parallel-feature
+> branch conflicts) was resolved by
+> [ADR 021](../adr/021-parallel-feature-branch-conflicts.md)** and removed from
+> this list.
 
 ## How to use this list
 

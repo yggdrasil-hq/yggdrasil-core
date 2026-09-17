@@ -4,9 +4,9 @@
 before diving into code or docs. For details, follow the links — do not treat this
 file as the full spec.
 
-Last updated: 2026-09-17 (Wave 1 of the open-issue burn-down: ADR 028 audit
-logging, ADR 018 per-feature override amendment, and the `spec_grill` full-page
-chat)
+Last updated: 2026-09-17 (open-issue burn-down waves 1-2: ADR 028 audit logging,
+ADR 018 per-feature override amendment, ADR 027 notification preferences, ADR 021
+parallel-feature branch conflicts, and the `spec_grill` full-page chat)
 
 ## Glossary
 
@@ -500,6 +500,53 @@ amended 2026-09-17 by issue #5
 - **Deferred:** member-visible own-trail (non-admins get 403), retention/
   export, partitioning, and read-auditing. The org audit page has **no `design/`
   wireframe** — recorded as known ADR 017 drift.
+
+## Decided (notification preferences)
+
+**ADR 027 — Notification preferences** ([`adr/027-notification-preferences.md`](adr/027-notification-preferences.md))
+
+- Per-user preferences keyed by **(organization, notification kind)**, plus a
+  separate **per-project mute** — two mechanisms rather than one generic scope
+  column, because "mute this kind everywhere in this org" and "mute this
+  project" are genuinely different questions a user asks.
+- Preferences are applied at **creation** time, not read time: `NotificationRepository.create`
+  consults them and skips the insert. The default for a user with no rows is
+  **notify**, so existing behaviour is unchanged. Consequence: enabling a kind
+  later does not backfill history.
+- A per-project mute governs notifications carrying that `project_id`;
+  notifications with a NULL `project_id` (e.g. `project_created`) are governed
+  only by the org/kind row.
+- Kinds exposed: `project_created`, `feature_created`, `adr_approved`,
+  `spec_grill`, `feature_build`, `build_started`, `deploy`,
+  `chart_scaffold_failed`, `design_grill`, plus a master per-org toggle.
+- Surfaced in account settings (org-scoped, since a user may belong to several
+  orgs) plus a per-project mute card on project settings.
+
+## Decided (parallel-feature branch conflicts)
+
+**ADR 021 — Parallel-feature branch conflicts**
+([`adr/021-parallel-feature-branch-conflicts.md`](adr/021-parallel-feature-branch-conflicts.md))
+
+- Two `feature_build` runs may proceed **concurrently** — there is deliberately
+  no per-project single-build guard.
+- Instead the feature branch is **synced onto the latest base at build start**
+  (resolved via `origin/HEAD`, falling back to `origin/main`, so a repo whose
+  default branch isn't `main` still works), and **`feature_build` resolves any
+  resulting conflicts itself** as step 1 of the implement skill.
+- The fatal/non-fatal line is drawn precisely: a failed **fetch** is fatal (the
+  agent must never start on an unverified workspace — the ADR 008 lesson), but
+  merge **conflicts** are not. A merge failure with *no* unmerged paths stays
+  fatal too, so a broken base ref cannot reach the agent dressed as a resolvable
+  conflict.
+- The conflicted state is signalled twice: env var `YGGDRASIL_MERGE_CONFLICTS=1`
+  and `/workspace/.yggdrasil/merge-conflicts.md`. The skill forbids
+  `merge --abort` and forbids making a conflict "go away" by reverting the other
+  side.
+- The human draft-PR review remains the backstop for a wrong resolution. The
+  residual race — base advancing again after the sync but before the PR merges —
+  is accepted, not closed; a merge queue is the documented follow-up. A retry
+  re-syncs, and the retry path now continues the existing remote branch instead
+  of recreating it (which previously discarded a partial attempt's commits).
 
 ## Proposed (surfaced by `design/`, not yet decided)
 
