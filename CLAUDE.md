@@ -59,7 +59,8 @@ requests and streaming progress back in real time. See
 | Projects / features / tests / project home / notifications | ADR `docs/adr/002-projects-features-tests.md` → `docs/concepts/feature-lifecycle.md`, `docs/concepts/job-dispatch.md` |
 | Six-stage feature lifecycle / Action Items / Testing gate / Agentic Review / `returned` state | ADR `docs/adr/015-six-stage-feature-lifecycle.md` → `docs/concepts/feature-lifecycle.md`'s "Target model" section |
 | Organization / RBAC / roles / invites / org-level secrets (generic KV) / per-org Kubernetes cluster routing | ADR `docs/adr/016-organization-rbac-and-cluster-routing.md` |
-| Providers & Models / model catalog / per-job-kind default model / project model overrides | ADR `docs/adr/018-multi-provider-model-config.md` |
+| Providers & Models / model catalog / per-job-kind default model / project & feature model overrides | ADR `docs/adr/018-multi-provider-model-config.md` |
+| Audit trail / who changed what / `audit_events` / org admin audit view | ADR `docs/adr/028-audit-logging.md` |
 | Making `web/`/`landing/` visually match `design/` (mock pages for undecided concepts, route/drift reconciliation) | ADR `docs/adr/017-web-visual-parity-with-design.md` |
 | `project_init` grill workflow / child-project structure standard (setup.sh/run.sh/Helm/docs) / submodule sub-repos | ADR `docs/adr/008-project-init-grill-and-submodule-repos.md` |
 | The Pi agent (how the agent itself runs)                | `docs/concepts/pi-agent.md`            |

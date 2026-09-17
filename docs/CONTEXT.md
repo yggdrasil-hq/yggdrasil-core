@@ -4,7 +4,9 @@
 before diving into code or docs. For details, follow the links — do not treat this
 file as the full spec.
 
-Last updated: 2026-08-31 (implementation-status audit against ADRs 001-016)
+Last updated: 2026-09-17 (Wave 1 of the open-issue burn-down: ADR 028 audit
+logging, ADR 018 per-feature override amendment, and the `spec_grill` full-page
+chat)
 
 ## Glossary
 
@@ -33,6 +35,8 @@ Last updated: 2026-08-31 (implementation-status audit against ADRs 001-016)
 | **Provider** | New concept (ADR 018, built): an org-scoped, named, typed (`openrouter`/`anthropic`/`custom_openai_compatible`) connection — one base URL + one encrypted API key. Known types imply a default base URL; admins may override it. |
 | **Model catalog** | New concept (ADR 018, built): an org-scoped list of models, each belonging to exactly one Provider, with a display name and the literal model-id string sent in requests. |
 | **Job model default** | New concept (ADR 018, built): the model an Organization assigns as default for one of the five agent-driven job kinds (`spec_grill`, `feature_build`, `test_run`, `agentic_review`, `design_grill`). A model in active use as a default cannot be deleted until unassigned. A project may override the default per job kind, either by picking another catalog model or by supplying its own custom triplet. |
+| **Feature model override** | New narrowest tier (ADR 018 amendment, built): a feature's jobs may resolve their model configuration themselves, beating both the project override and the org default. Same two shapes as the project tier — a catalog selection, or an encrypted custom triplet stored in `feature_model_secrets` that wins within the tier. The all-or-nothing three-key rule applies, so a partial triplet resolves to *nothing* rather than falling through. `design_grill` deliberately has no feature tier (a design job carries no `feature_id`). Not yet wired end to end: the Orchestrator must forward `featureId` to the internal job-spec endpoint before job pods see it. |
+| **Audit event** | New concept (ADR 028, built): one immutable row in the org-scoped, append-only `audit_events` table recording an actor (user/system/webhook/job), a dotted action (`project.created`, `feature.adr_approved`, …), a target, metadata, and the request IP. Written by explicit `recordAudit()` calls at 41 mutation sites — not generic middleware, which couldn't produce meaningful action names or target ids — and a failed audit write never fails the originating request. Read only by org admins, at `/settings/organization/audit`; kept indefinitely. Member-visible own-trail is deferred. |
 | **Organization** | New entity (ADR 016, Track A built in `api/`): a user can belong to several; every user gets a personal one auto-created at signup. Projects belong to exactly one Organization (`organization_id`, replacing `owner_user_id`). Deliberately decoupled from GitHub App installations (ADR 005) — not a 1:1 mirror of a GitHub org. Has its own hard gate, `pending_cluster` → `ready`, mirroring `project_init`'s gate; setting a cluster flips an org to `ready`. |
 | **Membership / Role** | New entity (ADR 016, built): a user's membership in an Organization carries exactly one role — Admin, Developer, Designer, Product Manager, or Tester — applying org-wide (every project under that org), not per-project. Capability grants per role are adjustable seed data in `role_capabilities`. |
 | **Invite link** | New mechanism (ADR 016, built) for adding a member to an Organization: a token-based shareable URL (org + role baked in), not email or username — the auth model has no email at all (ADR 001/009). Whoever opens it and completes GitHub OAuth is added. |
@@ -442,6 +446,61 @@ per-org cluster routing**
   project load, would 500) and broken invite links (missing base-path
   prefix). Not yet committed.
 
+## Decided (multi-provider model configuration)
+
+**ADR 018 — Multi-provider model configuration and per-job-kind defaults**
+([`adr/018-multi-provider-model-config.md`](adr/018-multi-provider-model-config.md)),
+amended 2026-09-17 by issue #5
+
+- Model configuration is resolved from an org-scoped **Provider** /
+  **Model catalog** rather than one flat org-wide triplet, and each of the five
+  agent-driven job kinds gets its own **Job model default**. A project may
+  override per job kind, by catalog selection or by its own custom triplet
+  (which wins). `user_secrets` is dropped.
+- **Amendment (issue #5, implemented):** a third, narrowest **feature tier**.
+  Precedence is now feature custom triplet → feature catalog override → project
+  custom triplet → project catalog override → org job-kind default. Same
+  all-or-nothing three-key bundle rule, so a partial triplet resolves to nothing
+  rather than falling through. ADR 018's in-use deletion protection extends to
+  feature-tier overrides.
+- `design_grill` deliberately has no feature tier: a design job row carries no
+  `feature_id` (ADR 014 keeps sessions project-scoped), so a gate that accepted
+  one would disagree with the pod.
+- **Known gap:** the Orchestrator does not yet forward `featureId` to the
+  internal job-spec endpoint, so job pods still resolve at project/org tier.
+  The API-side behaviour and the Web UI are complete; the plumbing is tracked as
+  a follow-up.
+
+## Decided (audit logging)
+
+**ADR 028 — Audit logging / trails**
+([`adr/028-audit-logging.md`](adr/028-audit-logging.md))
+
+- New org-scoped, append-only `audit_events` table: actor (nullable, with
+  `actor_kind` in user/system/webhook/job), dotted `action`, target, flexible
+  `metadata`, request IP, timestamp. Indexed by `(organization_id, created_at)`
+  and `(project_id, created_at)`. Retained indefinitely — no pruning policy.
+- **Write path is explicit `recordAudit()` calls at 41 mutation sites**, not a
+  blanket express middleware: generic middleware cannot produce
+  domain-meaningful action names or target ids. The ADR carries the full
+  coverage table plus 8 explicitly out-of-scope rows, each with a reason —
+  nothing is silently skipped.
+- **A failed audit write never fails the originating request** (logged and
+  continued). Deliberate trade-off; a transactional/outbox write is the
+  documented follow-up.
+- Read path is `GET /organizations/:id/audit` — admin-only, newest-first,
+  paginated, filterable by project, actor, action prefix and date range —
+  surfaced at `/settings/organization/audit` in the Web app. Reuses the
+  existing org-admin check rather than adding a capability; `role_capabilities`
+  is still not wired into enforcement anywhere.
+- Project/actor FKs are `ON DELETE SET NULL` so the trail outlives what it
+  points at; the deleted project's name is copied into metadata. The captured
+  user-agent is folded into `metadata.actorUserAgent` (the schema has no column
+  for it).
+- **Deferred:** member-visible own-trail (non-admins get 403), retention/
+  export, partitioning, and read-auditing. The org audit page has **no `design/`
+  wireframe** — recorded as known ADR 017 drift.
+
 ## Proposed (surfaced by `design/`, not yet decided)
 
 `design/` (the meta-repo wireframe directory, see
@@ -525,5 +584,6 @@ authoritative detail on each point.
 | 016 | [Organization entity, RBAC, org-level provider/secret config, and per-org cluster routing](adr/016-organization-rbac-and-cluster-routing.md) |
 | 017 | [Bring `web/` and `landing/` visually in line with `design/`](adr/017-web-visual-parity-with-design.md) |
 | 018 | [Multi-provider model configuration and per-job-kind defaults](adr/018-multi-provider-model-config.md) |
+| 028 | [Audit logging / trails](adr/028-audit-logging.md) |
 
 → [`adr/README.md`](adr/README.md)

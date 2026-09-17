@@ -143,3 +143,104 @@ calls for.
 | `ON DELETE CASCADE` (unassign automatically) on defaults | Silently changes a job kind's effective model on unrelated model deletion — rejected in favor of an explicit, visible failure |
 | Free-form provider list (arbitrary provider "type" string) | A closed enum (`openrouter`/`anthropic`/`custom_openai_compatible`) is enough for known-type default base URLs and keeps validation simple; a full plugin system is unwarranted scope |
 | Wire the granular capability matrix into enforcement now | Real work unrelated to this feature's core value; deferred as a Follow-up, same as ADR 016 left it |
+
+## Amendment: per-feature override tier (issue #5)
+
+**Date:** 2026-09-16
+**Issue:** `yggdrasil-hq/yggdrasil-core#5` (Phase 4 — per-feature model override)
+**Amends:** items 4, 5, 6, and 7 above. Everything else in this ADR stands.
+
+### Decision
+
+9. **A third, narrowest resolution tier exists: the feature.** Any job that
+   belongs to a feature resolves its model configuration through the feature
+   tier first. This is the same two-mechanism shape as the project tier
+   (item 5), one level down, rather than a new kind of override:
+
+   - a **catalog selection** per job kind — a `feature_job_model_overrides`
+     table (migration 030), mirroring `project_job_model_overrides` exactly
+     (same five-kind `CHECK`, same `PRIMARY KEY (feature_id, job_kind)`,
+     presence of a row means override);
+   - a **custom triplet** — a `feature_model_secrets` table, mirroring
+     `project_secrets`' encrypted storage (same AES-256-GCM envelope, same
+     metadata-only read surface), holding a feature's own
+     `MODEL_BASE_URL`/`MODEL_API_KEY`/`MODEL_ID`.
+
+10. **Full resolution order per job kind, highest first**: feature's custom
+    triplet → feature's catalog override → project's custom triplet → project's
+    catalog override → organization's per-job-kind default → nothing resolves
+    (dispatch is refused, as before). This replaces item 6's four-step order.
+
+11. **The all-or-nothing rule is unchanged and now applies at both levels**: a
+    tier has either none of the three keys or all three — never a per-key mix.
+    A *partial* triplet at the feature or project tier is treated as
+    unresolvable rather than falling through to a lower tier, so an
+    inconsistent state surfaces instead of being masked. The feature tier also
+    enforces this on write, as a whole-bundle PUT that rejects a partial
+    triplet with a 400 — structurally, rather than relying on every writer to
+    set all three keys in turn.
+
+12. **Item 4's deletion protection extends to the feature tier.** A model in
+    active use cannot be deleted — `ON DELETE RESTRICT` from the feature
+    override table to `organization_models`, the same mechanism that already
+    protects org defaults and project overrides.
+
+13. **Authorization reuses item 7's precedent, unchanged**: the feature-tier
+    routes are gated on project access (`ProjectRepository.findByIdForUser`),
+    exactly like the project-tier model-config routes they mirror, plus the
+    feature having to belong to that project. No new capability is introduced,
+    and the `role_capabilities` matrix is still not wired into enforcement
+    (still the same Follow-up).
+
+14. **Closure of the dispatch path.** Every dispatch-time gate that requires "a
+    resolvable model configuration" now resolves with the job's feature id, and
+    the internal job-spec endpoint the Orchestrator consumes takes an optional
+    `featureId` parameter. That parameter is additive: absent, the resolution is
+    exactly what it was before this tier existed.
+
+15. **UI: a dedicated route, not a seventh stage.**
+    `/projects/:projectId/features/:featureId/model-config` renders the feature
+    tier, linked from the feature-detail header. It is deliberately **not** an
+    entry in the six-stage nav (`FEATURE_STAGES`), because that list drives
+    lifecycle progress math (ADR 015) — model configuration is a settings
+    surface, not a lifecycle stage. Five job kinds plus three custom-connection
+    fields is also too much to inject into every stage page's header.
+
+### Scope notes and non-goals
+
+16. **A `design_grill` session stays project-scoped** (ADR 014), even when it
+    was started from one feature's Action Item: its job row carries no
+    `feature_id`, so the feature tier does not apply to it. Writing a feature id
+    onto a design job would additionally break the feature-scoped "is a build
+    already running?" gate, which is kind-agnostic (`findLatestJob(featureId)`).
+17. **Feature-level config is model config only.** Unlike `project_secrets`,
+    the feature-tier secret table is not a general env-var store: a feature is
+    not a deployment unit, so it has no delivery path for arbitrary keys. Only
+    the three `MODEL_*` keys are writable through it.
+
+### Consequences
+
+- A feature can pin a stronger/cheaper model for its own build without touching
+  its project or organization — the closest granularity to "this one feature".
+- **A third tier is a third place a model can be overridden**, so "why is this
+  job using that model?" now needs the effective-config read rather than a
+  mental model of one tier. Mitigated deliberately: the feature surface shows
+  the winning tier *and* its resolved model per job kind, so "inherit" is never
+  ambiguous, and one shared resolution function keeps the whole ladder in one
+  place so the dispatch path and the read path cannot disagree.
+- The feature tier inherits item 5's trade-off (two mechanisms rather than one)
+  and item 7's (no granular RBAC), both of which this amendment extends rather
+  than resolves.
+
+### Follow-up (out of scope here)
+
+- The Orchestrator passes a job's project and kind when fetching its secrets but
+  **not** the job's `feature_id`, so a feature-tier override is enforced at
+  dispatch-gate time but not yet delivered into the job pod's env vars until
+  that one-argument change lands (`orchestrator/internal/worker/worker.go`'s
+  `buildAgentEnv` → `internal/apiclient/client.go`'s `FetchProjectSecrets`).
+  The API side is additive and backward-compatible, so the two repos can land
+  in either order.
+- `docs/concepts/project-settings.md`'s "Levels" list still describes level 2
+  ("per-feature / per-run") as a general capability; its model-configuration
+  half is now implemented (this amendment), the rest is not.

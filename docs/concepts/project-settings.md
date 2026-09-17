@@ -31,13 +31,21 @@ per-feature/run overrides for the agent.
    (project fully inherits the org's) or all three are (fully custom) — no
    partial per-key override. For generic secrets, a project-level key shadows
    an org-level key of the same name.
-2. **Per-feature / per-run** — individual features can override the model and
-   some settings for a single run.
+2. **Per-feature / per-run** — individual features can override the model for a
+   single run. Implemented (ADR 018 amendment, issue #5): a feature may select a
+   catalog model per job kind or supply its own encrypted triplet, and its
+   resolution beats both the project and org tiers. `design_grill` has no feature
+   tier, since a design job carries no `feature_id`. Other per-run settings are
+   not part of this tier.
 
 **Currently implemented:** level 0 is the Org (`organization_secrets` /
 `organization_clusters`, admin-managed via `web/`'s `/settings/organization/*`).
 ADR 007's per-user account default no longer exists; `/settings/account` now
-points at the org's provider config rather than editing a user default.
+points at the org's provider config rather than editing a user default. Levels 1
+and 2 both exist for model configuration specifically — see ADR 018 and its
+amendment. Note the feature tier is not yet wired end to end: the Orchestrator
+must forward `featureId` to the internal job-spec endpoint before job pods
+resolve it.
 
 ## Repositories
 

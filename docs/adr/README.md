@@ -39,6 +39,8 @@ Each ADR is numbered sequentially: `NNN-short-title.md`.
 | [015](015-six-stage-feature-lifecycle.md) | Six-stage feature lifecycle — Action Items, Testing, and Agentic Review | Accepted |
 | [016](016-organization-rbac-and-cluster-routing.md) | Organization entity, RBAC, org-level provider/secret config, and per-org cluster routing | Accepted |
 | [017](017-web-visual-parity-with-design.md) | Bring `web/` and `landing/` visually in line with `design/` | Accepted |
+| [018](018-multi-provider-model-config.md) | Multi-provider model configuration and per-job-kind defaults (amended 2026-09-17: per-feature override tier) | Accepted |
+| [028](028-audit-logging.md) | Audit logging / trails | Accepted |
 
 When adding an ADR, update this index, add a routing row in root `CLAUDE.md`, and
 link from `docs/CONTEXT.md` if the decision affects suite-wide context.

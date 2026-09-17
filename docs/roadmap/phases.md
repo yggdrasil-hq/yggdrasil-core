@@ -57,13 +57,24 @@ screen recording, and test history UI. ADR 015's feature-stage
 `test_run`/`script_test_run` paths are already implemented, including
 feature-branch reports and the Testing tab.
 
-## Phase 4 — Polish — not started
+## Phase 4 — Polish — in progress
 
-Pi extension uploads, per-feature model override, token budgets, notification
-preferences, audit (logging/trails). Per-user default model configuration
-(ADR 007) and per-project override already exist, ahead of this phase — ADR
-007 is retired by ADR 016 (Phase 2, see above) once that ships, replaced by
-an Organization-level default; per-project override is unaffected.
+✅ Auditing (logging/trails) — implemented (ADR 028): an org-scoped append-only
+`audit_events` table written by explicit `recordAudit()` calls at 41 mutation
+sites, with an admin-only read view at `/settings/organization/audit`.
+
+✅ Per-feature model override — implemented as an amendment to ADR 018: a third,
+narrowest resolution tier (feature → project → organization) mirroring the
+project tier's catalog-selection and custom-triplet paths. Note the Orchestrator
+still resolves at project/org tier until it forwards `featureId` to the internal
+job-spec endpoint, so this is not fully wired end to end yet.
+
+⬜ Pi extension uploads, token budgets (reporting half in progress under
+open question #15), notification preferences.
+
+Per-user default model configuration (ADR 007) and per-project override already
+exist, ahead of this phase — ADR 007 is retired by ADR 016 (Phase 2, see above),
+replaced by an Organization-level default; per-project override is unaffected.
 Token budgets' proposed shape is sketched in `design/allocations/api`;
 consumption reporting (`design/usage`, `design/analytics`) is a related but
 distinct, equally unbuilt feature — not decided, see `docs/CONTEXT.md`.
