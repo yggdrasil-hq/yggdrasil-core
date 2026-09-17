@@ -66,6 +66,18 @@ calls for.
    org's default for that job kind → no config (job dispatch fails the same way it
    does today when nothing is configured).
 
+### Project-creation gate
+
+6a. **Project creation is additionally gated on all 5 job kinds having an org
+    default model assigned** (`spec_grill`, `feature_build`, `test_run`,
+    `agentic_review`, `design_grill`), same hard-gate pattern as ADR 016 item 11's
+    cluster requirement (`organizations.status`: `pending_cluster` → `ready`) — an
+    org must reach `ready` on **both** cluster config and full per-job-kind default
+    coverage before it can create a project. Partial coverage (e.g. 4 of 5 kinds)
+    still blocks. This closes the gap the plain resolution-order fallback in item 6
+    would otherwise leave open (job dispatch silently failing at run time instead
+    of being caught at project-creation time).
+
 ### RBAC
 
 7. **Reuse ADR 016's existing enforcement, unchanged**: reads (providers, catalog,

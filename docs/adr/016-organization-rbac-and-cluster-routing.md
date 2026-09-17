@@ -110,7 +110,10 @@ cluster config all depend on the Organization entity existing.
     this is a **hard gate**, the same pattern ADR 002 already established for
     `project_init` ("cannot create other features/tests while
     `initializing`"). New `organizations.status`:
-    `pending_cluster` → `ready`, gating all project creation.
+    `pending_cluster` → `ready`, gating all project creation. **Amended by
+    [ADR 018](018-multi-provider-model-config.md) item 6a**: readiness for project
+    creation also requires a default model assigned for all 5 agent-driven job
+    kinds, not cluster config alone.
 12. **Whole-org granularity, no overrides.** An org's cluster choice applies
     uniformly to every project under it — primary deployments and every
     ephemeral job alike. No per-project override exists or is planned.
