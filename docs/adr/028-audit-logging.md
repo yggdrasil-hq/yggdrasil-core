@@ -129,6 +129,8 @@ delete path anywhere in the codebase, and no retention/pruning policy.
    | `DELETE /projects/:projectId/secrets/:secretId` | `project_secret.deleted` | user |
    | `PUT /projects/:projectId/job-model-overrides/:jobKind` | `project_model_override.set` | user |
    | `DELETE /projects/:projectId/job-model-overrides/:jobKind` | `project_model_override.cleared` | user |
+   | `POST /projects/:projectId/designs` | `design.session_started` | user |
+   | `POST /projects/:projectId/designs/:sessionId/cancel` | `design.session_cancelled` | user |
    | `POST /organizations` | `org.created` | user |
    | `PATCH /organizations/:organizationId` | `org.updated` | user |
    | `POST /organizations/:organizationId/invites` | `org.invite_created` | user |
@@ -151,6 +153,7 @@ delete path anywhere in the codebase, and no retention/pruning policy.
    | `POST /github/installations/:installationId/sync` | `github.repos_synced` | user (one row per affected org) |
    | webhook `installation` (created/unsuspend/deleted/suspend) | `github.installation_updated` | webhook (one row per affected org) |
    | webhook `installation_repositories` | `github.repositories_updated` | webhook (one row per affected org) |
+   | `POST /projects/:projectId/rollback` | `deploy.rolled_back` | user |
 
    Only **successful** mutations produce rows: `recordAudit` runs after the
    mutation has committed, on the success path (item 5's ordering is what makes
@@ -162,9 +165,8 @@ delete path anywhere in the codebase, and no retention/pruning policy.
    |---|---|
    | `POST /projects/:id/features/:id/messages` (mid-run grill reply) | Conversational content, already persisted verbatim as a `user_message` `job_event` — the actual record of the reply. Copying transcripts into a second, broadly-readable store adds no audit value. |
    | Action Item resolution (`/resolve`, `/auto-resolve`, `/:itemId/subtask`) | Meaningful but lower-value than the enumerated categories, and `/auto-resolve` is opportunistic (a read sweeps it) so it would emit noise. Follow-up. |
-   | Design session create/cancel (`POST /projects/:id/designs`, `/cancel`) | The durable record is the committed artifact + the job row, and issues #2/#13 (design persistence, whether a Design becomes a DB entity at all) are unresolved — there is no stable target id to point at yet. |
    | Test entity CRUD (`POST`/`PATCH /projects/:id/tests`) | Belongs with the standalone Testing product (`#3`), which is unbuilt; instrumenting CRUD ahead of it would record a surface that issue is about to change. |
-   | Manual `deploy` trigger (`POST /projects/:id/deploy`) | The `deploy` job row plus ADR 013's deploy-status feedback already record this; the trail adds a duplicate with no actor detail the job row lacks. |
+   | Manual `deploy` trigger (`POST /projects/:id/deploy`) | The `deploy` job row plus ADR 013's deploy-status feedback already record this; the trail adds a duplicate with no actor detail the job row lacks. **Note the deliberate asymmetry with `POST /projects/:id/rollback`, which *is* audited** (`deploy.rolled_back`, added by [ADR 022](022-deployment-rollback.md) §8): a rollback is a destructive action whose actor is not recoverable from the job row, whereas the routine trigger is neither. Auditing the trigger too, for symmetry, remains an open follow-up rather than an oversight. |
    | Any read (`GET`) | The trail records mutations, not access. Read-auditing is a different feature with different volume characteristics and was not decided. |
    | `/internal/*` Orchestrator-driven writes | These are the Orchestrator reporting job outcomes, each already recorded in `job_events`. The `job` actor kind exists in the schema for whichever future write has no `job_events` equivalent. |
    | Installation-level GitHub events with **no linked project** | There is no org to scope them to: ADR 016 item 3 deliberately decouples installs from Organizations, and `organization_id` is NOT NULL. An installation that gains a project starts being recorded from its next event. |

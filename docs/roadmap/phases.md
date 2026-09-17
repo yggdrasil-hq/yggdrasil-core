@@ -39,10 +39,11 @@ webhook-driven `deploy`/`merged`/`changes_requested` automation (ADR 013).
 - ⬜ Live preview tunnel for ephemeral job runs — designed in ADR 003 but not
   implemented in `orchestrator/` (no preview/temporary-deployment code
   exists).
-- 🚧 `design_grill` (ADR 014) — the job-backed API, Orchestrator RPC path,
-  agent image/skill, and minimal Web live-preview session are implemented.
-  Design browse/history and re-open flows remain deferred with the
-  Design-persistence question.
+- ✅ `design_grill` (ADR 014) — the job-backed API, Orchestrator RPC path,
+  agent image/skill, minimal Web live-preview session, **and** design
+  browse/history + re-open flows (ADR 020, which resolved the design-persistence
+  question by indexing designs in a `designs` table while keeping the artifact
+  in git).
 - ✅ **Six-stage feature lifecycle** (ADR 015: Spec → Action Items →
   Implementation → Testing → Agentic Review → Manual Review) — Track B of
   `docs/roadmap/adr-015-016-build-plan.md` is implemented. This includes the
@@ -73,8 +74,18 @@ so a feature's own model actually reaches the job pod.
 (organization, notification kind) plus a per-project mute, applied at creation
 time with a default of notify. UI in account and project settings.
 
-⬜ Pi extension uploads, token budgets (reporting half in progress under
-open question #15).
+✅ Token usage tracking + consumption reporting — implemented (ADR 023): the
+Orchestrator issues Pi's own `get_session_stats` at session end and reports
+tokens/cost/duration per job; `/usage`, `/analytics` and their project-scoped
+counterparts render real aggregates instead of ADR 017 mock data. The
+**enforcement** half (caps, quotas) is explicitly deferred to issue #18.
+
+✅ Primary deployment rollback — implemented (ADR 022): Helm revisions are
+captured per deploy into an append-only ledger, with a non-agent `rollback` job
+kind and real deploy history + rollback on the Web deployments page. Resolves
+open question #9; a staging gate was considered and deferred.
+
+⬜ Pi extension uploads (issue #4).
 
 Per-user default model configuration (ADR 007) and per-project override already
 exist, ahead of this phase — ADR 007 is retired by ADR 016 (Phase 2, see above),

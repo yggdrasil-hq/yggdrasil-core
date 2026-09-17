@@ -63,6 +63,9 @@ requests and streaming progress back in real time. See
 | Audit trail / who changed what / `audit_events` / org admin audit view | ADR `docs/adr/028-audit-logging.md` |
 | Notification preferences / per-project mute / notification kinds | ADR `docs/adr/027-notification-preferences.md` |
 | Two features built in parallel / feature branch conflicts / merge-base sync | ADR `docs/adr/021-parallel-feature-branch-conflicts.md` |
+| Design persistence / saved designs / design browse & history / re-open a design | ADR `docs/adr/020-design-persistence.md` |
+| Deploy history / rolling a primary deployment back / Helm revisions | ADR `docs/adr/022-deployment-rollback.md` |
+| Token usage / cost per job / usage & analytics pages | ADR `docs/adr/023-token-usage-tracking.md` |
 | Making `web/`/`landing/` visually match `design/` (mock pages for undecided concepts, route/drift reconciliation) | ADR `docs/adr/017-web-visual-parity-with-design.md` |
 | `project_init` grill workflow / child-project structure standard (setup.sh/run.sh/Helm/docs) / submodule sub-repos | ADR `docs/adr/008-project-init-grill-and-submodule-repos.md` |
 | The Pi agent (how the agent itself runs)                | `docs/concepts/pi-agent.md`            |

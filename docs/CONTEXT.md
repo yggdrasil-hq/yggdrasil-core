@@ -4,9 +4,10 @@
 before diving into code or docs. For details, follow the links — do not treat this
 file as the full spec.
 
-Last updated: 2026-09-17 (open-issue burn-down waves 1-2: ADR 028 audit logging,
-ADR 018 per-feature override amendment, ADR 027 notification preferences, ADR 021
-parallel-feature branch conflicts, and the `spec_grill` full-page chat)
+Last updated: 2026-09-17 (open-issue burn-down waves 1-3: ADRs 020, 021, 022, 023,
+027, 028 — design persistence, branch conflicts, deploy rollback, token usage,
+notification preferences, audit logging — plus the per-feature model tier and the
+`spec_grill` full-page chat)
 
 ## Glossary
 
@@ -21,7 +22,7 @@ parallel-feature branch conflicts, and the `spec_grill` full-page chat)
 | **Returned** (feature state) | Unified landing state (ADR 015) when a feature is sent back to Implementation with a comment — from Testing failure, Agentic Review `changes_requested`, or Manual Review's human `changes_requested` (ADR 013 webhook). Carries `return_reason` and `return_comment`; requires an explicit human "Resume implementation" click before redispatching. Replaces today's `changes_requested` state. |
 | **Agentic Review** | New job kind (ADR 015, implemented): an agent reviews a feature's diff against its approved ADR with read-only container access, producing an internal `approved`/`changes_requested` verdict — not a real GitHub PR review. Per-project toggle, default on (`projects.agentic_review_enabled`). |
 | **`script_test_run`** | Non-agent job kind (ADR 015, B5 built): runs a project's `test-unit.sh`/`test-integration.sh` (optional, structure-standard convention) in a plain container and submits a canonical `.yggdrasil/test-report.json`. No Pi, no skill, no attach/RPC. |
-| **Design** | A named, agent-authored, self-contained static HTML mockup (or folder of related mockups) living under a project's `designs/` directory, produced by a `design_grill` session (ADR 014). No app logic beyond self-contained vanilla `<script>` for interaction states — no framework, no build step, no network calls. Not (yet) a persisted DB entity — see `roadmap/open-questions.md` #12. |
+| **Design** | A named, agent-authored, self-contained static HTML mockup (or folder of related mockups) living under a project's `designs/` directory, produced by a `design_grill` session (ADR 014). No app logic beyond self-contained vanilla `<script>` for interaction states — no framework, no build step, no network calls. Since ADR 020 it **is** indexed as a persisted entity (a `designs` table row: project, name, slug, status, originating job, PR url), while the artifact itself stays in git under `designs/<slug>/` — the row points at the committed artifact rather than duplicating it. |
 | **Feature branch** | Agent branch `yggdrasil/<feature-slug>-<id>`, created on every linked repo the build touches. Same name across repos for one feature. |
 | **Coordination PR** | Draft PR on the **primary** repo for a `feature_build`. The human review entry point; links to sibling repo PRs when sub-repos changed. |
 | **Repo PR** | Draft PR on a **sub-repo** that received commits during `feature_build`. One per touched sub-repo; opened alongside the coordination PR. |
@@ -548,6 +549,69 @@ amended 2026-09-17 by issue #5
   re-syncs, and the retry path now continues the existing remote branch instead
   of recreating it (which previously discarded a partial attempt's commits).
 
+## Decided (design persistence)
+
+**ADR 020 — Design persistence and browse/history**
+([`adr/020-design-persistence.md`](adr/020-design-persistence.md))
+
+- A **`designs` table is the index**, and the artifact **stays in git** under the
+  project's `designs/<slug>/` (ADR 014 already commits it and opens a PR). The
+  row is metadata pointing at the committed artifact — deliberately *not* a copy
+  of the HTML, which would create two sources of truth. Browse/history reads the
+  table; the artifact itself stays in the repo.
+- Status vocabulary is `in_progress` → `finalized`. A session row is created when
+  a `design_grill` session starts and finalized on `submit_design`, which is also
+  when the PR url is recorded.
+- **Re-open** starts a new session seeded with the prior design's identity/paths,
+  so the agent iterates on the existing `designs/<slug>/` folder rather than
+  starting from nothing. The seeding follows ADR 015's `specContext` precedent
+  rather than inventing a second mechanism.
+- A design that exists in the repo with no row (created before this change, or by
+  hand) is handled explicitly, so the browse view is not misleadingly empty on an
+  existing project.
+
+## Decided (primary deployment rollback)
+
+**ADR 022 — Primary deployment rollback safety net**
+([`adr/022-deployment-rollback.md`](adr/022-deployment-rollback.md))
+
+- Resolves open question #9. ADR 003 shipped auto-deploy-on-merge with no safety
+  net, and the **accepted fix is an explicit rollback path plus deploy history —
+  not a staging environment.** A staging branch + promote-to-production gate was
+  considered and deliberately deferred; the ADR records that trade-off rather
+  than leaving it implicit.
+- The Orchestrator captures the **Helm revision** each deploy produces (the Helm
+  client now returns it) and reports it to the API, which keeps an append-only
+  per-project `project_deploys` ledger.
+- Rollback is a **new non-agent job kind** (`rollback`, with a `target_revision`),
+  not an agent-driven one — it is deterministic, so it must not go through Pi.
+- The Web deployments page (a static mock under ADR 017) now renders real
+  history and offers rollback. Rollback is audited (`deploy.rolled_back`) and
+  gated on the same capability as other project mutations, with the deliberate
+  asymmetry that the routine `deploy` trigger is *not* audited — recorded in
+  ADR 028's out-of-scope table.
+
+## Decided (token usage tracking)
+
+**ADR 023 — Token usage tracking and consumption reporting**
+([`adr/023-token-usage-tracking.md`](adr/023-token-usage-tracking.md))
+
+- Resolves open question #15 and ships the **reporting half** of #6.
+- Uses **Pi's own accounting**, not a home-grown estimate: the Orchestrator
+  issues Pi's `get_session_stats` command at session end and posts
+  `tokens {input, output, cacheRead, cacheWrite, total}`, `cost`, and turn
+  duration to the API, which stores one row per job (kind, provider, model,
+  tokens, cost, duration). A reported cost of zero is kept distinct from an
+  absent cost — "not reported" and "free" are different facts.
+- The previously-mock `/usage`, `/analytics` and their project-scoped
+  counterparts now render real aggregates. Where a number genuinely cannot be
+  derived (live cluster telemetry, a provider's own billing-cycle reset),
+  the page says so instead of inventing it — Yggdrasil **meters, it does not
+  bill**, since providers are bring-your-own-key and org-owned.
+- **Explicitly out of scope:** allocation caps and enforcement (split to issue
+  #18), and `/infrastructure` + `/allocations/infra` live cluster telemetry —
+  there is no decided mechanism for exposing it.
+
 ## Proposed (surfaced by `design/`, not yet decided)
 
 `design/` (the meta-repo wireframe directory, see
@@ -563,17 +627,16 @@ above). This section is a rollup for agents who want the summary without
 opening every wireframe — the per-page `.design-note` is still the
 authoritative detail on each point.
 
-- **Token usage tracking + resource allocation caps.** `design/usage`,
-  `design/analytics`, and `design/allocations/{infra,api}` (org, project, and
-  account-level views) assume the API/Orchestrator log a token count and
-  duration per job and expose cluster/spend telemetry — none of that exists
-  today, at any level. `roadmap/phases.md` Phase 4's "token budgets" is the
-  spend-cap half of this (`allocations/api`); consumption *reporting*
-  (`usage`, `analytics`) is a distinct, equally unbuilt feature. `infrastructure`
-  (org-only cluster status) and `allocations/infra` (per-project k8s
-  ResourceQuota) are grounded in ADR 003's real namespace-per-project
-  isolation but assume a live cluster-telemetry API that doesn't exist. See
-  `roadmap/open-questions.md` #15.
+- **Resource allocation caps.** The **consumption-reporting half of this is now built**
+  (ADR 023): per-job token/cost/duration accounting from Pi's own
+  `get_session_stats`, and real aggregates on `/usage`, `/analytics` and their
+  project-scoped counterparts. What remains unbuilt is the **enforcement** half —
+  `design/allocations/api`'s per-project token cap and per-project provider
+  allow-list, and `design/allocations/infra`'s per-namespace
+  ResourceQuota/LimitRange. Tracked as issue #18. `infrastructure` (org-only
+  cluster status) and `allocations/infra` additionally assume a live
+  cluster-telemetry API that does not exist and has no decided mechanism — those
+  pages remain static mocks under ADR 017.
 - **Sidebar-first IA.** Every hub page (Projects, Notifications, Account/
   Organization settings, New project) now shares the same persistent
   `.sidebar`/`.main` shell as project pages (Vercel-style: org switcher above
@@ -631,6 +694,11 @@ authoritative detail on each point.
 | 016 | [Organization entity, RBAC, org-level provider/secret config, and per-org cluster routing](adr/016-organization-rbac-and-cluster-routing.md) |
 | 017 | [Bring `web/` and `landing/` visually in line with `design/`](adr/017-web-visual-parity-with-design.md) |
 | 018 | [Multi-provider model configuration and per-job-kind defaults](adr/018-multi-provider-model-config.md) |
+| 020 | [Design persistence and browse/history](adr/020-design-persistence.md) |
+| 021 | [Parallel-feature branch conflicts](adr/021-parallel-feature-branch-conflicts.md) |
+| 022 | [Primary deployment rollback safety net](adr/022-deployment-rollback.md) |
+| 023 | [Token usage tracking and consumption reporting](adr/023-token-usage-tracking.md) |
+| 027 | [Notification preferences](adr/027-notification-preferences.md) |
 | 028 | [Audit logging / trails](adr/028-audit-logging.md) |
 
 → [`adr/README.md`](adr/README.md)
