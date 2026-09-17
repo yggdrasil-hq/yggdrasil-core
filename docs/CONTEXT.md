@@ -4,11 +4,12 @@
 before diving into code or docs. For details, follow the links — do not treat this
 file as the full spec.
 
-Last updated: 2026-09-18 (open-issue burn-down waves 1-4: ADRs 020-024, 026-028
-— design persistence, branch conflicts, deploy rollback, token usage, per-message
-grill restart, test scheduling, notification preferences, audit logging — plus
-the per-feature model tier, the `spec_grill` full-page chat, and ephemeral
-preview deployments)
+Last updated: 2026-09-18 (open-issue burn-down waves 1-5 complete: ADRs 020-030
+all implemented — design persistence, branch conflicts, deploy rollback, token
+usage, per-message grill restart, Pi extension uploads, test scheduling, screen
+recording, notification preferences, audit logging, allocation caps — plus the
+per-feature model tier, the `spec_grill` full-page chat, and ephemeral preview
+deployments)
 
 ## Glossary
 
@@ -687,6 +688,74 @@ amended 2026-09-17 by issue #5
 - **Migration 039 is an index only** — no schema change was needed, and the ADR
   says so rather than inventing schema to consume a reserved number.
 
+## Decided (Pi extension uploads)
+
+**ADR 025 — Pi extension uploads** ([`adr/025-pi-extension-uploads.md`](adr/025-pi-extension-uploads.md))
+
+- An org admin can upload a Pi extension **org-scoped**, stored in the API
+  (one row per file), reviewed from the detail read, mounted **read-only** into
+  job pods, and **opt-in per project** (`projects.uploaded_extensions_enabled`,
+  default off). Its own kill switch (`active`) stops every project loading it.
+- The ADR confronts what this is: **arbitrary code running inside a container
+  that holds the project's live GitHub installation token and the model API
+  key**, in-process with the agent. Uploads require an explicit
+  `acknowledgedRisk` acknowledgement, and every mutation is audited.
+- The baked-in `yggdrasil-contract` extension (which makes the agent's
+  turn/completion protocol work) is separate and cannot be displaced by an
+  upload; reserved tool names are refused.
+- Validation is a pure module with heavy tests: path traversal, absolute and
+  backslash paths, drive letters, control characters, duplicate entries,
+  extension allow-list, size and count caps, dependency and reserved-name
+  refusal.
+
+## Decided (test-run screen recording)
+
+**ADR 029 — Test-run screen recording** ([`adr/029-test-run-screen-recording.md`](adr/029-test-run-screen-recording.md))
+
+- A `test_run`'s browser checks are captured with Playwright video and the
+  artifact is **transported out of the pod** before it is deleted. The headline
+  finding: the recording *metadata* already flowed end to end — every
+  `recordingPath` ever reported pointed into a pod that no longer existed. The
+  missing piece was artifact transport, so the Orchestrator reads the file out
+  of the pod (`k8s.ReadPodFile`, via client-go's `remotecommand`) after the
+  session ends and before the Job is deleted.
+- **Storage is Postgres `bytea`, deliberately, and not the end state.** The
+  documented assumption that object storage was available turned out to be
+  false — the Compose services receive `S3_*` variables that no code reads, and
+  no S3 client exists in either `package.json` or `go.mod`. Boundedness is
+  treated as part of the decision: a 25 MB cap plus 30-day retention swept
+  in-process. The exit is a two-method swap.
+- **Expiry tombstones rather than deletes** (`data IS NULL` + `purged_at`, with
+  a CHECK making a half-purged row unwritable), so an expired recording is
+  distinguishable from one that never existed — and the UI renders them
+  differently rather than showing a broken player. Content serves **410** when
+  reclaimed.
+- Recording never fails a test run, and a failed upload never loses the report.
+- **Known gap, filed as issue #22:** `screenshotPath` has exactly the same dead
+  pointer bug and is *not* fixed here.
+
+## Decided (resource allocation caps)
+
+**ADR 030 — Resource allocation caps** ([`adr/030-resource-allocation-caps.md`](adr/030-resource-allocation-caps.md))
+
+- The enforcement half split out of #6/#14, landing on top of ADR 023's measured
+  per-job usage. Two caps: a **monthly token cap per project** (metering a
+  project's draw against the org's own provider key — Yggdrasil meters, it does
+  not bill) and a **per-project Kubernetes ResourceQuota/LimitRange**, which
+  ADR 003 §5-6 already established per-namespace and this makes
+  admin-configurable and reported.
+- The decisions the ADR had to make, and did: warn-vs-block, which counter is
+  authoritative, **what happens to an in-flight job when a cap is hit** (the
+  hard one), dispatch-time vs mid-run checking, and how a cap interacts with
+  per-job-kind model defaults and ADR 018's per-feature override tier — capping
+  a project whose feature overrides to an expensive model is the case that
+  surprises people.
+- Enforcement lives in the **Orchestrator**, which is why no dispatch call site
+  in the hot API files needed editing.
+- **Out of scope and said so:** `/infrastructure`'s live cluster telemetry —
+  there is no decided mechanism for the API/Orchestrator to expose live cluster
+  metrics, so that page stays a mock.
+
 ## Proposed (surfaced by `design/`, not yet decided)
 
 `design/` (the meta-repo wireframe directory, see
@@ -773,7 +842,12 @@ authoritative detail on each point.
 | 021 | [Parallel-feature branch conflicts](adr/021-parallel-feature-branch-conflicts.md) |
 | 022 | [Primary deployment rollback safety net](adr/022-deployment-rollback.md) |
 | 023 | [Token usage tracking and consumption reporting](adr/023-token-usage-tracking.md) |
+| 024 | [Per-message grill restart](adr/024-per-message-grill-resume.md) |
+| 025 | [Pi extension uploads](adr/025-pi-extension-uploads.md) |
+| 026 | [Test-run scheduling and run history](adr/026-test-run-scheduling.md) |
 | 027 | [Notification preferences](adr/027-notification-preferences.md) |
 | 028 | [Audit logging / trails](adr/028-audit-logging.md) |
+| 029 | [Test-run screen recording](adr/029-test-run-screen-recording.md) |
+| 030 | [Resource allocation caps](adr/030-resource-allocation-caps.md) |
 
 → [`adr/README.md`](adr/README.md)

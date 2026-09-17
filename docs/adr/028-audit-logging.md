@@ -151,10 +151,16 @@ delete path anywhere in the codebase, and no retention/pruning policy.
    | `DELETE /organizations/:organizationId/models/:modelId` | `model.deleted` | user |
    | `PUT /organizations/:organizationId/job-model-defaults/:jobKind` | `job_model_default.set` | user |
    | `DELETE /organizations/:organizationId/job-model-defaults/:jobKind` | `job_model_default.cleared` | user |
+   | `PUT /organizations/:organizationId/allocations/projects/:projectId/token-cap` | `project_token_cap.set` | user (ADR 030) |
+   | `PUT /organizations/:organizationId/allocations/projects/:projectId/quota` | `project_resource_quota.set` | user (ADR 030) |
    | `POST /github/installations/:installationId/sync` | `github.repos_synced` | user (one row per affected org) |
    | webhook `installation` (created/unsuspend/deleted/suspend) | `github.installation_updated` | webhook (one row per affected org) |
    | webhook `installation_repositories` | `github.repositories_updated` | webhook (one row per affected org) |
    | `POST /projects/:projectId/rollback` | `deploy.rolled_back` | user |
+   | `POST /organizations/:organizationId/extensions` | `extension.uploaded` (`metadata.replaced` distinguishes a new revision of an existing slug) | user (ADR 025) |
+   | `PATCH /organizations/:organizationId/extensions/:extensionId` | `extension.activation_changed` | user (ADR 025) |
+   | `DELETE /organizations/:organizationId/extensions/:extensionId` | `extension.deleted` | user (ADR 025) |
+   | `PATCH /projects/:projectId/uploaded-extensions-enabled` | `project.uploaded_extensions_changed` | user (ADR 025) |
 
    Only **successful** mutations produce rows: `recordAudit` runs after the
    mutation has committed, on the success path (item 5's ordering is what makes
@@ -172,6 +178,8 @@ delete path anywhere in the codebase, and no retention/pruning policy.
    | `/internal/*` Orchestrator-driven writes | These are the Orchestrator reporting job outcomes, each already recorded in `job_events`. The `job` actor kind exists in the schema for whichever future write has no `job_events` equivalent. |
    | Ephemeral preview lifecycle (ADR 003 §15) | Previews are created and destroyed as a side effect of running a job — there is no user action to attribute and no separate actor: the job row and the `job_previews` registry already say what happened. This is why the preview registry callbacks (`POST /internal/jobs/:id/preview[/teardown]`) carry no `recordAudit` call despite being new mutations, and why the Web app deliberately offers no manual preview teardown control (a user-initiated one *would* need an action here). |
    | Installation-level GitHub events with **no linked project** | There is no org to scope them to: ADR 016 item 3 deliberately decouples installs from Organizations, and `organization_id` is NOT NULL. An installation that gains a project starts being recorded from its next event. |
+   | Extension *reads*, including the source-serving detail route (`GET /organizations/:id/extensions/:extensionId`) | Covered by "Any read", and deliberately not carved out: ADR 025's detail read exists so an admin can review code before enabling it, and recording "someone looked at the source" would add volume without answering a question the trail is for. The extension mutations themselves are recorded (see the coverage table above). |
+   | A job *loading* an uploaded extension | `/internal/*` Orchestrator-driven and already explained above. The question "which revision ran in this job" is answered instead by ADR 025 item 13's digest, which the job pod logs itself — a place it is actually needed, since the trail does not know what a container did. |
    | Failed or unauthorized attempts | Out of scope by construction (item 6): only committed mutations are recorded. |
 
 ### Read path

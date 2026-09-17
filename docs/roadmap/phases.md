@@ -4,16 +4,21 @@
 which phase a feature belongs to.
 **Skip if:** you don't need scheduling/scope context.
 
-> Status (2026-09-18): Phase 1 complete. Phase 2 complete. Phase 3 partially
-> built (cron scheduling + run history, ADR 026). Phase 4 well underway — see its
-> own section. ADR 014 (`design_grill`) and ADR 015 (six-stage feature lifecycle)
-> are implemented, and Phase 2's two former gaps have landed since: design
-> persistence (ADR 020) and the live preview tunnel (ADR 003 §10/§15/§17).
-> ADR 016 (Organization/RBAC/org-level config/cluster routing) was decided out
-> of the original phase plan and is implemented as well — see
-> `docs/CONTEXT.md`'s ADR entries. For ADR 015/016 specifically,
+> Status (2026-09-18): Phases 1-4 are functionally complete. Phase 3's screen
+> recording landed (ADR 029) and Phase 4's last two items — Pi extension uploads
+> (ADR 025) and allocation caps (ADR 030) — landed too. ADR 014 (`design_grill`)
+> and ADR 015 (six-stage feature lifecycle) are implemented, and Phase 2's two
+> former gaps landed as well: design persistence (ADR 020) and the live preview
+> tunnel (ADR 003 §10/§15/§17). ADR 016 (Organization/RBAC/org-level config/
+> cluster routing) was decided out of the original phase plan and is implemented
+> — see `docs/CONTEXT.md`'s ADR entries. For ADR 015/016 specifically,
 > [`adr-015-016-build-plan.md`](adr-015-016-build-plan.md) breaks the build into
 > ordered, independently-shippable slices.
+>
+> What remains is the residual scope and the follow-ups surfaced *by* this work,
+> tracked as issues #10/#12 (WebSocket relay), #19 (feature-branch image build),
+> #20 (preview access control), #21 (schedule-interval validation) and #22
+> (`screenshotPath` dead pointer) — not unbuilt planned phases.
 
 ## Phase 1 — Foundation ✅ done
 
@@ -69,8 +74,14 @@ claim, in UTC, with blocked projects skipped without advancing `last_run_at`.
 page lists past runs with status/duration/counts and expands to the report,
 failing tests and steps.
 
+✅ **Screen recording** — implemented (ADR 029, issue #17): a `test_run`'s
+browser checks are captured with Playwright video and the artifact is read out
+of the pod before deletion, with a 25 MB cap and 30-day retention; expired
+recordings tombstone to "no longer available" rather than rendering as a broken
+player.
+
 ⬜ Remaining: the test suite **manager** semantics beyond what exists (issue #3's
-residual scope) and **screen recording** (issue #17).
+residual scope).
 
 ADR 015's feature-stage `test_run`/`script_test_run` paths are separately
 implemented, including feature-branch reports and the Testing tab.
@@ -102,14 +113,22 @@ captured per deploy into an append-only ledger, with a non-agent `rollback` job
 kind and real deploy history + rollback on the Web deployments page. Resolves
 open question #9; a staging gate was considered and deferred.
 
-⬜ Pi extension uploads (issue #4).
+✅ Pi extension uploads — implemented (ADR 025): org-scoped upload, stored per
+file in the API, reviewed from the detail read, mounted read-only into job pods,
+opt-in per project with an explicit risk acknowledgement, a kill switch, and an
+audit entry per mutation. This is arbitrary code running beside a live GitHub
+token and the model key; the ADR says so.
+
+✅ Resource allocation caps — implemented (ADR 030): a monthly token cap per
+project (metering against the org's own provider key) and an admin-configurable
+per-project Kubernetes quota, enforced in the Orchestrator. `/infrastructure`'s
+live cluster telemetry remains a mock — no mechanism for it is decided.
 
 Per-user default model configuration (ADR 007) and per-project override already
 exist, ahead of this phase — ADR 007 is retired by ADR 016 (Phase 2, see above),
 replaced by an Organization-level default; per-project override is unaffected.
-Token budgets' proposed shape is sketched in `design/allocations/api`;
-consumption reporting (`design/usage`, `design/analytics`) is a related but
-distinct, equally unbuilt feature — not decided, see `docs/CONTEXT.md`.
+This makes **Phase 4 functionally complete** apart from the open follow-ups
+filed during the burn-down (issues #19-#22).
 
 > When working a feature, note its phase so out-of-phase scope is flagged rather
 > than silently built.

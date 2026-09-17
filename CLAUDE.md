@@ -65,6 +65,9 @@ requests and streaming progress back in real time. See
 | Two features built in parallel / feature branch conflicts / merge-base sync | ADR `docs/adr/021-parallel-feature-branch-conflicts.md` |
 | Design persistence / saved designs / design browse & history / re-open a design | ADR `docs/adr/020-design-persistence.md` |
 | Deploy history / rolling a primary deployment back / Helm revisions | ADR `docs/adr/022-deployment-rollback.md` |
+| Custom Pi extensions / `org_extensions` / uploading code that runs in a job pod | ADR `docs/adr/025-pi-extension-uploads.md` |
+| Screen recording of test runs / recordings storage & retention | ADR `docs/adr/029-test-run-screen-recording.md` |
+| Token caps / spend limits / per-project Kubernetes quota / `allocations` pages | ADR `docs/adr/030-resource-allocation-caps.md` |
 | Token usage / cost per job / usage & analytics pages | ADR `docs/adr/023-token-usage-tracking.md` |
 | Ephemeral preview deployments / preview URLs / `job_previews` | ADR `docs/adr/003-orchestrator-kubernetes.md` §10/§15/§17 |
 | Restarting a grill conversation from an earlier message | ADR `docs/adr/024-per-message-grill-resume.md` |
