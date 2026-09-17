@@ -4,14 +4,16 @@
 which phase a feature belongs to.
 **Skip if:** you don't need scheduling/scope context.
 
-> Status (2026-08-31): Phase 1 is complete. Phase 2 is partially built (see
-> below). Phase 3 (testing) and the rest of Phase 4 haven't started. ADR 014
-> (`design_grill`) and ADR 015 (six-stage feature lifecycle) are implemented;
+> Status (2026-09-18): Phase 1 complete. Phase 2 complete. Phase 3 partially
+> built (cron scheduling + run history, ADR 026). Phase 4 well underway — see its
+> own section. ADR 014 (`design_grill`) and ADR 015 (six-stage feature lifecycle)
+> are implemented, and Phase 2's two former gaps have landed since: design
+> persistence (ADR 020) and the live preview tunnel (ADR 003 §10/§15/§17).
 > ADR 016 (Organization/RBAC/org-level config/cluster routing) was decided out
 > of the original phase plan and is implemented as well — see
-> `docs/CONTEXT.md`'s ADR 014/015/016 entries. For ADR 015/016 specifically,
-> [`adr-015-016-build-plan.md`](adr-015-016-build-plan.md) breaks the actual
-> build into ordered, independently-shippable slices.
+> `docs/CONTEXT.md`'s ADR entries. For ADR 015/016 specifically,
+> [`adr-015-016-build-plan.md`](adr-015-016-build-plan.md) breaks the build into
+> ordered, independently-shippable slices.
 
 ## Phase 1 — Foundation ✅ done
 
@@ -36,9 +38,15 @@ webhook-driven `deploy`/`merged`/`changes_requested` automation (ADR 013).
   Kubernetes cluster routing (supersedes ADR 003 §3-4, removes the
   `KUBECONFIG_HOST_PATH` instance-wide default). See
   `docs/adr/016-organization-rbac-and-cluster-routing.md`.
-- ⬜ Live preview tunnel for ephemeral job runs — designed in ADR 003 but not
-  implemented in `orchestrator/` (no preview/temporary-deployment code
-  exists).
+- ✅ Live preview tunnel for ephemeral job runs — implemented (ADR 003
+  §10/§15/§17): per-job temporary deployments + Ingress at
+  `<project-slug>-<kind>-<id>.preview.<domain>`, a `job_previews` registry, the
+  §17 three-preview-per-project cap enforced at queue claim, and fail-closed
+  teardown with a TTL sweep. **Two limits worth knowing:** a preview serves the
+  project's app as its chart currently declares it, not the branch under
+  construction (no feature-branch image pipeline exists yet — tracked as issue
+  #19), and previews are publicly reachable gated only by an unguessable host
+  (issue #20).
 - ✅ `design_grill` (ADR 014) — the job-backed API, Orchestrator RPC path,
   agent image/skill, minimal Web live-preview session, **and** design
   browse/history + re-open flows (ADR 020, which resolved the design-persistence
@@ -51,12 +59,21 @@ webhook-driven `deploy`/`merged`/`changes_requested` automation (ADR 013).
   testing, Agentic Review, unified `returned` transitions, and Manual Review
   UI. See `docs/concepts/feature-lifecycle.md` for the state model.
 
-## Phase 3 — Testing — not started
+## Phase 3 — Testing — partially built
 
-Future testing-product work remains: test suite manager, cron scheduling,
-screen recording, and test history UI. ADR 015's feature-stage
-`test_run`/`script_test_run` paths are already implemented, including
-feature-branch reports and the Testing tab.
+✅ **Cron scheduling** for `test_run` — implemented (ADR 026): a Test entity's
+`scheduleCron` now fires, multi-replica safe via a transactional `SKIP LOCKED`
+claim, in UTC, with blocked projects skipped without advancing `last_run_at`.
+
+✅ **Test run history UI** — implemented (ADR 026, issue #16): the Test detail
+page lists past runs with status/duration/counts and expands to the report,
+failing tests and steps.
+
+⬜ Remaining: the test suite **manager** semantics beyond what exists (issue #3's
+residual scope) and **screen recording** (issue #17).
+
+ADR 015's feature-stage `test_run`/`script_test_run` paths are separately
+implemented, including feature-branch reports and the Testing tab.
 
 ## Phase 4 — Polish — in progress
 

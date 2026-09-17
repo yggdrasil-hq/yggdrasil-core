@@ -8,7 +8,6 @@ these — surface them.**
 |---|----------|---------|
 | 7 | **Agent chat wire path** — Web → API vs orchestrator subdomain vs direct preview WebSocket to Pi in container. | Orchestrator, API, Web, nginx |
 | 11 | **spec_grill polling → WebSocket migration** — replace the Web app's 2s REST polling of `GET /features/:id/events` with a WebSocket-based live relay for real interactivity (agent "thinking" states, streaming tokens, instant delivery); relates to #7's wire-path question but is specifically about leaving polling, not which topology to use. Cross-ref `api/CLAUDE.md`'s "WebSocket (planned)" line. | Web, API |
-| 17 | **Per-message grill resume/restart** — `design/projects/detail/features/detail/spec` adds "Resume/Restart from here" on individual transcript messages, below ADR 006's mid-run-reply and ADR 012's job-level-retry granularity. Would need new API surface and Orchestrator/Pi contract. | Orchestrator, API |
 
 > Questions #1, #4, #6, #8 were resolved by
 > [ADR 003](../adr/003-orchestrator-kubernetes.md) and removed from this list.
@@ -25,7 +24,10 @@ these — surface them.**
 > [ADR 022](../adr/022-deployment-rollback.md)), #12 (design persistence →
 > [ADR 020](../adr/020-design-persistence.md)), and #15 (token usage tracking
 > + resource allocation caps → [ADR 023](../adr/023-token-usage-tracking.md),
-> with the caps half explicitly deferred to issue #18).
+> with the caps half explicitly deferred to issue #18), and #17 (per-message
+> grill resume/restart → [ADR 024](../adr/024-per-message-grill-resume.md),
+> shipped as an approximate transcript rewind with the true Pi-level fork left
+> as a follow-up).
 
 ## How to use this list
 

@@ -44,6 +44,8 @@ Each ADR is numbered sequentially: `NNN-short-title.md`.
 | [021](021-parallel-feature-branch-conflicts.md) | Parallel-feature branch conflicts — sync onto base, agent resolves | Accepted |
 | [022](022-deployment-rollback.md) | Primary deployment rollback safety net | Accepted |
 | [023](023-token-usage-tracking.md) | Token usage tracking and consumption reporting | Accepted |
+| [024](024-per-message-grill-resume.md) | Per-message grill restart (approximate rewind) | Accepted |
+| [026](026-test-run-scheduling.md) | Test-run scheduling and run history | Accepted |
 | [027](027-notification-preferences.md) | Notification preferences | Accepted |
 | [028](028-audit-logging.md) | Audit logging / trails | Accepted |
 

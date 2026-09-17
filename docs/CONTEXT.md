@@ -4,10 +4,11 @@
 before diving into code or docs. For details, follow the links — do not treat this
 file as the full spec.
 
-Last updated: 2026-09-17 (open-issue burn-down waves 1-3: ADRs 020, 021, 022, 023,
-027, 028 — design persistence, branch conflicts, deploy rollback, token usage,
-notification preferences, audit logging — plus the per-feature model tier and the
-`spec_grill` full-page chat)
+Last updated: 2026-09-18 (open-issue burn-down waves 1-4: ADRs 020-024, 026-028
+— design persistence, branch conflicts, deploy rollback, token usage, per-message
+grill restart, test scheduling, notification preferences, audit logging — plus
+the per-feature model tier, the `spec_grill` full-page chat, and ephemeral
+preview deployments)
 
 ## Glossary
 
@@ -611,6 +612,80 @@ amended 2026-09-17 by issue #5
 - **Explicitly out of scope:** allocation caps and enforcement (split to issue
   #18), and `/infrastructure` + `/allocations/infra` live cluster telemetry —
   there is no decided mechanism for exposing it.
+
+## Decided (ephemeral preview deployments)
+
+**ADR 003 §10/§15/§17 — implemented** ([`adr/003-orchestrator-kubernetes.md`](adr/003-orchestrator-kubernetes.md))
+
+- Ephemeral **preview deployments** now exist: each preview-eligible job
+  (`spec_grill`, `feature_build`, `test_run`) gets its own temporary deployment +
+  Ingress at `<project-slug>-<kind>-<id>.preview.<domain>`, torn down at job end.
+  A `job_previews` registry tells the API — and therefore the Web app — which
+  previews are live.
+- The §17 concurrency cap (default 3 per project) is enforced **in the queue's
+  claim**, because that is the only point where an over-cap request can *queue*
+  rather than be rejected. A capped project cannot stall the queue behind it.
+- Teardown is **fail-closed**: the registry row closes only after the cluster
+  resources are gone, so a failed teardown leaves the row `active` for the sweep
+  to retry rather than freeing a slot for a release that is still running. The
+  sweep needs both "job no longer running" *and* a TTL — a hard-crashed job stays
+  `running` forever, so the TTL is what makes cleanup robust.
+- A preview failure does **not** fail the job (previews are additive to kinds that
+  previously worked); it is logged and recorded as `failed` so it is visible.
+- **Known limits, recorded rather than glossed:** (a) a preview shows the
+  project's app *as its chart currently declares it*, not the branch under
+  construction — nothing in the system builds/pushes an image for a feature
+  branch, so "look at my in-progress build" needs an image pipeline first;
+  (b) previews are **publicly reachable, gated only by an unguessable host**, per
+  ADR 003 §15 putting them on the same ingress layer as primary deployments with
+  no auth — a deliberate ADR-consistent risk awaiting its own access-control ADR;
+  (c) per-preview TLS is requested from cert-manager rather than the wildcard
+  certificate §15 anticipated (wildcard DNS is still a hard prerequisite).
+
+## Decided (per-message grill restart)
+
+**ADR 024 — Per-message grill restart** ([`adr/024-per-message-grill-resume.md`](adr/024-per-message-grill-resume.md))
+
+- Resolves open question #17. A user can **restart a grill from a specific
+  transcript message**: the feature returns to `draft` and a **new** `spec_grill`
+  job is dispatched (ADR 012's precedent — the superseded run is kept as history,
+  never mutated) seeded with the transcript **truncated at that message**.
+- The seeding reuses ADR 015's existing `specContext` path rather than inventing a
+  second mechanism.
+- **It is an approximate reconstruction, not a true fork.** The agent receives a
+  re-rendering of the earlier conversation, not the original Pi session, so
+  tool-call side effects already applied to the workspace and any reasoning the
+  transcript does not capture are lost. The ADR states this plainly; the real
+  fork (`switch_session`/`fork` against a persisted session file) is the primary
+  follow-up and is **not** built. No session files are persisted anywhere.
+
+## Decided (test-run scheduling)
+
+**ADR 026 — Test-run scheduling and run history** ([`adr/026-test-run-scheduling.md`](adr/026-test-run-scheduling.md))
+
+- A Test entity's `scheduleCron` now actually **fires**: a scheduler dispatches
+  `test_run` jobs for due enabled tests and stamps `last_run_at`.
+- **Multi-replica safe by transactional claim** (`FOR UPDATE OF t SKIP LOCKED`,
+  job insert and stamp in one commit), reusing the job queue's own precedent
+  rather than adding advisory locks or a claims table — two API replicas will not
+  double-fire.
+- **UTC, stated in the UI.** No per-project timezone exists, and UTC makes DST
+  structurally impossible; the preset labels were changed to say so. Per-project
+  timezone is a follow-up.
+- Due-ness is one expression — `previousOccurrence(now) > (lastRunAt ?? createdAt)`
+  — which gives a new test its next window instead of firing immediately, and
+  yields catch-up-once rather than a burst after downtime.
+- **Blocked projects are skipped without advancing `last_run_at`**, so the run
+  happens once the warning clears.
+- `last_run_at` means "the schedule last fired", not "the test last ran" —
+  feature-driven runs deliberately do not touch it, and the authoritative last run
+  is the newest history entry.
+- The Test detail page gains its **run history** (status, duration, pass/fail
+  counts, expanding to report + failing tests + steps) — distinct from ADR 015's
+  per-feature Testing tab, which answers a different question about the same
+  reports.
+- **Migration 039 is an index only** — no schema change was needed, and the ADR
+  says so rather than inventing schema to consume a reserved number.
 
 ## Proposed (surfaced by `design/`, not yet decided)
 

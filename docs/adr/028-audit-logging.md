@@ -123,6 +123,7 @@ delete path anywhere in the codebase, and no retention/pruning policy.
    | `POST /projects/:projectId/features/:featureId/cancel` | `feature.cancelled` | user |
    | `POST /projects/:projectId/features/:featureId/restart` | `feature.restarted` | user |
    | `POST /projects/:projectId/features/:featureId/retry-grill` | `feature.grill_retried` | user |
+   | `POST /projects/:projectId/features/:featureId/restart-from-message` | `feature.grill_restarted_from_message` | user (ADR 024) |
    | `POST /projects/:projectId/features/:featureId/retry-build` | `feature.build_retried` | user |
    | `POST /projects/:projectId/features/:featureId/resume` | `feature.resumed` | user |
    | `PUT /projects/:projectId/secrets` | `project_secret.updated` | user |
@@ -169,6 +170,7 @@ delete path anywhere in the codebase, and no retention/pruning policy.
    | Manual `deploy` trigger (`POST /projects/:id/deploy`) | The `deploy` job row plus ADR 013's deploy-status feedback already record this; the trail adds a duplicate with no actor detail the job row lacks. **Note the deliberate asymmetry with `POST /projects/:id/rollback`, which *is* audited** (`deploy.rolled_back`, added by [ADR 022](022-deployment-rollback.md) §8): a rollback is a destructive action whose actor is not recoverable from the job row, whereas the routine trigger is neither. Auditing the trigger too, for symmetry, remains an open follow-up rather than an oversight. |
    | Any read (`GET`) | The trail records mutations, not access. Read-auditing is a different feature with different volume characteristics and was not decided. |
    | `/internal/*` Orchestrator-driven writes | These are the Orchestrator reporting job outcomes, each already recorded in `job_events`. The `job` actor kind exists in the schema for whichever future write has no `job_events` equivalent. |
+   | Ephemeral preview lifecycle (ADR 003 §15) | Previews are created and destroyed as a side effect of running a job — there is no user action to attribute and no separate actor: the job row and the `job_previews` registry already say what happened. This is why the preview registry callbacks (`POST /internal/jobs/:id/preview[/teardown]`) carry no `recordAudit` call despite being new mutations, and why the Web app deliberately offers no manual preview teardown control (a user-initiated one *would* need an action here). |
    | Installation-level GitHub events with **no linked project** | There is no org to scope them to: ADR 016 item 3 deliberately decouples installs from Organizations, and `organization_id` is NOT NULL. An installation that gains a project starts being recorded from its next event. |
    | Failed or unauthorized attempts | Out of scope by construction (item 6): only committed mutations are recorded. |
 
