@@ -160,10 +160,25 @@ Two facts shape the design:
 
 ### Follow-ups (out of scope here)
 
-- **A curated event (or job annotation) for "built on top of a base sync, resolved
-  N conflicts"**, so the Web app can show it and a reviewer sees it before
-  opening the PR. Belongs with the curated-event vocabulary in ADR 006's
-  `internal/rpc/curated.go`.
+- ~~**A curated event (or job annotation) for "built on top of a base sync,
+  resolved N conflicts"**, so the Web app can show it and a reviewer sees it
+  before opening the PR.~~ **Done** (issue #27). The event is `merge_conflicts`,
+  and it names the conflicted files rather than counting them — the list is what a
+  reviewer acts on, and a count would leave them hunting through the diff.
+
+  It is synthesized by the **Orchestrator**, not emitted by the pod and mapped in
+  `rpc.Translate` as this follow-up imagined. Two reasons, both recorded in
+  `orchestrator/internal/worker/mergeconflicts.go`: `Translate` translates *Pi's*
+  vocabulary and this is not something Pi knows about (the entrypoint computed it
+  before Pi was exec'd), and the alternative — having the entrypoint POST to the
+  internal events endpoint — would hand every agent pod the shared internal bearer
+  token, which reaches every `/internal/*` route.
+
+  Ordering is the part worth noting: the marker is read lazily on the session's
+  *first* curated event rather than when the pod reports Running, because
+  `WaitForJobPod` returns before the entrypoint has finished merging. Pi cannot
+  produce an event until the entrypoint exec'd it, so the read is ordered after
+  the merge by the pod's own lifecycle rather than by a timeout.
 - **A merge queue**, the only real fix for item 9.
 - **Concurrent builds touching the same submodule** are still just a conflict for
   the agent to resolve; a policy for *which* side wins per submodule is not
