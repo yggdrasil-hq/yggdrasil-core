@@ -298,8 +298,12 @@ without softening it, and specifies the parts of it that can be made mechanical.
   jobs that load extensions. None of that is designed here, and until it exists
   the honest framing is "trusted code, audited", not "sandboxed plugins".
 - **Per-project selection** of which extensions a project loads (item 11).
-- **Move artifacts to object storage** once the API has a client for it; the
-  repository module is the seam, and the delivery contract would not change.
+- ~~**Move artifacts to object storage** once the API has a client for it; the
+  repository module is the seam, and the delivery contract would not change.~~
+  **Done** (issue #30). The prediction was right twice over: the repository module
+  was the seam and the delivery contract did not change. Bundles now live in
+  object storage alongside recordings and screenshots, through one shared storage
+  layer rather than a third per-feature arrangement.
 - **Restrict a job pod's GitHub token scope when an extension is loaded**, which
   would cap what an upload can reach even if it is hostile.
 - **An `extension.uploaded` review gate**: requiring a second admin to activate a
@@ -312,7 +316,7 @@ without softening it, and specifies the parts of it that can be made mechanical.
 
 | Alternative | Why not |
 |---|---|
-| Store the artifact in object storage (S3/MinIO) | The API has no object-storage client today (`@aws-sdk/*` and `minio` are absent from both `package.json` and `node_modules`, and `config.ts` never reads the `S3_*` variables `deploy/` sets — they are aspirational). This would have meant adding a runtime dependency for a bounded set of small files that a table handles well, and it would have lost transactional replace. Revisit if artifacts grow. |
+| Store the artifact in object storage (S3/MinIO) | The API has no object-storage client today (`@aws-sdk/*` and `minio` are absent from both `package.json` and `node_modules`, and `config.ts` never reads the `S3_*` variables `deploy/` sets — they are aspirational). This would have meant adding a runtime dependency for a bounded set of small files that a table handles well, and it would have lost transactional replace. **Partially superseded by issue #30**: bundles did move, and they moved without a new dependency, because the client that shipped is an internal SigV4 signer. The "loses transactional replace" point still stands and is the thing to check if a future change makes a bundle's write and its row's write need to be atomic together. The `S3_*` variables those notes called aspirational are now read. |
 | Accept a tarball (one blob row) | An opaque archive cannot be validated before storage, which pushes path safety entirely into the container — the one place a traversal bug is worst. It also hides the file list from the admin review view. |
 | Allow uploaded dependencies, installed in the pod | Network access to a registry from a container holding the project's GitHub token, non-reproducible runs from floating ranges, and the exact version-mismatch failure mode ADR 004 pinned `typebox` to avoid. |
 | Per-project opt-in only, no org-level inventory | The upload has to live somewhere, and it must be reviewable by more than the person who uploaded it. Per-project storage would also duplicate the same artifact per project. |
