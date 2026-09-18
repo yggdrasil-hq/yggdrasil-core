@@ -33,7 +33,7 @@ the record is transparent. Issues and PRs are merged once verified.
 | #50 | 14 stale `.design-note`s corrected + `scripts/check-design.py` | meta |
 | #53 | Skipped-because-uninstallable group no longer counts as verified | api |
 | #20 | ADR 031: preview access control decides *the gate follows the secrets* | meta |
-| + #57 | Web: real load-failure page; markdown heading outline fixed | web |
+| (no issue) | Web: real load-failure page; markdown heading outline fixed | yggdrasil-web#7 |
 
 Suite sizes at time of writing: **api 75 files / 1026 tests**, **web 22 files /
 429 tests**, **orchestrator** all packages green with `gofmt` enforced.
