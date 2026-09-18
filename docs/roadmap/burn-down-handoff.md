@@ -299,3 +299,40 @@ And **#69** — the build pipeline merged and looked complete; only running it
 against a real cluster revealed that the container could not start at all. Four
 distinct failure modes of "the tests pass", which is why "run the thing" is now
 the standing instruction to every agent rather than advice.
+
+### Two "the environment is broken" claims that were harness bugs
+
+Both cost real time, and both would have left work permanently unverified on a
+false premise. Worth stating because the prior agent's claim tends to be believed
+by the next one.
+
+**"There is no registry / the cluster cannot create jobs" (#19).** The `can-i`
+results were taken against the **host's default kubeconfig**, which points at an
+AWS EKS cluster with read-only rights. The kubeconfig *supplied for testing* is
+**k3s with cluster-admin** and answers `yes`. The build pipeline was then
+verified end to end against that cluster. Half the original finding was real
+(nothing had a registry), but the headline was wrong.
+
+**"The container network cannot route between compose services" (#32).** Reported
+by one worker and inherited by another, so two agents spent time on it.
+**False.** Proved with a fresh network, two containers, TCP first try:
+
+```
+$ docker network create tcp-probe-2451255
+$ docker run -d --rm --name probe-pg --network tcp-probe-2451255 \
+    -e POSTGRES_PASSWORD=x -e POSTGRES_USER=x postgres:16-alpine
+$ docker run --rm --network tcp-probe-2451255 postgres:16-alpine \
+    pg_isready -h probe-pg -p 5432 -U x
+probe-pg:5432 - accepting connections
+```
+
+The tell in the original report was *"`pg_isready` inside the container only
+proved the unix socket"* — `pg_isready` with no `-h` passes even when TCP is
+entirely unavailable. So the harness was checking the wrong thing and concluding
+the environment was at fault.
+
+**The standing lesson, which is the third time it has applied here:** when a
+worker reports that something is impossible, reproduce it against the *intended
+input* before accepting it, and prefer the simplest harness — for #32 that meant
+two API processes against the **already-running** dev Postgres, not two
+brand-new containers whose networking then became a research project.
