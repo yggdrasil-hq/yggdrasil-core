@@ -299,14 +299,15 @@ unit tests. The web repo has no React testing library by design (vitest runs
 
 ### Follow-ups
 
-1. **`meetsMinimumInterval` does not actually enforce its own rule (found while
-   building this; not fixed here).** It rejects `*/N * * * *` and `* * * * *`,
-   but accepts other sub-hourly expressions, so `* 10 * * *` (every minute
-   during 10:00-10:59) and `* * * * 1` (every minute on Mondays) pass validation
-   while the UI states "Minimum interval is 1 hour." The scheduler is correct
-   for them regardless — at most one dispatch per test per tick — so this is a
-   validation gap, not a scheduler bug. Tightening it is a behaviour change to
-   an existing endpoint and belongs in its own change.
+1. **`meetsMinimumInterval` did not actually enforce its own rule.** Fixed in
+   yggdrasil-hq/yggdrasil-core#21: the validator now expands the expression
+   through `parseCron` and measures the real interval between occurrences
+   (`minimumIntervalMs`), instead of pattern-matching the string. It previously
+   rejected `*/N * * * *` and `* * * * *` but accepted `* 10 * * *` (every
+   minute during 10:00-10:59), `0-59 10 * * *` and `* * * * 1` (every minute on
+   Mondays) while the UI states "Minimum interval is 1 hour." The scheduler was
+   correct for them regardless — at most one dispatch per test per tick — so
+   this was a validation gap, not a scheduler bug.
 2. **Per-project timezone** for schedules, or at least a per-project display
    offset. Requires a product decision about where the setting lives.
 3. **Surface a persistently failing scheduled suite**, e.g. a project-home
