@@ -259,13 +259,33 @@ user-triggered delete would need its own authorization story and audit action fo
 something the sweep already does — the same reasoning ADR 003 §15 applied to
 manual preview teardown.
 
-### 11. Migration path to object storage is a two-method swap
+### 11. Migration path to object storage is a two-method swap — **done** (issue #30)
 
 When an S3/MinIO client becomes available, `JobRecordingRepository.insert`'s
 payload and `findContent` are the only byte-touching methods; every other read in
 the feature is metadata-only, and the tombstones, the retention sweep, the HTTP
 contract and the UI all stay as they are. That is why bytes live behind a
 repository rather than being inlined into the reports table.
+
+**That prediction held.** Issue #30 moved recordings, screenshots and extension
+bundles to object storage behind exactly that seam: the routes, the sweep, the
+types and the Web app are unchanged, and the two byte-touching methods are where
+the storage backend is chosen. Two things are worth recording because they were
+not predicted:
+
+- **A careless version of this change is silently wrong.** The reclaimable
+  indexes were `WHERE data IS NOT NULL`; with bytes moved out, every
+  object-backed recording becomes unreclaimable **while every Postgres-only test
+  still passes**. The indexes had to be rebuilt against the new shape, and the
+  verification script asserts it. A reader who takes "a two-method swap" as
+  evidence the change is small should know this is what it actually cost.
+- **The "no client library and no way to add one" premise in this ADR's
+  alternatives table turned out to be about the *environment*, not the problem.**
+  The build environment cannot install packages, so the client that shipped is an
+  internal ~150-line SigV4 signer rather than `@aws-sdk/client-s3`. That is a
+  defensible choice on its own terms for the four operations this feature needs —
+  but a future reader deciding whether to swap in the SDK should know the choice
+  was made under a constraint, not because hand-rolling was judged better.
 
 ## Consequences
 
@@ -319,7 +339,7 @@ repository rather than being inlined into the reports table.
 | Alternative | Why not |
 |---|---|
 | Keep only a path, and serve recordings from the pod before teardown via a URL on the preview ingress | The pod is deleted at job end (ADR 006 item 11), so there is no "after". A recording would be viewable only while its run was still going — useless, since the artifact is written when it ends. |
-| Upload to MinIO/S3 directly | No client library in either service, and no way to add one in this environment. A hand-rolled SigV4 client is real crypto to get wrong for no benefit over a bounded Postgres column. Revisit at item 11. |
+| Upload to MinIO/S3 directly | No client library in either service, and no way to add one in this environment. A hand-rolled SigV4 client is real crypto to get wrong for no benefit over a bounded Postgres column. **Superseded by issue #30** — item 11 was revisited, the client exists now (an internal signer, see item 11), and the "no benefit" judgement was the part that did not survive: the benefit is not in the bytes but in keeping them out of a database backup. The "no way to add one" half turned out to describe the build environment rather than the problem. |
 | Hand-roll RFC 6455-style streaming / a bespoke sidecar to move bytes | The transport that already exists (client-go's `remotecommand`) does this in ~40 lines with no new dependency. |
 | Put the bytes in a `bytea` column on `test_run_reports` | Bloats the row every run-history query touches, and makes the eventual move to object storage a schema change instead of a repository swap. |
 | Delete rows on expiry instead of tombstoning | Cheaper, and it is what most retention implementations do — but it erases the distinction between "reclaimed" and "never recorded", which is the single most user-visible requirement here. |

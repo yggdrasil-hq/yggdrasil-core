@@ -98,6 +98,10 @@ Constraints:
     primary repo's `main` branch**. There is **no migration/rollback safety
     net for MVP** — this is an explicit, temporary risk acceptance in service
     of shipping faster; see Follow-ups.
+11a. **Whether the primary deployment should also run a *built* image rather
+    than its chart's declared one is open**, and it is the same chart-convention
+    question as §12's multi-repository images — one image slot per repository in
+    the chart — asked from the other direction (issue #55).
 
 ### Build & runtime contract
 
@@ -118,6 +122,49 @@ Constraints:
     **Yggdrasil-operated registry**, namespaced per project with per-namespace
     pull secrets. No dependency on public registries (Docker Hub) as a hard
     requirement.
+
+    **Amended (2026-09-19, issue #19): the bundled registry is optional
+    configuration, not an assumption.** It is described above as part of the
+    self-hosted install, but nothing in the product depended on that statement
+    until a build step existed, and one does now. So the honest position is:
+    the Orchestrator builds a preview's image **only when `IMAGE_REGISTRY` is
+    set**. Unset means no build is attempted and a preview keeps its chart's
+    declared image, which makes an install without a registry *unchanged*
+    rather than broken — the state every existing install is in.
+
+    **The build is best-effort by design.** Two cases are *skips* rather than
+    failures, because failing the job for either would be reporting a problem
+    the operator cannot act on:
+
+    - a repository with **no Dockerfile at §12's contract path**;
+    - a **ref that is not on the remote yet** — the ordinary case, not an edge
+      one: a preview is created when a job *starts* (§10), while a
+      `feature_build`'s branch is pushed only when the agent *finishes*. On a
+      feature's first build the branch genuinely does not exist remotely, and
+      treating that as a failure would replace a working preview with a
+      failed-looking one for the whole of the first run.
+
+    Both fall back to the chart's image with the reason logged, and no failure
+    path in the build can fail the job — the posture `startJobPreview` already
+    takes.
+
+    **Only the primary repository is built today.** §12 says each linked
+    sub-repository provides its own Dockerfile; that half needs a chart
+    convention for per-repository image slots, which does not exist and which
+    §14's "one image" shape cannot express. Tracked as issue #55, with the four
+    sub-questions (which values key, precedence against the primary's image,
+    re-scaffolding when repositories are linked later, and which repositories
+    are buildable at all).
+
+    **The ref a build takes is a branch or a tag, not a commit.** The clone is
+    shallow and single-ref (`--depth 1 --branch`), which a bare SHA cannot
+    express; a ref that is neither is a skip rather than an opaque failure. A
+    full-SHA build would need an unshallow fetch, and nothing needs one yet.
+
+    Images land at `<registry>/proj-<project-id>/<repo>:<sanitised-ref>` —
+    **keyed on the project id rather than the slug**, so renaming a project
+    cannot orphan its images, matching the `proj-<id>` namespace naming used
+    everywhere else.
 
 ### Networking
 
