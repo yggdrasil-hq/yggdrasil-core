@@ -229,3 +229,73 @@ dropping it or routing around the gate. **The coordinator can read those paths**
 so the practical rule is: when a worker reports a blocked path, the coordinator
 does that one. Six unlabelled inputs were fixed this way (web#9), and it is how
 #67 was discovered.
+
+## Final state (wave 2 complete)
+
+**45 issues closed, 12 open.** All four child repos at merged, verified `main`,
+trees clean, submodule pointers recorded and matching:
+
+| Repo | Commit | Verified |
+|---|---|---|
+| `api` | `8912802` | 78 files, 1110 passed + 18 skipped |
+| `web` | `ed0cd17` | 26 files, 504 passed |
+| `orchestrator` | `ae06307` | gofmt clean, all ten packages pass |
+| `agent-images` | `e54b8e9` | `skipReason=no_script` producer half |
+
+### The remaining twelve, and which are actually blocked
+
+**Blocked on a decision, not on work** — do not dispatch these as if they were
+implementation tasks:
+
+- **#19 / #71** — the build now works end to end (verified against the real k3s
+  cluster, image confirmed in the registry independently of Kaniko's exit code).
+  What does not work is a preview *pulling* it: containerd is a node daemon, so it
+  resolves the registry with the node's resolver (not cluster DNS) and will not
+  fall back to HTTP. An install must serve the registry over TLS with a
+  node-trusted CA, or mark it insecure in containerd's config, **and** address it
+  by a node-resolvable name. Which of those the product should do is an
+  install-shape decision. Recorded in ADR 003 §14.
+- **#55** — building every linked repository's image needs a chart convention for
+  per-repository image slots. Four sub-questions are enumerated on the issue;
+  they are product decisions about the scaffolded chart.
+
+**Implementation, unblocked:** #25 (relay remaining polling surfaces), #28 (grill
+restart as a real Pi fork — largest), #31 (timezone + Run now wiring), #32 (verify
+multi-replica fan-out), #35 (onboarding readiness gate), #38 (structured
+`ask_user`), #39 (progress streaming e2e — overlaps #25), #59 (Agentic Review read
+endpoint), #63 (Orchestrator publishes capability flags).
+
+**#59 and #63 are the best-scoped of those**, and both are single broken surfaces
+rather than features: #59 is a tab that 404s because no read endpoint was ever
+written for a verdict that *is* stored, and #63 is the second half of work whose
+API side already merged.
+
+### A git mistake worth recording, again
+
+My own `git add -A` in the ADR doc commits swept up submodule pointer changes I
+did not intend to put in those commits. **The end state is correct** — all four
+pointers match `origin/main` and I verified that directly — but the commits are
+messier than they should be: a reviewer of an ADR PR sees pointer bumps they did
+not expect, and the bump was never the deliberate, separately-reviewable change I
+had planned.
+
+Same class as the `submodule.recurse` mistake above: in a repo full of submodules,
+`git add -A` is not a safe way to stage a documentation change. Use `git add <path>`
+and check `git diff --cached --submodule` before committing.
+
+### Verification discipline that paid off
+
+Three issues in this batch (#56, #61, #68) were invisible to a green suite, and
+each needed a *different* kind of verification to catch:
+
+- **#56** — the test mounted a router the way the app does not, so it passed while
+  the app 404'd. Caught by exercising the real app's wiring.
+- **#61** — the unit test asserted the generated SQL *string*, so it asserted the
+  broken form. Caught by running the query against real Postgres.
+- **#68** — routing genuinely worked, so no behavioural test could fail. Caught by
+  measuring `layer.handle` *identity* (1 route discoverable of 148, vs 148 after).
+
+And **#69** — the build pipeline merged and looked complete; only running it
+against a real cluster revealed that the container could not start at all. Four
+distinct failure modes of "the tests pass", which is why "run the thing" is now
+the standing instruction to every agent rather than advice.
