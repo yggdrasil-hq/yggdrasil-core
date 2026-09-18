@@ -99,6 +99,38 @@ calls for.
 9. **Unchanged**: pod env vars are still exactly `MODEL_BASE_URL`/`MODEL_API_KEY`/
    `MODEL_ID` (ADR 004). Only the API-side resolution changes — it now takes the
    job's kind as an input, in addition to project/organization.
+9a. **Amended by issue #37: pods also receive `MODEL_SESSION_ID`**, and every
+   model request — from a pod and from the API — carries the `x-opencode-session`
+   header. This is not the API-side resolution changing, it is a second, separate
+   fact travelling with the model config: *which run this request is for*.
+
+   The motivation is concrete rather than defensive. A gateway in front of the
+   provider (Bifrost, in the deployment this was found on) routes by that header
+   and refuses a request without one:
+
+   ```
+   400 {"type":"MissingSessionID","message":"Error from provider (Console Go):
+        Request is missing x-opencode-session and cannot be routed efficiently."}
+   ```
+
+   That refusal is what a `spec_grill` job in the dev stack died of, so the header
+   is sent unconditionally rather than behind an "are you behind a gateway"
+   setting — an unrecognised header is ignored, so sending it is free where it
+   does nothing and required where it does something.
+
+   **The value**, which the issue left open: per-run where a run exists, and
+   per-component where it does not. A pod's value is the job id, so a gateway's
+   cost and traffic breakdown is per-run rather than per-project; the API's own
+   calls (a provider-connection probe) use a fixed component identifier, because
+   inventing a run id for an admin checking a key would put a meaningless entry in
+   the same breakdown. A project cannot override the pod's value — the run's
+   identity is the Orchestrator's to set.
+
+   **Where the constant lives**: nowhere shared, because the three components
+   that issue provider requests (`agent-images`' `models.json.template`, the
+   Orchestrator's env plumbing, the API's provider client) cannot import each
+   other. The header name is a contract, and each side names it in a comment
+   pointing at the others.
 
 ## Consequences
 
@@ -129,8 +161,16 @@ calls for.
 
 - Wiring the `role_capabilities`/`CapabilityLevel` matrix into these routes instead
   of the blunt admin check (same follow-up ADR 016 already flagged).
-- UI/API for bulk-importing a provider's full model list (e.g. from OpenRouter's
-  models endpoint) rather than manual entry.
+- ~~UI/API for bulk-importing a provider's full model list (e.g. from
+  OpenRouter's models endpoint) rather than manual entry.~~ **Partly done by issue
+  #36**: the list is fetched live and offered as a picker, with free text kept as
+  the fallback. Bulk *import* (registering every listed model as a catalog row in
+  one action) is deliberately still not built — the issue's own scope note puts
+  "show what the provider already knows" ahead of auto-registering a catalog, and
+  each row carries a display name a human should choose.
+- **Pricing and context-window metadata** from the provider's list are not read
+  or stored (#36's explicit out-of-scope). The catalog keeps `modelId` +
+  `displayName`, and a listed model's other fields are dropped.
 - Revisiting whether the project custom-triplet escape hatch should eventually be
   retired once orgs reliably configure their own providers.
 
