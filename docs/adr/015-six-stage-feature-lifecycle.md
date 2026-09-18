@@ -188,6 +188,25 @@ returned → [human clicks "Resume implementation"] → queued
     than as a pass, because "the tests passed" is the one wrong answer that
     costs the most and an exit code is not evidence of it.
 
+12b. **A skipped group says *why* it was skipped** (amended by issues #53 and
+    #63). Item 11's canonical report gains a closed-enum `skipReason`, because
+    "skipped" was doing two jobs that have opposite consequences:
+
+    | `skipReason` | Producer | Gate |
+    |---|---|---|
+    | `no_script` | the runner — the repository has no test script | **advances** |
+    | `runner_unavailable` | the Orchestrator — *the install* cannot run this group | `errored` |
+
+    Item 10 made a script's presence its own toggle, so a repository with no
+    script is a normal state and a skip is the correct outcome — nothing was
+    intended to be verified and nothing failed. A group the *install* cannot run
+    is the opposite: something was meant to be verified and was not, and counting
+    it as verified is the defect this closes. The two arrive from different
+    producers (the runner and the Orchestrator), which is why the field is on the
+    report rather than inferred.
+
+    A reported failure still outranks either skip.
+
 ### Agentic Review (new job kind, zero prior grounding)
 
 13. New job kind **`agentic_review`**, triggered automatically once all
