@@ -52,6 +52,7 @@ Each ADR is numbered sequentially: `NNN-short-title.md`.
 | [028](028-audit-logging.md) | Audit logging / trails | Accepted |
 | [029](029-test-run-screen-recording.md) | Test-run screen recording | Accepted |
 | [030](030-resource-allocation-caps.md) | Resource allocation caps (token cap, per-project quota) | Accepted |
+| [031](031-preview-deployment-access-control.md) | Preview deployment access control | Accepted |
 
 When adding an ADR, update this index, add a routing row in root `CLAUDE.md`, and
 link from `docs/CONTEXT.md` if the decision affects suite-wide context.

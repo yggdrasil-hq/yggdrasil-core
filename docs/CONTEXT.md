@@ -637,11 +637,47 @@ amended 2026-09-17 by issue #5
   project's app *as its chart currently declares it*, not the branch under
   construction — nothing in the system builds/pushes an image for a feature
   branch, so "look at my in-progress build" needs an image pipeline first;
-  (b) previews are **publicly reachable, gated only by an unguessable host**, per
-  ADR 003 §15 putting them on the same ingress layer as primary deployments with
-  no auth — a deliberate ADR-consistent risk awaiting its own access-control ADR;
+  (b) preview reachability is **decided by ADR 031**: a preview is gated by
+  project membership — enforced at the Ingress by a forward-auth subrequest to
+  the API — **if and only if the project has any entries in its secret store**,
+  so a project with nothing to leak keeps a public preview and a project carrying
+  credentials does not. `spec_grill` no longer gets a preview at all (nothing it
+  produces is worth opening, and it held one of the three per-project slots);
   (c) per-preview TLS is requested from cert-manager rather than the wildcard
   certificate §15 anticipated (wildcard DNS is still a hard prerequisite).
+
+## Decided (preview deployment access control)
+
+**ADR 031 — Preview deployment access control** ([`adr/031-preview-deployment-access-control.md`](adr/031-preview-deployment-access-control.md))
+
+- **The gate follows the project's configuration, and is derived rather than
+  declared.** A preview is authenticated **iff the project has any secrets** —
+  because a preview with no credentials in its environment and no persistent
+  volume to mount is harmless, and a preview with credentials certainly is not.
+  A declared per-project flag was rejected as the mechanism precisely because the
+  two facts could drift; this way they cannot.
+- **Authorization is project membership, reused rather than reinvented**: the
+  same check `GET /projects/:id/previews` already applies, enforced at the
+  Ingress by a forward-auth subrequest to the API. That makes it revocable per
+  person (a session is) and keeps one answer to "who may see this project"
+  instead of a second credential to protect (ADR 022 §7's precedent).
+- **The auth subrequest must fail closed.** An API outage taking previews down is
+  a degraded feature; failing open would make every gated preview public during
+  that outage, which is a disclosure.
+- **The job pod authenticates too.** `PREVIEW_URL`'s one consumer is `test_run`'s
+  own Playwright browser, so a redirect to a login would silently break every
+  test run; a gated pod is handed a preview credential scoped to that one preview.
+- **Sharing the URL works for members and only members.** A refused viewer is
+  told why rather than bounced to a login they cannot complete — the distinction
+  between a lapsed session and a non-member only exists once the session is known.
+  External review of a gated preview is deliberately not supported.
+- **`spec_grill` loses its preview**, amending ADR 003 §10: it was the one
+  eligible kind whose preview nobody has a reason to open, so it was reachable
+  surface for no benefit, competing for the same per-project slots.
+- **Recorded, not built:** a reduced secret set (per-key preview-safe marking plus
+  a second Secret) is what would let a project with credentials opt into a public
+  preview. Deferred because its absence is not a safety gap — the gate covers
+  that case — and because it is a real feature (marking, storage, chart change).
 
 ## Decided (per-message grill restart)
 
@@ -887,5 +923,6 @@ authoritative detail on each point.
 | 028 | [Audit logging / trails](adr/028-audit-logging.md) |
 | 029 | [Test-run screen recording](adr/029-test-run-screen-recording.md) |
 | 030 | [Resource allocation caps](adr/030-resource-allocation-caps.md) |
+| 031 | [Preview deployment access control](adr/031-preview-deployment-access-control.md) |
 
 → [`adr/README.md`](adr/README.md)
