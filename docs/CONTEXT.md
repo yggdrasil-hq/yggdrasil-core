@@ -836,24 +836,41 @@ amended 2026-09-17 by issue #5
 the current source of truth for **where the Web app's IA is headed** — every
 page's own `.design-note` states precisely what it maps to, what's faked, and
 what's grounded vs. invented. That directory now sketches a substantially
-larger product surface than anything below has decided or built. **None of
-what follows is implemented; none of it has an ADR** (the Organization/RBAC/
-provider/cluster group formerly listed here is now decided — see
-"Decided (Organization, RBAC, org-level config, and cluster routing)"
-above). This section is a rollup for agents who want the summary without
-opening every wireframe — the per-page `.design-note` is still the
-authoritative detail on each point.
+larger product surface than anything below has decided or built. **Not all of
+what follows is unimplemented** — several entries have since been decided and
+shipped, and the ones that have say so inline. This section is a rollup for
+agents who want the summary without opening every wireframe — the per-page
+`.design-note` is still the authoritative detail on each point.
 
-- **Resource allocation caps.** The **consumption-reporting half of this is now built**
-  (ADR 023): per-job token/cost/duration accounting from Pi's own
-  `get_session_stats`, and real aggregates on `/usage`, `/analytics` and their
-  project-scoped counterparts. What remains unbuilt is the **enforcement** half —
-  `design/allocations/api`'s per-project token cap and per-project provider
-  allow-list, and `design/allocations/infra`'s per-namespace
-  ResourceQuota/LimitRange. Tracked as issue #18. `infrastructure` (org-only
-  cluster status) and `allocations/infra` additionally assume a live
-  cluster-telemetry API that does not exist and has no decided mechanism — those
-  pages remain static mocks under ADR 017.
+*(Corrected by issue #50: this paragraph used to assert flatly that "none of what
+follows is implemented; none of it has an ADR". That stopped being true for
+resource allocation caps (ADR 030) and per-message grill restart (ADR 024), which
+is the same staleness #50 found in the wireframes themselves — arriving one level
+up, in the rollup those wireframes route readers to.)*
+
+*(The heading above is left as-is on purpose: its slug is linked from
+`design/README.md` and from this file's own table of contents, and a heading is a
+poor place to carry a status anyway. Read the section as "surfaced by `design/`",
+with the per-entry status inline.)*
+
+- **Resource allocation caps. Now mostly built** (ADR 030) — corrected by issue
+  #50, which found this bullet still describing the enforcement half as unbuilt.
+  The **consumption-reporting half** shipped first (ADR 023): per-job
+  token/cost/duration accounting from Pi's own `get_session_stats`, and real
+  aggregates on `/usage`, `/analytics` and their project-scoped counterparts.
+  The **enforcement half is shipped too**: ADR 030 decided a monthly per-project
+  token cap (admin-set, enforced by the Orchestrator before a job starts work,
+  counted as a `SUM` of `job_usage` over the UTC calendar month) and per-project
+  CPU/memory/pod limits applied to the namespace `ResourceQuota`, with the read
+  deliberately member-visible rather than admin-only. What is still unbuilt is
+  **one** piece: the per-project **provider allow-list** (ADR 030 item 17), which
+  was deferred rather than skipped — a custom `MODEL_BASE_URL` triplet bypasses
+  the catalog, so an allow-list over catalog providers would not bound what a
+  project can reach. The pages render those pills disabled with that reason.
+  `infrastructure` (org-only cluster status) and `allocations/infra` additionally
+  assume a live cluster-telemetry API that does not exist and has no decided
+  mechanism, so the telemetry cards are **not rendered** on the real pages
+  (ADR 030 item 18) — a mock's shape, deliberately not faked.
 - **Sidebar-first IA.** Every hub page (Projects, Notifications, Account/
   Organization settings, New project) now shares the same persistent
   `.sidebar`/`.main` shell as project pages (Vercel-style: org switcher above
@@ -861,17 +878,24 @@ authoritative detail on each point.
   `.hub-header` pattern. Layout-only itself, no separate decision needed — but
   the org switcher it depicts now has a real entity behind it (ADR 016's
   Organization, above), where before it was purely speculative chrome.
-- **Landing page redesign.** `design/landing/` is a full proposed copy/IA
-  rework of the marketing site — positioning around safety/security, a
-  6-step "how it works," a "no lock-in" (BYOK/BYOI/BYOG) section. The real
-  `landing/` page today is just a logo + one-line tagline splash; nothing in
-  the redesign is live.
-- **Per-message grill resume/restart.** `design/projects/detail/features/detail/spec`
+- **Landing page redesign. Shipped** — corrected by issue #50. `design/landing/`
+  specified a full copy/IA rework of the marketing site (positioning around
+  safety/security, a 6-step "how it works," a "no lock-in" BYOK/BYOI/BYOG
+  section), and `landing/` now renders it: the real page is the redesign, not the
+  logo-and-tagline splash this bullet still described. The `/terms` and `/privacy`
+  routes in that design shipped with it, carrying **placeholder legal copy that is
+  not lawyer-reviewed** — that caveat is real and is the reason those two notes
+  exist.
+- **Per-message grill resume/restart. Decided and shipped** (ADR 024, which
+  explicitly resolves `roadmap/open-questions.md` #17) — corrected by issue #50:
+  this bullet described it as needing new API surface and a new
+  Orchestrator/Pi contract, which is exactly what ADR 024 built. `design/projects/detail/features/detail/spec`
   adds "Resume from here" / "Restart from here" on individual grill-transcript
-  messages, plus a "Stop" control. ADR 006 covers mid-run reply delivery and
-  ADR 012 covers job-level retry, but neither operates at the granularity of
-  one transcript message — this would need new API surface and a new
-  Orchestrator/Pi contract. See `roadmap/open-questions.md` #17.
+  messages, plus a "Stop" control; the restart ships as a transcript rewind plus a
+  re-seeded run. What remains genuinely open is its **fidelity and visibility**,
+  tracked as issue #28: the restart is an honest reconstruction rather than a true
+  Pi session fork (which needs durable session storage that does not exist), and
+  superseded runs are written but not surfaced anywhere.
 
 ## Still open
 
