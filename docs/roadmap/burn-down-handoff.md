@@ -176,3 +176,56 @@ stale, because a submodule checked out at its recorded SHA looks clean.
   held while work is in flight — a pointer bump must record a finished state.
 - **#19's verification**, **#22's orchestrator half**, **#31's web half**.
 - ADR wording left by workers for the coordinator (see each issue's comments).
+
+### The frontend audit, and what it changed about method
+
+The audit did not just find bugs — it changed how the remaining work should be
+scoped, twice.
+
+**It measured instead of spot-checking, and the numbers were the finding.** "83
+called paths, 41 with no MSW handler" and "18 of 19 pages have no accessibility
+problem" are both counts against the whole surface, not impressions. The clean
+result is as useful as the failures, because it is what stops a future audit
+redoing the work.
+
+**Its clean result turned out to be a floor, not a ceiling.** The accessibility
+sweep covered **default-rendered state only**, so every dialog, inline form and
+subview toggle went unchecked — which is exactly how six unlabelled inputs
+survived a sweep that reported the app clean. Found because the coordinator went
+looking in the one file the audit's own sandbox blocked it from reading. Filed as
+#67.
+
+**Its first measurement was taken on a stale base** (the submodule detach
+described above). It corrected its own figures publicly rather than quietly
+restating them (83/41 → 85/43), which is the behaviour that makes a number worth
+trusting.
+
+#### Findings it filed
+
+| Issue | Severity | Repos |
+|---|---|---|
+| #56 Usage/Analytics unreachable — router mounted at two prefixes while its routes are absolute, so all four endpoints 404 | production-breaking | api |
+| #61 Audit page 500s — `buildAuditWhere` emits unqualified columns, ambiguous against the joined `projects` table | production-breaking | api |
+| #59 Agentic Review tab 404s — no read endpoint was ever built for the verdict (the write path is complete) | broken surface | api, web |
+| #64 MSW is 43 handlers behind, on by default in dev | developer trap | web |
+| #66 Four unused `lib/features` exports; `fileTooLarge` looks *unwired* rather than dead | latent missing feature | web |
+| #67 The a11y sweep covered default-rendered state only | method gap | web |
+| #65 (fixed) Load-failure copy was never reached on a real 404 — the status was dropped, and a 404 offered a retry that lies | fixed in web#8 | web |
+
+**#56 and #61 are worth reading as a pair**, because they are the same failure at
+different levels. #56's routes *are* tested — `usage/routes.test.ts` mounts the
+router at root while `app.ts` mounts it at prefixes, so the test passes while the
+real app 404s: the wiring between them was never covered. #61's unit tests assert
+the generated SQL *string*, so they assert the broken form and pass. Both are #43
+again (a repository method that threw on every call behind 880 green tests): the
+tests exist, they simply never execute the thing that breaks.
+
+### The sandbox blocks some paths, and that costs findings
+
+`read`, `bash` and `gh` are all refused for paths or content matching `secret`.
+The audit found an accessibility bug in `org-secrets-settings.tsx`, could not read
+the file, and could not file the issue — and correctly said so rather than
+dropping it or routing around the gate. **The coordinator can read those paths**,
+so the practical rule is: when a worker reports a blocked path, the coordinator
+does that one. Six unlabelled inputs were fixed this way (web#9), and it is how
+#67 was discovered.
