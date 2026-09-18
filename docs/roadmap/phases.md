@@ -130,8 +130,22 @@ live cluster telemetry remains a mock — no mechanism for it is decided.
 Per-user default model configuration (ADR 007) and per-project override already
 exist, ahead of this phase — ADR 007 is retired by ADR 016 (Phase 2, see above),
 replaced by an Organization-level default; per-project override is unaffected.
-This makes **Phase 4 functionally complete** apart from the open follow-ups
-filed during the burn-down (issues #19-#22).
+This makes **Phase 4 functionally complete** apart from the follow-ups filed
+separately (#19-#34). Those are all *after* the phases, not unbuilt phase work:
+
+- **#19-#22** — found during the burn-down: a feature-branch image pipeline
+  (previews currently show the chart, not the branch), preview access control,
+  schedule-interval validation, and `screenshotPath`'s dead pointer.
+- **#23-#34** — recorded as follow-ups inside ADR 019-#030 while they were being
+  implemented. The substantive ones: coalescing the relay's deltas (#23) and its
+  verification in a real multi-replica deployment (#32), deploy/rollback
+  hardening (#26), and pulling agent images on a fresh install (#29).
+
+Each ADR's own "Follow-ups" section remains the design record for what was
+deferred and why; the notes that are *not* filed as issues are the ones that are
+undecided rather than pending — an alternative nobody has chosen, or a decision
+that needs to be made before work can start. Those stay in the ADRs deliberately,
+so the tracker holds committed work rather than a list of possibilities.
 
 > When working a feature, note its phase so out-of-phase scope is flagged rather
 > than silently built.
