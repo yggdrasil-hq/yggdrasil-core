@@ -14,6 +14,12 @@
     .settings-col .card-title { font-size: 16px; font-weight: 600; color: var(--frost); }
     .settings-col .card-desc { margin-top: 6px; font-size: 13px; }
     .settings-col .card-body { margin-top: 16px; }
+    /* Declared rather than left inline on both labels: the styling was identical
+       on each, so the class was doing nothing while the inline copy was the only
+       thing holding the layout — two places to change and one of them invisible
+       from the stylesheet. Same rendering, one source. */
+    .settings-col .radio-option { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--frost); }
+    .settings-col .radio-option + .radio-option { margin-top: 10px; }
     .dashed-block { border: 1px dashed var(--rime); border-radius: var(--radius-sm); padding: 12px; display: flex; flex-direction: column; gap: 10px; }
     .secret-field { border: 1px solid var(--rime); border-radius: var(--radius-sm); padding: 12px; }
     .secret-field + .secret-field { margin-top: 10px; }
@@ -84,7 +90,7 @@
         </div>
       </div>
       <div class="main-inner">
-        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/settings/models</span> — split out of the old single-page settings, see <a href="/projects/detail/settings/general/index.html" style="color:var(--bifrost);">General</a>'s design-note for the IA rework itself. Sources from the project's organization (Acme Retail) rather than the project owner's personal account — org-scoped model config, not ADR 007's per-user default, is now the fallback this project resolves against. Not yet in ADR 002/007 or web/; see <a href="/settings/organization/providers/index.html" style="color:var(--bifrost);">Organization Settings &rarr; Providers &amp; Models</a>'s design-note for the full rationale.</div>
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/settings/models</span> — split out of the old single-page settings, see <a href="/projects/detail/settings/general/index.html" style="color:var(--bifrost);">General</a>'s design-note for the IA rework itself. <b>The split is still proposed; the capability is not</b> — corrected by issue #50. The route does not exist as its own page today, but the real project settings page (<span class="mono">web/app/projects/[projectId]/settings/page.tsx</span> → <span class="mono">components/settings/project-settings-client.tsx</span>) already manages this: it lists the organization's catalog, sets a per-job-kind override and clears one. This note's other claim, that org-scoped model config was "not yet in ADR 002/007 or web/", was wrong when written and is now doubly so: <b>ADR 016</b> made the organization the fallback tier and retired ADR 007's per-user default outright, and <b>ADR 018</b> implemented the catalog, the per-job-kind defaults and the project/feature override tiers on top of it. So sourcing from the project's organization (Acme Retail) rather than the owner's personal account is the decided design, not a proposal. What is genuinely still only here: the split into per-route pages, which is layout-only and needs no ADR (<span class="mono">docs/concepts/project-settings.md</span> records it as proposed). See <a href="/settings/organization/providers/index.html" style="color:var(--bifrost);">Organization Settings &rarr; Providers &amp; Models</a>'s design-note for the org tier's own rationale.</div>
 
         <div class="page-header">
           <div>
@@ -98,8 +104,8 @@
             <p class="card-title">Model configuration</p>
             <p class="card-desc">Which models the Pi agent uses for this project's jobs. Pulls from the providers and models connected in <a href="/settings/organization/providers/index.html" style="color:var(--bifrost);">Organization settings</a>.</p>
             <div class="card-body">
-              <label class="radio-option" style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:var(--frost);"><input type="radio" name="model-mode" /> Use Acme Retail's defaults</label>
-              <label class="radio-option" style="display:flex; align-items:flex-start; gap:10px; font-size:14px; color:var(--frost); margin-top:10px;"><input type="radio" name="model-mode" checked /> Override models for this project</label>
+              <label class="radio-option"><input type="radio" name="model-mode" /> Use Acme Retail's defaults</label>
+              <label class="radio-option"><input type="radio" name="model-mode" checked /> Override models for this project</label>
 
               <div class="dashed-block" style="margin-top:12px;">
                 <div class="secret-field">

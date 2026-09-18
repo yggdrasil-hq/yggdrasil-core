@@ -84,9 +84,27 @@ Full route → file map: `design/README.md`.
 
 ## Keeping this in sync
 
+**Run `python3 scripts/check-design.py` (meta repo root) after editing anything
+under `design/`.** It enforces the three conventions above that a static directory
+otherwise has no way to enforce — links resolve (including the root-absolute form),
+every page keeps a `.design-note`, and no page uses a class that is defined
+nowhere — plus a tag-balance check. It exits non-zero and names each problem.
+
+That script exists because the conventions had no enforcement and drifted exactly
+as you would expect: issue #50 found thirteen notes still describing their page as
+"a new route/page, no equivalent exists in web/ today" long after ADR 017 item 1
+had built a page for every route in the map above. Nothing could have caught it,
+so the check is the durable half of that fix — the corrections are the other half.
+
 - When a page's real layout changes meaningfully in `web/`, update its
   wireframe in the same change (or file a follow-up) — a stale wireframe is
   worse than none.
+- **When a page ships, its `.design-note` is part of shipping it.** A note that
+  still says the route does not exist is the specific failure #50 was, and it is
+  the easiest one to miss because the page itself is fine. Where the wireframe
+  mocks a concept the real page renders as a static mock (ADR 017 item 2), say
+  which — "this shipped" and "this is a mock" are different claims, and the
+  second is the honest one for a page built ahead of its decision.
 - When a new page/route is added to `web/`, add its wireframe here in the
   same change that adds the route, and add a row to `design/README.md`'s
   route → file map.

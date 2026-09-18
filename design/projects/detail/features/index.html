@@ -10,6 +10,13 @@
   <link rel="stylesheet" href="/shared/tokens.css" />
   <link rel="stylesheet" href="/shared/shell.css" />
   <style>
+    /* The New-feature panel's heading. Copied from the sibling wireframes'
+       `.card-title`/`.card-desc` (see `tests/new/index.html`) — this page used
+       both classes without defining either, so the heading rendered without the
+       weight and frost colour every other card title has. The inline
+       `font-size:14px` on the title is kept and still wins over the 16px here. */
+    .card .card-title { font-size: 16px; font-weight: 600; color: var(--frost); }
+    .card .card-desc { margin-top: 6px; font-size: 13px; max-width: 620px; }
     .toolbar {
       display: flex;
       flex-direction: column;
