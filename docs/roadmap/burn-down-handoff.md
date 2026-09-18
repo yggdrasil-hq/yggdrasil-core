@@ -125,3 +125,54 @@ mechanism is not built).
   coordinator to apply — see each issue's closing comment.
 - Merge each PR once its suite is green, then close the issue with a comment
   naming what changed and where.
+
+## Coordinator log — decisions and mistakes (append as you go)
+
+Kept here rather than in a chat log because most of these are things a fresh
+context would otherwise re-derive wrongly.
+
+### Landed since the first draft
+
+- **#19** — pipeline merged (orchestrator#7, #8). **Left open**: never verified
+  against a cluster. Filed **#55** for the multi-image half. **The blocker was a
+  wrong kubeconfig** — see the environment section; the supplied one *can* create
+  jobs. A correction comment is on the issue.
+- **#22 API half** merged (api#7). Orchestrator collection half still outstanding.
+- **#30** merged (api#8) — recordings, screenshots, extension bundles in object
+  storage, verified by a committed 33-check script against real Postgres + MinIO.
+  Hand-rolled SigV4 signer, **no new dependency** (the build environment cannot
+  install packages — see below). Set the `S3_*` variables, which were dead until
+  now.
+- **#50** merged as core#54 — 14 stale `.design-note`s, plus
+  `scripts/check-design.py`, which is the durable half: the conventions had zero
+  enforcement, which is why the drift was invisible.
+- **#53 part 2** merged (api#9).
+- ADR 003 §9/§14, ADR 029 §11, ADR 025 amended in core#62 to record the #19 and
+  #30 implementations, including where the original ADRs were wrong about their
+  own premises.
+- Handoff + PR-reference fix: core#57, core#60.
+
+### A mistake I made, and its cost
+
+I ran `git config submodule.recurse true` so submodule commits would follow the
+superproject. **That silently detached three submodules at their stale recorded
+SHAs** — so a worker editing `web/` was on a base predating five merged PRs, and a
+commit from there would have reverted ~2200 lines. Caught by checking
+`HEAD` vs `origin/main` in each submodule rather than trusting `git status`, which
+showed nothing wrong (`web` at its *recorded* SHA is "clean", not "modified" —
+the recorded pointer was the stale thing).
+
+Fix: `git config --unset submodule.recurse`; restored `orchestrator` and
+`agent-images` to `main`; steered the `web` worker to re-base before writing.
+**No work was lost** — every merged commit was already on `origin/main`.
+
+Lesson: after any git config change, verify each submodule's `HEAD` against
+`origin/main` **directly**. `git status` cannot tell you a recorded pointer is
+stale, because a submodule checked out at its recorded SHA looks clean.
+
+### Outstanding
+
+- **Submodule bump**: `api` and `web` pointers still un-bumped. Deliberately
+  held while work is in flight — a pointer bump must record a finished state.
+- **#19's verification**, **#22's orchestrator half**, **#31's web half**.
+- ADR wording left by workers for the coordinator (see each issue's comments).
