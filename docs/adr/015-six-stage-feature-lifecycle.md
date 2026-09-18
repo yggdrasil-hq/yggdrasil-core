@@ -154,6 +154,39 @@ returned → [human clicks "Resume implementation"] → queued
     `projects.agentic_review_enabled` boolean) — not every team wants an AI
     reviewing their AI's diff as a hard gate. Unit/Integration have no
     separate toggle (item 10 — script presence is the toggle).
+12a. **The gate decides on runs, not on reports** (amended by issue #40). The
+    decision is a single pure function
+    (`api/src/features/testing-gate.ts`) over the feature's `test_run` /
+    `script_test_run` rows, and it asks whether those *runs* are terminal —
+    which the jobs table already knows — rather than whether every one of them
+    submitted a report. The original implementation waited for a report from
+    every run, so a run that never reported (a container that never started)
+    blocked the stage forever: the feature was neither returned nor advanced and
+    had nothing to click. Since the API cannot be told "the pod died", it reads
+    the job status instead, and a reconcile tick
+    (`api/src/features/testing-gate-reconcile.ts`) supplies the trigger the
+    event path cannot.
+
+    The gate says one of four things, and the distinction between the two
+    failure kinds is the point:
+
+    | Decision | Condition | Transition |
+    |---|---|---|
+    | `in_progress` | any run is pending/running | none — wait |
+    | `returned` | a run's report recorded failures | `returned`, `reason: test_failure`, comment = the report's summary + failing test names |
+    | `errored` | runs finished, none reported a failure, at least one never reported | `failed` (item 19) |
+    | `advance` | every run reported and none failed | Agentic Review, or `in_review` when that toggle is off |
+
+    `errored` exists because the alternative is wrong twice over. Returning the
+    feature tells the agent to fix code nothing was learned about; and when the
+    cause is configuration — no `script_test_run` image, which is the default
+    state of an install (see #44) — the build is re-dispatched into the same
+    missing image and returned again, burning a build and a model call each
+    round. Item 19 already settles the principle: infra-level failure is
+    `failed`, and `returned` is reserved for "the job ran fine and said no".
+    A run that exits 0 without submitting a report counts as `errored` rather
+    than as a pass, because "the tests passed" is the one wrong answer that
+    costs the most and an exit code is not evidence of it.
 
 ### Agentic Review (new job kind, zero prior grounding)
 
@@ -255,6 +288,13 @@ returned → [human clicks "Resume implementation"] → queued
 
 ### Follow-ups (out of scope here)
 
+- **A run that could not run has no surface of its own** (#40, #44). It is
+  `errored` → the feature is `failed`, and the run's own error is the visible
+  reason on the Testing tab. There is no notification (ADR 027's kinds do not
+  include "testing could not run") and no project-home Action Item, so an
+  unattended feature that fails this way is only found by looking.
+- **Per-project notification of a persistently failing suite / stage**
+  remains unbuilt (ADR 026 follow-up 3, ADR 027's kind list).
 - Cap/summarize kickback context growth across repeated cycles (item 8).
 - Guard against unbounded blocking-subtask-feature recursion (item 5).
 - Any Web app surface for Agentic Review's comment beyond the "Returned"
