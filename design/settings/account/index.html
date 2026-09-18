@@ -25,16 +25,26 @@
     #section-profile:checked ~ .account-layout .account-nav label[for="section-profile"],
     #section-providers:checked ~ .account-layout .account-nav label[for="section-providers"],
     #section-usage:checked ~ .account-layout .account-nav label[for="section-usage"],
-    #section-analytics:checked ~ .account-layout .account-nav label[for="section-analytics"] {
+    #section-analytics:checked ~ .account-layout .account-nav label[for="section-analytics"],
+    #section-notifications:checked ~ .account-layout .account-nav label[for="section-notifications"] {
       background: var(--surface-02);
       color: var(--frost);
     }
     #section-profile:checked ~ .account-layout #panel-profile,
     #section-providers:checked ~ .account-layout #panel-providers,
     #section-usage:checked ~ .account-layout #panel-usage,
-    #section-analytics:checked ~ .account-layout #panel-analytics {
+    #section-analytics:checked ~ .account-layout #panel-analytics,
+    #section-notifications:checked ~ .account-layout #panel-notifications {
       display: block;
     }
+
+    .pref-stack { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+    .pref-row { display: flex; align-items: flex-start; gap: 12px; border: 1px solid var(--rime-soft); background: var(--surface-01); border-radius: var(--radius-sm); padding: 12px; font-size: 14px; color: var(--frost); }
+    .pref-row-master { border-color: var(--rime); background: var(--surface-02); }
+    .pref-row input { margin-top: 2px; }
+    .pref-label { font-weight: 500; }
+    .pref-desc { display: block; margin-top: 2px; font-size: 12px; color: var(--mist); }
+    .pref-foot { font-size: 12px; color: var(--mist); }
 
     .stat-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px; }
     .stat-card .label { font-size: 13px; color: var(--mist); }
@@ -201,7 +211,7 @@
 
     <div class="main">
       <div class="main-inner narrow">
-    <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/settings/account</span> (web/app/settings/account/page.tsx) · <b>IA rework round 3</b>: top hub-header replaced by the same persistent sidebar as every other page — this page is now reached via the sidebar account cell's dropdown rather than a separate user-menu (see /projects's design-note for the full rationale) · relaid out from one long scroll into a sectioned settings page (Profile / Providers &amp; Models) — CSS-only radio-toggle tabs, same technique as the /projects/new stepper · <b>superseded pass</b>: this page previously had full multi-provider/multi-model CRUD (connect providers, add models, set per-job defaults) as a proposed rework of ADR 007's single-bundle design. Now that <span class="mono">/settings/organization</span> exists, that CRUD moved there and admin-managed — letting individual members configure their own provider keys would undercut the whole point of centralizing on an audited, admin-controlled set of connections (and directly contradicts the "scoped, admin-controlled access" story the landing page now makes). This page is read-only, showing what the org has made available, with a link out to Organization settings for whoever can actually change it. <span class="mono">design_grill</span> row dropped from the job-defaults list here for brevity (still present in the org settings page) — not implemented yet either way (ADR 014). None of this exists in ADR 007 or the api/web model-secrets code; ADR 007 itself will need a full rewrite (or replacement) once an Organization entity is real, since its central premise — "no team/org entity yet" — no longer holds. <b>Added Usage and Analytics sections</b> as the user-level tier of /usage and /analytics (folded into Account settings rather than given their own top-level nav item, since "your personal usage/activity" reads as an account concern, not a primary destination) — same "nothing here is tracked today" caveat as those two pages, see their design-notes for the full explanation. Framed the same way as project-level Usage: your numbers are a slice of Acme Retail's shared quota, not a separate one — no independent limit or reset date shown here.</div>
+    <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/settings/account</span> (web/app/settings/account/page.tsx) · <b>IA rework round 3</b>: top hub-header replaced by the same persistent sidebar as every other page — this page is now reached via the sidebar account cell's dropdown rather than a separate user-menu (see /projects's design-note for the full rationale) · relaid out from one long scroll into a sectioned settings page (Profile / Providers &amp; Models) — CSS-only radio-toggle tabs, same technique as the /projects/new stepper · <b>superseded pass</b>: this page previously had full multi-provider/multi-model CRUD (connect providers, add models, set per-job defaults) as a proposed rework of ADR 007's single-bundle design. Now that <span class="mono">/settings/organization</span> exists, that CRUD moved there and admin-managed — letting individual members configure their own provider keys would undercut the whole point of centralizing on an audited, admin-controlled set of connections (and directly contradicts the "scoped, admin-controlled access" story the landing page now makes). This page is read-only, showing what the org has made available, with a link out to Organization settings for whoever can actually change it. <span class="mono">design_grill</span> row dropped from the job-defaults list here for brevity (still present in the org settings page) — not implemented yet either way (ADR 014). None of this exists in ADR 007 or the api/web model-secrets code; ADR 007 itself will need a full rewrite (or replacement) once an Organization entity is real, since its central premise — "no team/org entity yet" — no longer holds. <b>Added Usage and Analytics sections</b> as the user-level tier of /usage and /analytics (folded into Account settings rather than given their own top-level nav item, since "your personal usage/activity" reads as an account concern, not a primary destination) — same "nothing here is tracked today" caveat as those two pages, see their design-notes for the full explanation. Framed the same way as project-level Usage: your numbers are a slice of Acme Retail's shared quota, not a separate one — no independent limit or reset date shown here. <b>Added a Notifications section (issue #33, ADR 027)</b> — notification preferences shipped in ADR 027 item 12 as a section of <span class="mono">/settings/account</span>, not as a route of its own, so this is where its wireframe belongs: the org picker, the master "All project activity" row, one row per registered kind with the API's real label and description, and the closing note that turning a kind back on does not replay skipped notifications. <b>Built and real</b>, not proposed — the five kinds and their copy come from the API's registry (<span class="mono">api/src/notifications/preferences.ts</span>), and a kind only appears once something creates it. <b>Drift worth stating</b>: the shipped account page is a single scroll of cards (Profile, Default model configuration, Notifications), while this wireframe presents it as CSS-only section tabs — the section list now includes Notifications, so the two agree on content and still differ on presentation. The section is <b>not</b> admin-only: any member reads and writes their own preferences, and the org picker exists because preferences are personal but keyed per organization.</div>
     <div class="hub-page-title">
       <h1>Account</h1>
       <p>Your profile, and the providers &amp; models your organization has made available to you.</p>
@@ -211,6 +221,7 @@
     <input type="radio" name="account-section" id="section-providers" class="section-toggle" />
     <input type="radio" name="account-section" id="section-usage" class="section-toggle" />
     <input type="radio" name="account-section" id="section-analytics" class="section-toggle" />
+    <input type="radio" name="account-section" id="section-notifications" class="section-toggle" />
 
     <div class="account-layout">
       <nav class="account-nav">
@@ -218,6 +229,7 @@
         <label for="section-providers">Providers &amp; Models</label>
         <label for="section-usage">Usage</label>
         <label for="section-analytics">Analytics</label>
+        <label for="section-notifications">Notifications</label>
       </nav>
 
       <div class="account-content">
@@ -417,6 +429,71 @@
             <div class="session-meta">Acme Storefront</div>
           </div>
           <div class="session-tokens">31.4K</div>
+        </div>
+        </section>
+
+        <section class="account-panel" id="panel-notifications">
+        <div class="card-title">Notifications</div>
+        <p class="card-desc">Every notification kind is on for this organization.</p>
+
+        <div class="pref-stack">
+          <label style="font-size:12px; color:var(--mist); display:block;">
+            Organization
+            <select class="input" style="margin-top:8px;">
+              <option>Acme Retail</option>
+              <option>Northwind Labs</option>
+            </select>
+          </label>
+
+          <label class="pref-row pref-row-master">
+            <input type="checkbox" checked />
+            <span>
+              <span class="pref-label">All project activity</span>
+              <span class="pref-desc">Every kind below, for this organization.</span>
+            </span>
+          </label>
+
+          <label class="pref-row">
+            <input type="checkbox" checked />
+            <span>
+              <span class="pref-label">Project created</span>
+              <span class="pref-desc">When a new project is created in the organization.</span>
+            </span>
+          </label>
+
+          <label class="pref-row">
+            <input type="checkbox" checked />
+            <span>
+              <span class="pref-label">Helm chart scaffolding failed</span>
+              <span class="pref-desc">When the Helm chart could not be scaffolded for a new project.</span>
+            </span>
+          </label>
+
+          <label class="pref-row">
+            <input type="checkbox" checked />
+            <span>
+              <span class="pref-label">Feature created (spec grill started)</span>
+              <span class="pref-desc">When a feature is created and its spec grill starts.</span>
+            </span>
+          </label>
+
+          <label class="pref-row">
+            <input type="checkbox" checked />
+            <span>
+              <span class="pref-label">ADR approved</span>
+              <span class="pref-desc">When a feature&rsquo;s ADR is approved and it is ready to build.</span>
+            </span>
+          </label>
+
+          <label class="pref-row">
+            <input type="checkbox" checked />
+            <span>
+              <span class="pref-label">Build started</span>
+              <span class="pref-desc">When an implementation build starts for a feature.</span>
+            </span>
+          </label>
+
+          <p class="pref-foot">Turning a kind back on does not bring back notifications that were skipped while it was off. Mute individual projects from that project&rsquo;s settings.</p>
         </div>
         </section>
       </div>

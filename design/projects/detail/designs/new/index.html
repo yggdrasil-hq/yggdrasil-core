@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Continue a design session — Acme Storefront — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .main-inner { max-width: 960px; }
+    .back-link { font-size: 13px; color: var(--shadow); text-decoration: none; }
+    .back-link:hover { color: var(--frost); }
+    .form-col { max-width: 640px; }
+    .form-col h1 { margin: 24px 0 0; font-size: 24px; font-weight: 600; color: var(--frost); }
+    .form-col > p { margin-top: 8px; font-size: 14px; color: var(--mist); }
+    .form-col code { background: var(--surface-02); border-radius: 4px; padding: 1px 5px; font-family: var(--font-mono); font-size: 12px; }
+    .form-stack { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; }
+    .form-stack label.block { display: block; font-size: 14px; color: var(--mist); }
+    .form-stack .input, .form-stack textarea { margin-top: 8px; width: 100%; }
+    .form-stack textarea { min-height: 144px; background: var(--surface-02); border: 1px solid var(--rime); border-radius: var(--radius-sm); padding: 10px 12px; font-family: inherit; font-size: 14px; color: var(--frost); resize: vertical; }
+    .form-stack textarea::placeholder { color: var(--shadow); }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+      <a class="sidebar-project" href="/projects/index.html">
+        <span>Acme Storefront</span>
+        <span class="text-shadow">&#8964;</span>
+      </a>
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/projects/detail/index.html"><span class="icon">&#8962;</span> Home</a>
+        <a class="nav-link" href="/projects/detail/features/index.html"><span class="icon">&#9638;</span> Features</a>
+        <a class="nav-link" href="/projects/detail/tests/index.html"><span class="icon">&#9879;</span> Tests</a>
+        <a class="nav-link" href="/projects/detail/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+        <a class="nav-link" href="/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+        <a class="nav-link" href="/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
+        <a class="nav-link active" href="/projects/detail/designs/index.html"><span class="icon">&#127912;</span> Designs</a>
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-settings" class="nav-group-toggle" checked />
+          <label for="nav-group-settings" class="nav-group-label">
+            <span class="nav-group-title">Settings</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/projects/detail/settings/general/index.html"><span class="icon">&#9881;</span> General</a>
+            <a class="nav-link" href="/projects/detail/settings/secrets/index.html"><span class="icon">&#128273;</span> Secrets</a>
+            <a class="nav-link" href="/projects/detail/settings/models/index.html"><span class="icon">&#129504;</span> Models</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <div class="main">
+      <div class="shell-topbar">
+        <div class="crumbs">
+          <a href="/projects/index.html">Acme Retail</a>
+          <span class="sep">/</span>
+          <a href="/projects/detail/index.html">Acme Storefront</a>
+          <span class="sep">/</span>
+          <a href="/projects/detail/designs/index.html">Designs</a>
+          <span class="sep">/</span>
+          <span class="current">Continue a design session</span>
+        </div>
+        <div class="shell-topbar-actions">
+          <a class="notif-bell" href="/notifications/index.html" aria-label="Notifications"><span class="dot"></span>&#128276;</a>
+        </div>
+      </div>
+
+      <div class="main-inner">
+        <div class="design-note">
+          <b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/designs/new</span>
+          (web/app/projects/[projectId]/designs/new/page.tsx → web/components/designs/new-design-client.tsx), in its
+          <b>re-open</b> state. <b>Added by issue #33</b>: the issue names the "browse and re-open flows" as shipping without a
+          reference, and re-open is this page — <span class="mono">reopenDesignPath()</span> routes a re-open through the
+          ordinary create form with <span class="mono">?reopen=&lt;designId&gt;</span> rather than a second page.
+          <b>Built and real.</b> The two headings, the pre-filled name, the <span class="mono">designs/&lt;slug&gt;/</span>
+          sentence and the disabled-until-ready gate all come from the component.
+          <b>What this state has to get right, and why it is worth a wireframe</b>: the <b>slug is carried through, not
+          re-derived from the name</b> (ADR 020 item 2) — the slug is what selects the same <span class="mono">designs/&lt;slug&gt;/</span>
+          folder and the same index row, so a user who edits the name must still land in their existing folder rather than in a
+          second one. The name therefore arrives pre-filled but the identity does not depend on it.
+          <b>Also not mocked</b>: the create state (<span class="mono">/designs/new</span> with no
+          <span class="mono">?reopen</span> — "Start a design session", an empty form, and the same two warning lines), the
+          two project-readiness warnings shown when <span class="mono">status !== "ready"</span> or the project has no design
+          surface, and the submitting state. The badge/provenance variants of the form — a design session started from a
+          <span class="mono">design_grill</span> Action Item or from a feature (<span class="mono">featureId</span> /
+          <span class="mono">actionItemId</span>) — look identical here and are not distinguished in the UI.
+        </div>
+
+        <div class="form-col">
+          <a class="back-link" href="/projects/detail/designs/index.html">&#8592; All designs</a>
+
+          <h1>Continue a design session</h1>
+          <p>
+            The agent will read the existing <code>designs/empty-cart-state/</code> folder and iterate on it rather than
+            starting a new one.
+          </p>
+
+          <form class="form-stack">
+            <label class="block">
+              Name
+              <input class="input" type="text" value="Empty cart state" required />
+            </label>
+
+            <label class="block">
+              Brief
+              <textarea placeholder="Design a responsive checkout flow with an address form and confirmation state." required>Empty cart state — keep the current illustration, but try a version with a suggested-products row underneath and a lighter background.</textarea>
+            </label>
+
+            <div>
+              <button class="btn btn-primary" type="submit">Start design session</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

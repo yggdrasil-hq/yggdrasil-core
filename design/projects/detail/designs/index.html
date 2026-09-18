@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Designs — Acme Storefront — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .main-inner { max-width: 960px; }
+    .back-link { font-size: 13px; color: var(--shadow); text-decoration: none; }
+    .back-link:hover { color: var(--frost); }
+    .design-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; margin-top: 24px; }
+    .design-head h1 { font-size: 24px; font-weight: 600; color: var(--frost); margin: 0; }
+    .design-head p { margin-top: 8px; font-size: 14px; color: var(--mist); max-width: 560px; }
+    .design-head code { background: var(--surface-02); border-radius: 4px; padding: 1px 5px; font-family: var(--font-mono); font-size: 12px; }
+    .filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 24px; }
+    .filter-pill { border: 1px solid var(--rime-soft); background: transparent; color: var(--mist); border-radius: var(--radius-pill); padding: 5px 12px; font-size: 12px; font-family: inherit; cursor: default; }
+    .filter-pill.active { border-color: var(--rime); background: var(--surface-03); color: var(--frost); }
+    .filter-row .input { margin-left: auto; max-width: 260px; }
+    .design-list { list-style: none; margin: 24px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+    .design-card { border: 1px solid var(--rime); background: var(--surface-01); border-radius: var(--radius-card); padding: 16px; }
+    .design-card-top { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .design-name { font-size: 14px; font-weight: 600; color: var(--frost); text-decoration: none; }
+    .design-name:hover { text-decoration: underline; }
+    .design-name-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .design-folder { margin-top: 4px; font-family: var(--font-mono); font-size: 12px; color: var(--shadow); }
+    .design-attention { margin-top: 4px; font-size: 12px; color: var(--st-input); }
+    .design-actions { display: flex; flex-shrink: 0; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .design-details { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--rime-soft); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 16px; }
+    .design-details dt { font-size: 12px; color: var(--shadow); }
+    .design-details dd { margin: 2px 0 0; font-size: 12px; color: var(--mist); }
+    .st-pill { display: inline-flex; align-items: center; border-radius: var(--radius-pill); padding: 2px 8px; font-size: 11px; border: 1px solid; }
+    .st-pill.finalized { border-color: rgba(70, 194, 133, 0.4); color: var(--st-approved); }
+    .st-pill.in-progress { border-color: rgba(226, 161, 60, 0.4); color: var(--st-input); }
+    @media (max-width: 640px) {
+      .design-details { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .filter-row .input { margin-left: 0; max-width: none; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+      <a class="sidebar-project" href="/projects/index.html">
+        <span>Acme Storefront</span>
+        <span class="text-shadow">&#8964;</span>
+      </a>
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/projects/detail/index.html"><span class="icon">&#8962;</span> Home</a>
+        <a class="nav-link" href="/projects/detail/features/index.html"><span class="icon">&#9638;</span> Features</a>
+        <a class="nav-link" href="/projects/detail/tests/index.html"><span class="icon">&#9879;</span> Tests</a>
+        <a class="nav-link" href="/projects/detail/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+        <a class="nav-link" href="/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+        <a class="nav-link" href="/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
+        <a class="nav-link active" href="/projects/detail/designs/index.html"><span class="icon">&#127912;</span> Designs</a>
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-settings" class="nav-group-toggle" checked />
+          <label for="nav-group-settings" class="nav-group-label">
+            <span class="nav-group-title">Settings</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/projects/detail/settings/general/index.html"><span class="icon">&#9881;</span> General</a>
+            <a class="nav-link" href="/projects/detail/settings/secrets/index.html"><span class="icon">&#128273;</span> Secrets</a>
+            <a class="nav-link" href="/projects/detail/settings/models/index.html"><span class="icon">&#129504;</span> Models</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <div class="main">
+      <div class="shell-topbar">
+        <div class="crumbs">
+          <a href="/projects/index.html">Acme Retail</a>
+          <span class="sep">/</span>
+          <a href="/projects/detail/index.html">Acme Storefront</a>
+          <span class="sep">/</span>
+          <span class="current">Designs</span>
+        </div>
+        <div class="shell-topbar-actions">
+          <a class="notif-bell" href="/notifications/index.html" aria-label="Notifications"><span class="dot"></span>&#128276;</a>
+        </div>
+      </div>
+
+      <div class="main-inner">
+        <div class="design-note">
+          <b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/designs</span>
+          (web/app/projects/[projectId]/designs/page.tsx → web/components/designs/designs-index-client.tsx).
+          <b>Added by issue #33</b> — the browse and re-open flows shipped with ADR 020 item 6 and had no reference at all
+          (there was no <span class="mono">design/designs/</span> tree in any form). <b>Built and real</b>: the filter pills,
+          the search box, the per-row actions and the expandable details all exist.
+          <b>Two things to know before reading it as IA</b>: the page is <b>project-scoped</b>, not a top-level
+          <span class="mono">/designs</span> — a design belongs to one project's repository, so it lives under
+          <span class="mono">/projects/detail/designs/</span> like the other project surfaces. And the sidebar's
+          <b>Designs</b> item is <b>conditional</b>: the shipped sidebar renders it only when the project is
+          <span class="mono">ready</span> and <span class="mono">hasDesignSurface</span> (set by
+          <span class="mono">project_init</span>'s answer, ADR 014) — a project with no design surface never sees this route.
+          Rows are sample data. The <b>mockup itself is deliberately not rendered here</b>: ADR 020 item 2 makes the repo the
+          source of truth for the artifact, so this page is an index over the <span class="mono">designs</span> table and the
+          mockup is viewed through the design's draft PR. The empty state ("No designs yet", with its honesty note that
+          folders committed by hand are not listed) and the "No designs match this filter" state are not mocked.
+        </div>
+
+        <a class="back-link" href="/projects/detail/index.html">&#8592; Back to project</a>
+
+        <div class="design-head">
+          <div>
+            <h1>Designs</h1>
+            <p>Saved mockups for this project. Each one lives in the repository under its own <code>designs/&lt;slug&gt;/</code> folder.</p>
+          </div>
+          <a class="btn btn-primary" href="/projects/detail/designs/new/index.html">New design</a>
+        </div>
+
+        <div class="filter-row">
+          <button class="filter-pill active" type="button">All (4)</button>
+          <button class="filter-pill" type="button">In progress (2)</button>
+          <button class="filter-pill" type="button">Finalized (2)</button>
+          <input class="input" type="text" placeholder="Filter by name or slug…" />
+        </div>
+
+        <ul class="design-list">
+          <li class="design-card">
+            <div class="design-card-top">
+              <div>
+                <div class="design-name-row">
+                  <a class="design-name" href="/projects/detail/designs/detail/index.html">Pricing page hero</a>
+                  <span class="st-pill in-progress">In progress</span>
+                </div>
+                <div class="design-folder">designs/pricing-page-hero</div>
+                <div class="design-attention">The latest session is waiting on your reply.</div>
+              </div>
+              <div class="design-actions">
+                <a class="btn btn-outline btn-sm" href="#">View PR</a>
+                <a class="btn btn-outline btn-sm" href="#">Transcript</a>
+                <a class="btn btn-primary btn-sm" href="/projects/detail/designs/new/index.html">Continue</a>
+                <button class="btn btn-ghost btn-sm" type="button">Details</button>
+              </div>
+            </div>
+          </li>
+
+          <li class="design-card">
+            <div class="design-card-top">
+              <div>
+                <div class="design-name-row">
+                  <a class="design-name" href="/projects/detail/designs/detail/index.html">Checkout review step</a>
+                  <span class="st-pill in-progress">In progress</span>
+                </div>
+                <div class="design-folder">designs/checkout-review-step</div>
+              </div>
+              <div class="design-actions">
+                <a class="btn btn-outline btn-sm" href="#">View PR</a>
+                <a class="btn btn-outline btn-sm" href="#">Transcript</a>
+                <a class="btn btn-primary btn-sm" href="/projects/detail/designs/new/index.html">Continue</a>
+                <button class="btn btn-ghost btn-sm" type="button">Details</button>
+              </div>
+            </div>
+          </li>
+
+          <li class="design-card">
+            <div class="design-card-top">
+              <div>
+                <div class="design-name-row">
+                  <a class="design-name" href="/projects/detail/designs/detail/index.html">Empty cart state</a>
+                  <span class="st-pill finalized">Finalized</span>
+                </div>
+                <div class="design-folder">designs/empty-cart-state</div>
+              </div>
+              <div class="design-actions">
+                <a class="btn btn-outline btn-sm" href="#">View PR</a>
+                <a class="btn btn-outline btn-sm" href="#">Transcript</a>
+                <a class="btn btn-primary btn-sm" href="/projects/detail/designs/new/index.html">Iterate</a>
+                <button class="btn btn-ghost btn-sm" type="button">Details</button>
+              </div>
+            </div>
+
+            <!-- The expanded "Details" state, shown open on one row so the
+                 disclosure's content is visible in the mockup. -->
+            <dl class="design-details">
+              <div><dt>Created</dt><dd>12 Sep 2026</dd></div>
+              <div><dt>Updated</dt><dd>16 Sep 2026</dd></div>
+              <div><dt>Finalized</dt><dd>16 Sep 2026</dd></div>
+              <div><dt>Sessions</dt><dd>latest completed</dd></div>
+            </dl>
+          </li>
+
+          <li class="design-card">
+            <div class="design-card-top">
+              <div>
+                <div class="design-name-row">
+                  <a class="design-name" href="/projects/detail/designs/detail/index.html">Order confirmation email</a>
+                  <span class="st-pill finalized">Finalized</span>
+                </div>
+                <div class="design-folder">designs/order-confirmation-email</div>
+              </div>
+              <div class="design-actions">
+                <a class="btn btn-outline btn-sm" href="#">View PR</a>
+                <a class="btn btn-outline btn-sm" href="#">Transcript</a>
+                <a class="btn btn-primary btn-sm" href="/projects/detail/designs/new/index.html">Iterate</a>
+                <button class="btn btn-ghost btn-sm" type="button">Details</button>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

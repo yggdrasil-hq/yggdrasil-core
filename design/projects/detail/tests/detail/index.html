@@ -71,6 +71,38 @@
       font-size: 13px;
       color: var(--st-approved);
     }
+
+    /* Run history (ADR 026, issue #16) — the shipped page's second card. */
+    .run-card { margin-top: 24px; max-width: 720px; }
+    .run-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+    .run-current { font-size: 12px; font-weight: 500; }
+    .run-current.failing { color: var(--st-rejected); }
+    .run-current.passing { color: var(--shadow); }
+    .run-list { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+    .run-row { border: 1px solid var(--rime-soft); border-radius: var(--radius-sm); padding: 8px 12px; }
+    .run-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+    .run-glyph { font-size: 14px; }
+    .run-glyph.pass { color: var(--st-approved); }
+    .run-glyph.fail { color: var(--st-rejected); }
+    .run-glyph.idle { color: var(--shadow); }
+    .run-status { font-size: 13px; color: var(--frost); }
+    .run-meta { font-size: 12px; color: var(--shadow); }
+    .run-ref { font-family: var(--font-mono); font-size: 12px; color: var(--shadow); }
+    .run-spacer { flex: 1; }
+    .run-counts { font-size: 12px; color: var(--mist); }
+    .run-counts .fail { color: var(--st-rejected); }
+    .run-detail { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--rime-soft); display: flex; flex-direction: column; gap: 12px; }
+    .run-totals { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; color: var(--frost); }
+    .run-summary { font-size: 12px; color: var(--shadow); }
+    .run-failing { margin: 0; padding-left: 16px; font-size: 12px; color: var(--st-rejected); font-family: var(--font-mono); }
+    .step-row { display: flex; align-items: center; gap: 10px; border: 1px solid var(--rime-soft); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 13px; }
+    .step-glyph.pass { color: var(--st-approved); }
+    .step-glyph.fail { color: var(--st-rejected); }
+    .step-name { flex: 1; min-width: 0; color: var(--frost); }
+    .step-details { font-size: 12px; color: var(--shadow); }
+    .recording-note { font-size: 12px; color: var(--shadow); }
+    .recording-player { border: 1px solid var(--rime-soft); background: var(--surface-02); border-radius: var(--radius-sm); padding: 28px 12px; text-align: center; font-size: 12px; color: var(--shadow); }
+    .run-footnote { margin-top: 12px; font-size: 12px; color: var(--shadow); }
   </style>
 </head>
 <body>
@@ -135,7 +167,7 @@
         </div>
       </div>
       <div class="main-inner">
-        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/tests/:testId</span> (web/app/projects/[projectId]/tests/[testId]/page.tsx) · the Test type only tracks schedule + last-run, no pass/fail history yet — "Changes saved" below is the post-save state, shown here for reference, not conditional · proposed IA rework: sidebar/topbar per /projects/:projectId; breadcrumb replaces the old "&larr; Back to tests" link</div>
+        <div class="design-note"><b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/tests/:testId</span> (web/app/projects/[projectId]/tests/[testId]/page.tsx → web/components/tests/test-detail-client.tsx). <b>The run history is built</b> (ADR 026 item 6, issue #16) and the file below now shows it; this note used to say the Test type had "no pass/fail history yet", which stopped being true when the run-history view shipped — corrected by issue #33. <b>What the history actually is</b>, because it is easy to confuse with the feature page's Testing tab: this is the <em>project-level standalone Testing product</em> — how one scheduled suite has behaved over time — not ADR 015's per-feature Testing stage, which asks whether one feature branch passed before review. The two share the report schema and nothing else. <b>Every row is real data</b> from the run's report plus its job row; the expanded row is the one place the failure artefacts are reachable (report summary, failing test names, per-step results, and the screen recording ADR 029 collects), which is why one is shown open. "Changes saved" below is the post-save state, shown here for reference, not conditional. <b>Not mocked</b>: the empty history (which reads differently for a paused test than for one that has never run, and says so), the "Showing the 25 most recent of N runs" truncation footnote, and the expanded row's "no report" branch — a run shown as failing while reporting nothing, which is a real and visible state rather than an edge case. <b>Proposed IA rework</b>: sidebar/topbar per <span class="mono">/projects/:projectId</span>; breadcrumb replaces the old "&larr; Back to tests" link</div>
 
         <div class="title-row">
           <h1>Checkout flow</h1>
@@ -198,6 +230,89 @@ confirmation page renders.</textarea>
             <span class="saved-note">Changes saved.</span>
           </div>
         </form>
+
+        <div class="card run-card">
+          <div class="run-head">
+            <h3 style="margin:0;">Run history</h3>
+            <span class="run-current failing">Currently failing</span>
+          </div>
+          <p class="card-desc">34 passed · 2 failed · 1 skipped across 3 reported runs</p>
+
+          <ul class="run-list">
+            <li class="run-row">
+              <div class="run-line">
+                <span class="run-glyph fail" aria-hidden="true">&#10007;</span>
+                <span class="run-status">Completed</span>
+                <span class="run-meta">Scheduled</span>
+                <span class="run-ref">main</span>
+                <span class="run-meta">2 hours ago</span>
+                <span class="run-meta">4m 12s</span>
+                <span class="run-spacer"></span>
+                <span class="run-counts">16 passed <span class="fail">· 2 failed</span></span>
+                <button class="btn btn-ghost btn-sm" type="button">Hide</button>
+              </div>
+
+              <div class="run-detail">
+                <div class="run-totals">
+                  <span>16 passed</span>
+                  <span>2 failed</span>
+                  <span>0 skipped</span>
+                  <span>18 total</span>
+                </div>
+                <p class="run-summary">Two checkout assertions regressed after the payment-methods change.</p>
+                <ul class="run-failing">
+                  <li>checkout rejects an expired card</li>
+                  <li>order confirmation shows the saved card</li>
+                </ul>
+
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                  <div class="step-row">
+                    <span class="step-glyph pass" aria-hidden="true">&#10003;</span>
+                    <span class="step-name">Sign in</span>
+                    <span class="step-details">18 checks ran</span>
+                  </div>
+                  <div class="step-row">
+                    <span class="step-glyph fail" aria-hidden="true">&#10007;</span>
+                    <span class="step-name">Checkout with a saved card</span>
+                    <span class="step-details">2 of 6 checks failed</span>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="recording-note">Recording · 2.4 MB · kept for 24 more days</div>
+                  <div class="recording-player" style="margin-top:8px;">&#9654; screen recording (ADR 029)</div>
+                </div>
+              </div>
+            </li>
+
+            <li class="run-row">
+              <div class="run-line">
+                <span class="run-glyph fail" aria-hidden="true">&#10007;</span>
+                <span class="run-status">Failed</span>
+                <span class="run-meta">Scheduled</span>
+                <span class="run-ref">main</span>
+                <span class="run-meta">Yesterday</span>
+                <span class="run-meta">&mdash;</span>
+                <span class="run-spacer"></span>
+                <span class="run-counts">No report</span>
+              </div>
+            </li>
+
+            <li class="run-row">
+              <div class="run-line">
+                <span class="run-glyph pass" aria-hidden="true">&#10003;</span>
+                <span class="run-status">Completed</span>
+                <span class="run-meta">Feature branch</span>
+                <span class="run-ref">yggdrasil/checkout-flow</span>
+                <span class="run-meta">3 days ago</span>
+                <span class="run-meta">3m 48s</span>
+                <span class="run-spacer"></span>
+                <span class="run-counts">18 passed <span>· 1 skipped</span></span>
+                <button class="btn btn-ghost btn-sm" type="button">Details</button>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>

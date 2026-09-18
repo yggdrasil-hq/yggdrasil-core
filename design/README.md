@@ -68,6 +68,9 @@ page.
 | `/projects/:projectId/tests` | `projects/detail/tests/index.html` |
 | `/projects/:projectId/tests/new` | `projects/detail/tests/new/index.html` |
 | `/projects/:projectId/tests/:testId` | `projects/detail/tests/detail/index.html` |
+| `/projects/:projectId/designs` | `projects/detail/designs/index.html` |
+| `/projects/:projectId/designs/new` | `projects/detail/designs/new/index.html` (shown in its re-open state) |
+| `/projects/:projectId/designs/:designId` | `projects/detail/designs/detail/index.html` |
 | `/projects/:projectId/deployments` | `projects/detail/deployments/index.html` |
 | `/projects/:projectId/usage` | `projects/detail/usage/index.html` |
 | `/projects/:projectId/analytics` | `projects/detail/analytics/index.html` |
@@ -87,8 +90,24 @@ page.
 | `/settings/organization/providers` | `settings/organization/providers/index.html` |
 | `/settings/organization/secrets` | `settings/organization/secrets/index.html` |
 | `/settings/organization/cluster` | `settings/organization/cluster/index.html` |
+| `/settings/organization/audit` | `settings/organization/audit/index.html` |
 
 `detail/` stands in for one sample record of a dynamic route segment.
+
+### Known gaps in this map
+
+Two shipped surfaces have a route but no wireframe, both noted on the pages
+nearest to them rather than left for a reader to discover by looking:
+
+- `/settings/organization/extensions` (ADR 025) — the shipped org-settings
+  sidebar has an "Extensions" item and this map has neither the item nor a page.
+- `/projects/:projectId/designs/sessions/:sessionId` — the live
+  `design_grill` session view. The designs pages above link to it, but those
+  buttons are inert here.
+
+`/settings/account`'s **Notifications** section (ADR 027) is a section rather
+than a route, so it lives inside `settings/account/index.html` and has no row of
+its own — that is where the shipped page puts it too.
 
 ## Editing
 

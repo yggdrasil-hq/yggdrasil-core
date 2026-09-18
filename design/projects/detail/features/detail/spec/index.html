@@ -48,10 +48,15 @@
     .turn.user .bubble { background: var(--surface-03); border-color: var(--rime); }
     .bubble p { color: var(--frost); font-size: 14px; line-height: 1.5; }
 
-    .turn-actions { display: flex; gap: 4px; width: 90%; padding: 0 2px; }
-    .turn.user .turn-actions { justify-content: flex-end; }
-    .turn-action { font-size: 11px; color: var(--shadow); background: none; border: none; cursor: pointer; padding: 2px 4px; font-family: inherit; }
-    .turn-action:hover { color: var(--bifrost); }
+    /* The shipped control sits under the bubble, left-aligned for both speakers:
+       TurnRestartControl's wrapper is `ml-1 flex justify-start` regardless of
+       who spoke, even though a user bubble itself is right-aligned. */
+    .turn-actions { display: flex; gap: 4px; width: 90%; padding: 0 2px; margin-left: 4px; justify-content: flex-start; }
+    .turn-action { font-size: 12px; color: var(--shadow); background: none; border: none; cursor: pointer; padding: 2px 0; font-family: inherit; text-underline-offset: 2px; }
+    .turn-action:hover { color: var(--frost); text-decoration: underline; }
+    .restart-confirm { margin-left: 4px; width: 90%; border: 1px solid var(--rime-soft); background: var(--surface-02); border-radius: var(--radius-sm); padding: 12px; }
+    .restart-confirm p { margin: 0; font-size: 12px; color: var(--mist); }
+    .restart-confirm .confirm-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -120,16 +125,30 @@
       </div>
       <div class="main-inner">
         <div class="design-note">
-          <b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/features/:featureId/spec</span>. Two additions per the user's spec: <b>(1) per-message
-          controls</b> — every turn in the grill transcript gets "Resume from here" / "Restart from here", and the toolbar gets a "Stop" control while the grill is
-          active. <b>Nothing here is grounded</b>: ADR 006 covers mid-run reply delivery (<span class="mono">ask_user</span> &rarr; human reply &rarr; back into a
-          running job) at the level of "the next turn," and ADR 012 covers retry at the level of "the whole job" (a new job row, old one kept as history) — neither
-          operates at the granularity of "one specific message in the middle of the transcript." Resume/restart-from-message would need new API surface + a new
-          Orchestrator/Pi contract this doesn't attempt to design, it just shows what clicking it would look like. <b>(2) Stop</b>, by contrast, already has a real
-          landing spot — <span class="mono">feature-lifecycle.md</span>'s <span class="mono">cancelled</span> state exists today for exactly this ("spec or build was
-          stopped"). This grill already finished (<span class="mono">spec_ready</span>), so Stop isn't shown — it only applies while a grill is actually running
+          <b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/features/:featureId/spec</span>.
+          Two additions per the user's spec: <b>(1) per-message controls</b> — the grill transcript gets a
+          "Restart from here" control under each conversation turn, and the toolbar gets a "Stop" control while the grill is
+          active. <b>(2) Stop</b> already had a real landing spot — <span class="mono">feature-lifecycle.md</span>'s
+          <span class="mono">cancelled</span> state ("spec or build was stopped"). This grill already finished
+          (<span class="mono">spec_ready</span>), so Stop isn't shown — it only applies while a grill is actually running
           (<span class="mono">draft</span>), which this page can't be in retroactively.
-        </div>
+          <b>Corrected by issue #33: Restart from here is built</b> (ADR 024), and this note used to describe an unbuilt
+          proposal. Three corrections came with it, each of them a thing ADR 024 item 12 recorded as drift and this wireframe
+          now matches instead of contradicting: <b>"Resume from here" is gone</b> — ADR 024 item 1 scopes it out, and a control
+          that does not exist is worse than an absent one; the mock showed it on every turn. <b>The confirmation step is
+          shown</b> — the real control is two clicks, because a rewind discards every later turn *and* any ADR produced after
+          it, so the first click only explains what is about to be lost (bottom turn above is the expanded state). And the
+          control is <b>left-aligned under both speakers</b>, not right-aligned under a user turn, matching how the component
+          renders it.
+          <b>What is still not mocked</b>: the control's real conditionality. It appears only where the API would accept it —
+          a conversation turn (<span class="mono">agent_text</span> / <span class="mono">ask_user</span> /
+          <span class="mono">user_message</span>, and the API enforces the same set), a <span class="mono">spec_grill</span>
+          job, a feature still in <span class="mono">draft</span> / <span class="mono">spec_ready</span> /
+          <span class="mono">failed</span> / <span class="mono">cancelled</span>, and not a run that is still going. Every turn
+          here happens to be restartable, so the mock cannot show the negative case — on a feature that has moved past Spec
+          (this page reached via Implementation or Testing, say) the page renders with no restart controls at all. Nor is the
+          "this session was restarted from an earlier message" notice mocked, which is what a run produced by a rewind shows
+          in place of the discarded turns.</div>
 
         <div class="detail-title">
           <h1>Saved payment methods</h1>
@@ -216,8 +235,7 @@
                     <p>I'll spec out saved payment methods. First — should we support more than one saved card per customer, or just one?</p>
                   </div>
                   <div class="turn-actions">
-                    <button class="turn-action" type="button">&#8635; Resume from here</button>
-                    <button class="turn-action" type="button">&#10226; Restart from here</button>
+                    <button class="turn-action" type="button" title="Discard the conversation after this message and re-run the grill from here">&#8634; Restart from here</button>
                   </div>
                 </div>
                 <div class="turn user">
@@ -226,8 +244,7 @@
                     <p>Multiple cards, with one marked default.</p>
                   </div>
                   <div class="turn-actions">
-                    <button class="turn-action" type="button">&#8635; Resume from here</button>
-                    <button class="turn-action" type="button">&#10226; Restart from here</button>
+                    <button class="turn-action" type="button" title="Discard the conversation after this message and re-run the grill from here">&#8634; Restart from here</button>
                   </div>
                 </div>
                 <div class="turn">
@@ -236,8 +253,7 @@
                     <p>Got it. I'll use a Stripe SetupIntent to tokenize the card without touching raw PAN data, store only the Stripe payment_method id + last4/brand, and add a `default_payment_method_id` on the customer record. Should removing the default card auto-promote another saved card, or require the customer to pick a new default first?</p>
                   </div>
                   <div class="turn-actions">
-                    <button class="turn-action" type="button">&#8635; Resume from here</button>
-                    <button class="turn-action" type="button">&#10226; Restart from here</button>
+                    <button class="turn-action" type="button" title="Discard the conversation after this message and re-run the grill from here">&#8634; Restart from here</button>
                   </div>
                 </div>
                 <div class="turn user">
@@ -246,8 +262,7 @@
                     <p>Require picking a new default first — don't guess for the customer.</p>
                   </div>
                   <div class="turn-actions">
-                    <button class="turn-action" type="button">&#8635; Resume from here</button>
-                    <button class="turn-action" type="button">&#10226; Restart from here</button>
+                    <button class="turn-action" type="button" title="Discard the conversation after this message and re-run the grill from here">&#8634; Restart from here</button>
                   </div>
                 </div>
                 <div class="turn">
@@ -256,8 +271,14 @@
                     <p>ADR drafted. Ready for your review.</p>
                   </div>
                   <div class="turn-actions">
-                    <button class="turn-action" type="button">&#8635; Resume from here</button>
-                    <button class="turn-action" type="button">&#10226; Restart from here</button>
+                    <button class="turn-action" type="button" title="Discard the conversation after this message and re-run the grill from here">&#8634; Restart from here</button>
+                  </div>
+                  <div class="restart-confirm">
+                    <p>Restart the grill from this message? This feature goes back to draft and a new session starts from the conversation up to this point &mdash; everything after it is discarded. The approved ADR is discarded too, because it was produced after this point.</p>
+                    <div class="confirm-actions">
+                      <button class="btn btn-outline btn-sm" type="button">Yes, restart from here</button>
+                      <button class="btn btn-ghost btn-sm" type="button">Cancel</button>
+                    </div>
                   </div>
                 </div>
               </div>

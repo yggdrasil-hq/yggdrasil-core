@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Empty cart state — Designs — Acme Storefront — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .main-inner { max-width: 960px; }
+    .back-link { font-size: 13px; color: var(--shadow); text-decoration: none; }
+    .back-link:hover { color: var(--frost); }
+    .design-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; margin-top: 24px; }
+    .design-head h1 { font-size: 24px; font-weight: 600; color: var(--frost); margin: 0; }
+    .design-head .folder { margin-top: 4px; font-family: var(--font-mono); font-size: 12px; color: var(--shadow); }
+    .design-head .actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 24px; margin-top: 24px; }
+    .facts dt { font-size: 12px; color: var(--shadow); }
+    .facts dd { margin: 4px 0 0; font-size: 14px; color: var(--frost); }
+    .repo-note { margin-top: 16px; border: 1px solid var(--rime); background: var(--surface-01); border-radius: var(--radius-card); padding: 16px; font-size: 12px; color: var(--mist); }
+    .repo-note code { font-family: var(--font-mono); }
+    h2.sessions { margin: 32px 0 0; font-size: 16px; font-weight: 600; color: var(--frost); }
+    .session-list { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+    .session-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--rime); background: var(--surface-01); border-radius: var(--radius-card); padding: 12px 16px; }
+    .session-title { font-size: 14px; color: var(--frost); }
+    .session-status { margin-left: 8px; font-size: 12px; color: var(--shadow); }
+    .session-date { margin-top: 2px; font-size: 12px; color: var(--shadow); }
+    .session-attention { margin-top: 4px; font-size: 12px; color: var(--st-input); }
+    .foot-note { margin-top: 12px; font-size: 12px; color: var(--shadow); }
+    @media (max-width: 640px) { .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+      <a class="sidebar-project" href="/projects/index.html">
+        <span>Acme Storefront</span>
+        <span class="text-shadow">&#8964;</span>
+      </a>
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/projects/detail/index.html"><span class="icon">&#8962;</span> Home</a>
+        <a class="nav-link" href="/projects/detail/features/index.html"><span class="icon">&#9638;</span> Features</a>
+        <a class="nav-link" href="/projects/detail/tests/index.html"><span class="icon">&#9879;</span> Tests</a>
+        <a class="nav-link" href="/projects/detail/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+        <a class="nav-link" href="/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+        <a class="nav-link" href="/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
+        <a class="nav-link active" href="/projects/detail/designs/index.html"><span class="icon">&#127912;</span> Designs</a>
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-settings" class="nav-group-toggle" checked />
+          <label for="nav-group-settings" class="nav-group-label">
+            <span class="nav-group-title">Settings</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/projects/detail/settings/general/index.html"><span class="icon">&#9881;</span> General</a>
+            <a class="nav-link" href="/projects/detail/settings/secrets/index.html"><span class="icon">&#128273;</span> Secrets</a>
+            <a class="nav-link" href="/projects/detail/settings/models/index.html"><span class="icon">&#129504;</span> Models</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <div class="main">
+      <div class="shell-topbar">
+        <div class="crumbs">
+          <a href="/projects/index.html">Acme Retail</a>
+          <span class="sep">/</span>
+          <a href="/projects/detail/index.html">Acme Storefront</a>
+          <span class="sep">/</span>
+          <a href="/projects/detail/designs/index.html">Designs</a>
+          <span class="sep">/</span>
+          <span class="current">Empty cart state</span>
+        </div>
+        <div class="shell-topbar-actions">
+          <a class="notif-bell" href="/notifications/index.html" aria-label="Notifications"><span class="dot"></span>&#128276;</a>
+        </div>
+      </div>
+
+      <div class="main-inner">
+        <div class="design-note">
+          <b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/designs/:designId</span>
+          (web/app/projects/[projectId]/designs/[designId]/page.tsx → web/components/designs/design-detail-client.tsx).
+          <b>Added by issue #33</b> — part of the browse/re-open pair ADR 020 item 6 shipped with no reference.
+          <b>Built and real</b>. What this page is <em>for</em> is worth stating, because the mockup itself is nowhere on it:
+          ADR 020 item 2 makes the repository the source of truth for the artifact, so this page answers "what happened to this
+          design?" from the <span class="mono">designs</span> table and the session list, and the mockup is viewed through the
+          draft PR. That is why the primary action re-opens a session rather than previewing the HTML.
+          <b>The session list is the point of the page</b>: a design's own status records only whether it was ever committed,
+          while whether it is being worked on *right now* is the newest session's business, so the two are shown separately and
+          the footnote below the list says so. Rows are sample data.
+          The design's <span class="mono">/designs/sessions/:sessionId</span> transcript view has no wireframe yet — the
+          "Open transcript" buttons here are inert for that reason.
+        </div>
+
+        <a class="back-link" href="/projects/detail/designs/index.html">&#8592; All designs</a>
+
+        <div class="design-head">
+          <div>
+            <h1>Empty cart state</h1>
+            <div class="folder">designs/empty-cart-state/</div>
+          </div>
+          <div class="actions">
+            <a class="btn btn-outline" href="#">View draft PR</a>
+            <a class="btn btn-primary" href="/projects/detail/designs/new/index.html">Iterate on this design</a>
+          </div>
+        </div>
+
+        <dl class="facts">
+          <div><dt>Status</dt><dd>Finalized</dd></div>
+          <div><dt>Finalized</dt><dd>16 Sep 2026</dd></div>
+          <div><dt>Created</dt><dd>12 Sep 2026</dd></div>
+          <div><dt>Updated</dt><dd>16 Sep 2026</dd></div>
+        </dl>
+
+        <p class="repo-note">
+          The mockup files are committed in the repository under <code>designs/empty-cart-state/</code>. Re-opening this design
+          starts a new session that reads those files and iterates on them, rather than starting a second folder.
+        </p>
+
+        <h2 class="sessions">Sessions</h2>
+        <ul class="session-list">
+          <li class="session-row">
+            <div>
+              <div class="session-title">Latest session<span class="session-status">completed</span></div>
+              <div class="session-date">16 Sep 2026</div>
+            </div>
+            <a class="btn btn-outline btn-sm" href="#">Open transcript</a>
+          </li>
+          <li class="session-row">
+            <div>
+              <div class="session-title">Earlier session<span class="session-status">failed</span></div>
+              <div class="session-date">14 Sep 2026</div>
+              <div class="session-attention">Last session failed: the agent run ended with an error.</div>
+            </div>
+            <a class="btn btn-outline btn-sm" href="#">Open transcript</a>
+          </li>
+          <li class="session-row">
+            <div>
+              <div class="session-title">Earlier session<span class="session-status">completed</span></div>
+              <div class="session-date">12 Sep 2026</div>
+            </div>
+            <a class="btn btn-outline btn-sm" href="#">Open transcript</a>
+          </li>
+        </ul>
+
+        <p class="foot-note">
+          A design&rsquo;s status records whether it was ever committed; the newest session&rsquo;s outcome is shown above and is
+          not merged into it.
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
