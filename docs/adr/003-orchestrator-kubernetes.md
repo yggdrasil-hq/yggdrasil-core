@@ -111,6 +111,14 @@ Constraints:
     Yggdrasil-defined template during `project_init` (ADR 002) — not
     hand-authored by the project team. (Project teams here mostly means the Pi
     agent, not a human, so the chart's rigidity is a feature, not friction.)
+
+    **Amended (issues #69/#71): the build runs as an ordinary in-cluster Job with
+    two containers of deliberately different capability** — a *context* container
+    whose image has a shell (it clones, and it decides the two skip cases), and a
+    shell-**less** executor container driven through the builder's own CLI. That
+    split is load-bearing rather than incidental: any guard that needs a shell
+    belongs in the former, and issue #69 is exactly what happens when one is put
+    in the latter. See §14 for why the executor image has no shell at all.
 13. The Orchestrator applies charts **imperatively** — it calls Helm (via its
     Go SDK) directly against the target cluster at deploy time. No GitOps
     controller (ArgoCD/Flux) for MVP.
@@ -186,6 +194,26 @@ Constraints:
     Dockerfile) belongs in a container whose image is known to have a shell —
     which is why it moved to the clone init container, where "this ref is not on
     the remote yet" is already answered the same way.
+
+    **And again (issues #69/#71): the build path and the pull path have different
+    requirements, and only the build path is satisfied by a bare `registry:2`.**
+
+    A build *pushes* from userspace code inside a pod, so cluster DNS resolves the
+    registry and go-containerregistry falls back to plain HTTP. A preview
+    Deployment *pulls* through **containerd, which is a node daemon**: it resolves
+    registry hostnames with the node's resolver — so
+    `registry.<ns>.svc.cluster.local` resolves perfectly from inside a pod and not
+    at all for the pull — and it will not fall back to HTTP, so a plain
+    `registry:2` fails with `http: server gave HTTP response to HTTPS client`.
+    Both were measured against the real cluster, not inferred.
+
+    So the bundled registry above is necessary but **not sufficient**. An install
+    must additionally either serve it over TLS with a CA the nodes trust, or list
+    it as insecure in containerd's configuration (k3s:
+    `/etc/rancher/k3s/registries.yaml`), **and** address it by a name the nodes can
+    resolve. Which of those the product should do is open (issue #71). What is now
+    established is the part that matters for anyone reading evidence: **"the image
+    built" is not evidence that a preview can run it.**
 
 ### Networking
 
