@@ -143,6 +143,11 @@ Constraints:
       feature's first build the branch genuinely does not exist remotely, and
       treating that as a failure would replace a working preview with a
       failed-looking one for the whole of the first run.
+    - a **repository with no Dockerfile** at §12's contract path.
+
+    Both skips are decided in the clone init container, which is the one place in
+    the build that has a shell — see the §14 amendment below for why that
+    matters.
 
     Both fall back to the chart's image with the reason logged, and no failure
     path in the build can fail the job — the posture `startJobPreview` already
@@ -165,6 +170,22 @@ Constraints:
     **keyed on the project id rather than the slug**, so renaming a project
     cannot orphan its images, matching the `proj-<id>` namespace naming used
     everywhere else.
+
+    **Amended again (issue #69): the build container is invoked through the
+    builder's own CLI, never through a shell.** The first implementation wrapped
+    Kaniko in `sh -c`, and the Kaniko executor image is **distroless** — it has no
+    shell at all — so *every* build failed at container start with
+    `exec: "sh": executable file not found in $PATH`. It was not a subtle failure
+    to diagnose once seen, but nothing had asserted the container could start, so
+    the pipeline merged and appeared complete.
+
+    The rule this leaves behind, for any future builder image: **check that the
+    image has the interpreter you are invoking before wrapping it in one.**
+    Kaniko's own `--context`/`--dockerfile`/`--destination` arguments need no
+    shell, and a check that does need one (whether the repository has a
+    Dockerfile) belongs in a container whose image is known to have a shell —
+    which is why it moved to the clone init container, where "this ref is not on
+    the remote yet" is already answered the same way.
 
 ### Networking
 

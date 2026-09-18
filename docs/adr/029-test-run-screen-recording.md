@@ -287,6 +287,27 @@ not predicted:
   but a future reader deciding whether to swap in the SDK should know the choice
   was made under a constraint, not because hand-rolling was judged better.
 
+### 11a. Screenshots share the collection shape but not the count policy (issue #22)
+
+Screenshots are collected the same way a recording is — read out of the pod with
+`k8s.ReadPodFile` after the session ends and before the deferred `DeleteJob`
+destroys it, through the same `podFileReader`, with the same
+"never fail the job" posture. What they deliberately do **not** share is a
+per-job count cap:
+
+- **The API owns the bound** (`SCREENSHOT_MAX_PER_JOB`, default 50). A second
+  bound in the Orchestrator would be a divergent limit, and a divergent limit
+  **fails silently** — the pod would stop collecting at a different number than
+  the API expects, with nothing reporting the discrepancy. One authority, or the
+  disagreement is invisible.
+- **The read timeout is per-screenshot, inside the batch's overall budget**, not
+  one deadline for the batch. A shared deadline means one wedged `exec` consumes
+  the time available to every screenshot after it, so a single bad read loses all
+  the remaining artifacts rather than one.
+
+Recordings keep a per-job size cap because there is exactly **one** of them per
+job; the asymmetry follows from the cardinality, not from different standards.
+
 ## Consequences
 
 ### Positive
