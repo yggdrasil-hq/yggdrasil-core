@@ -447,6 +447,7 @@ looks like on the wire, and the honest sequence is to measure first.
   long stream waits for those POSTs to drain, and each delta is one `pg_notify`
   plus one socket write. This is the cost this ADR accepts for building the
   streaming path first and measuring before optimising; coalescing is follow-up 1
+  and has since landed (issue #23)
   and is the expected fix.
 - The relay is a read amplification: one event now causes a Postgres read, a
   socket write, and (coalesced) a REST re-read per subscribed tab, where before
@@ -455,20 +456,36 @@ looks like on the wire, and the honest sequence is to measure first.
 
 ### Follow-ups
 
-1. **Coalesce deltas in the Orchestrator.** Accumulate chunks and flush every
-   ~50-100 ms (or above a size threshold) rather than forwarding one per token.
-   This is the fix for item 13's dominant cost — HTTP requests — and it is a
-   localised change to the forwarding path, not to the protocol. Deliberately not
-   built speculatively: what a good flush interval is depends on the measured
-   delta rate, which is why it is a follow-up rather than a guess.
+1. ~~**Coalesce deltas in the Orchestrator.**~~ **Done** (issue #23,
+   `orchestrator/internal/worker/deltas.go`). Consecutive deltas accumulate and
+   are forwarded as one, on a 75 ms timer or a 4 KiB ceiling, whichever comes
+   first. It is the localised change to the forwarding path this predicted and
+   nothing else: the endpoint, the fan-out, the frame shape and the client's
+   delta handling are untouched.
+
+   Two properties are the reason it is a wrapper rather than a protocol change,
+   and both are now pinned by tests. **Ordering**: every non-delta event flushes
+   the buffer before it is forwarded, so the authoritative `agent_text` — which
+   the client uses to *replace* accumulated text — can never overtake the deltas
+   it supersedes. **No loss**: the buffer is flushed on every return path, and a
+   delta arriving after the session ends is forwarded rather than dropped.
+
+   The interval is still a judgement rather than a measurement, contrary to this
+   item's own advice, because nobody has measured a real delta rate yet — 75 ms
+   is the middle of the range the item names, chosen so a stream does not visibly
+   arrive in lumps while cutting a few hundred chunks a second to about ten. If
+   the number ever needs defending with a figure, that is the measurement to
+   take.
 2. **A design-session topic**, so `design_grill`'s live preview stops polling
    (ADR 014's snapshot events are already in the same vocabulary).
 3. **Subscribe-once authorisation for build and testing surfaces** — the grill
    page is the only converted surface; the build-progress panel, the feature
    testing tab and the design session view still poll unchanged.
 4. **Per-socket rate limiting and a delta volume ceiling**, now that frame volume
-   is client-visible. There is none today, matching the rest of the API, and
-   coalescing (follow-up 1) should land first.
+   is client-visible. There is none today, matching the rest of the API. Its
+   prerequisite (follow-up 1) has landed, so what a normal stream costs is now
+   measurable rather than hypothetical — which is what this item said it was
+   waiting for.
 5. Consider a `subscribe`-acknowledged cursor if the REST catch-up read ever
    becomes expensive enough to avoid — not close today, since a grill transcript
    is a few hundred rows at most.
