@@ -1,3 +1,8 @@
 .mcp-playwright
 .playwright-mcp
 .local-go/
+
+# The Playwright CLI's snapshot/console scratch directory. Local state written on
+# every command, not content — leaving it untracked means every `git status` in
+# the meta repo is noisy for no reason.
+.playwright-cli/

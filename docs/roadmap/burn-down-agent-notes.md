@@ -1,0 +1,83 @@
+# Burn-down: conventions for delegated agents
+
+You are one of several agents working through the open issues of the Yggdrasil
+suite. This file is your shared context so each of you needs no memory of the
+others. **Read it before you start.**
+
+## The repo layout
+
+`/home/mugiwara/files/personal/projects/apps/yggdrasil` is the **meta repo**. It
+contains no application code — only docs and the child repos as git submodules.
+**Read `CLAUDE.md` in it first**: it has a routing table pointing at whichever
+doc your task needs, so you do not have to read the whole `docs/` tree.
+
+| Path | Repo | What is there |
+|---|---|---|
+| `api/` | `yggdrasil-hq/yggdrasil-api` | REST + WebSocket API, PostgreSQL, Express 4 + TS |
+| `web/` | `yggdrasil-hq/yggdrasil-web` | Next.js app |
+| `orchestrator/` | `yggdrasil-hq/yggdrasil-orchestrator` | Stateless job executor, Go, Kubernetes |
+| `agent-images/` | `yggdrasil-hq/yggdrasil-agent-images` | Pi base images, skills, shared extension |
+| `landing/`, `docusaurus/` | | Marketing site, end-user docs |
+| `docs/` (meta) | `yggdrasil-hq/yggdrasil-core` | ADRs — the design authority |
+| `design/` (meta) | | HTML wireframes; ADR 017 makes them the source of truth for how a page looks |
+
+## Non-negotiable rules
+
+1. **Run every build, test and install command through Docker.** Do not install
+   anything on the host. Each child repo has a `docker-compose.test.yml` and a
+   `deploy/Dockerfile.test`; the standard invocation is:
+   ```
+   docker compose -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from test
+   ```
+   For Go, `docker run --rm -v "$PWD":/app -w /app -v yggdrasil-gocache:/go/pkg/mod golang:1.26-bookworm sh -c "gofmt -l cmd internal; go test ./... -count=1"`.
+   Note `npx` is blocked by the sandbox — use `./node_modules/.bin/<tool>` if a
+   repo's node_modules is present (api and web have them), or the repo's own
+   `scripts/run-tests.sh` (which the Docker test image runs for you).
+
+2. **Do not fix something you have not reproduced.** If a test is the only thing
+   that would catch it, the test is part of the fix. Tests that pass trivially —
+   e.g. a fake repository that never executes the real SQL — do not count as
+   verification; say so plainly if that is all you could get.
+
+3. **Read before you write.** Each child repo has its own `CLAUDE.md`, which is
+   the authority inside it. Respect the existing comment style: this codebase
+   explains *why* in prose comments, and that is deliberate — match it.
+
+4. **One writer per repo.** You are told in your task which repos you own. Do
+   not write to a repo you were not given; another agent may be in it. If your
+   work genuinely needs a change there, implement what you can and report the
+   rest rather than reaching across.
+
+5. **Land it the way this project lands things**: branch (`fix/<issue>-<slug>` or
+   `feat/...`), commit with a message that explains the reasoning and references
+   the issue (`Refs yggdrasil-hq/yggdrasil-core#NN`), open a PR with `gh`, and
+   **merge it to main once the suite is green**
+   (`gh pr merge <n> --squash --delete-branch`). Then bump nothing in the meta
+   repo yourself — the coordinator does that.
+
+6. **Close the issue when it is actually done**, with `gh issue close` and a
+   comment saying what changed and where. If you only partly did it, say so in
+   the comment and leave the issue open, or open a new issue for the remainder.
+
+7. **File anything you find that is out of scope** as a new issue on
+   `yggdrasil-hq/yggdrasil-core` (labels from the repo's existing set), rather
+   than silently fixing it or silently ignoring it. The operator asked for
+   transparency.
+
+8. **Verify against reality where you can.** The dev stack is running:
+   `docker compose -f deploy/docker-compose.dev.yml ps` from the meta repo shows
+   nginx (8080), web, api, orchestrator, postgres, minio. `http://localhost:8080`
+   serves the app. A kubeconfig is registered, and there is a real test project
+   (`Luffy's Portfolio`). Prefer a demonstration over a claim.
+
+9. **Do not browse anything except the Yggdrasil app itself.** `playwright-cli`
+   is available and is attached to a Chrome already logged in as the operator —
+   use it *only* against `http://localhost:8080` (and the product's own pages).
+   Do not use the operator's browser for anything else.
+
+## Report back
+
+Finish with a short report: what you changed, which issue(s) you closed, the
+exact test command and its result, and **anything you could not verify or chose
+not to do**, with the reason. A precise "I could not verify X" is far more
+useful than an optimistic claim.
