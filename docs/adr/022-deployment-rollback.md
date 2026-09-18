@@ -143,8 +143,16 @@ existing internal surface.
   marking the job failed would report a true outcome as a false one — the same
   principle as ADR 028's non-fatal audit write. The cost is real, though: that
   revision is then absent from the ledger and so not offered as a rollback
-  target, so the worker logs it loudly with the revision named rather than
-  swallowing it (§12, follow-ups).
+  target.
+- **The report is retried before it is given up on** (issue #26). Four attempts
+  with 1s/2s/4s backoff, then the loud log naming the revision. This covers the
+  two transient cases — an API restart and a dropped packet — and the ingest is
+  idempotent per job (`project_deploys` is unique on `job_id`, migration 043) so
+  the case a retry cannot tell apart from a fresh attempt, "the write landed but
+  the response didn't", records one row rather than two. It does **not** cover a
+  pod that is evicted between the Helm operation and the report: no retry inside
+  that pod can, and closing that would need the revision to be recoverable from
+  the cluster by something that outlives the job.
 
 ### 6. One deployment operation at a time per project.
 
@@ -160,10 +168,27 @@ failure in place of a clear refusal.
 **Helm is the second line of defence, not the first.** `action.Rollback` and
 `action.Upgrade` mark the release `pending-rollback`/`pending-upgrade` while they
 run and refuse to start against a release in one of those states, so a race that
-slips past the check-then-enqueue guard fails the second job loudly instead of
-corrupting release state. **The guard is not atomic** — it reads, then inserts —
-so this window is real and accepted; §12 records the constraint that would close
-it.
+slips past the guard fails the second job loudly instead of corrupting release
+state.
+
+**The guard is atomic as of issue #26.** It was originally check-then-enqueue —
+read the latest `deploy`/`rollback` job, then insert — which left a real window
+in which two concurrent requests both passed the check and raced the same Helm
+release. The route still reads first, so the ordinary case gets a clear 409 from
+the route's own logic, but the invariant is now enforced by a partial unique
+index (migration 043):
+
+```sql
+CREATE UNIQUE INDEX idx_jobs_one_active_deploy_per_project
+  ON jobs(project_id)
+  WHERE kind IN ('deploy', 'rollback') AND status IN ('pending', 'running');
+```
+
+The loser of the race now gets the same 409 rather than something Helm-shaped.
+Note the constraint's failure mode: a job stuck in `pending`/`running` blocks
+further deployments for that project until it is cancelled — nothing reaps a
+stale job. That is not new (the pre-check already blocked on the same condition)
+and cancelling the job is the way out, which the tests pin.
 
 ### 7. Rollback authorization reuses the project-access gate.
 
@@ -176,20 +201,24 @@ enforces while every neighbouring route used the membership gate. Rollback is
 thus exactly as privileged as "Deploy now", which is why §8's audit and §9's
 confirmation carry the weight that the authorization does not.
 
-### 8. Rollback is audited; the routine deploy trigger still is not.
+### 8. Both operator-initiated deployment actions are audited.
 
-A new `deploy.rolled_back` audit action is recorded with actor, project, the
-revision being undone and the revision requested.
+`deploy.rolled_back` and `deploy.triggered` are each recorded with actor,
+project and the resulting job id (the rollback's row also carries the revision
+being undone and the revision requested, both of which matter: one is what was
+live, the other is what the operator asked for).
 
 ADR 028's out-of-scope table lists the manual `deploy` trigger as unaudited,
 with the reason that "the `deploy` job row plus ADR 013's deploy-status feedback
 already record this; the trail adds a duplicate with no actor detail the job row
-lacks". That reasoning does **not** carry over to rollback: the job row still
+lacks". That reasoning did **not** carry over to rollback — the job row still
 carries no actor, and "who sent production back to an older revision, and when"
 is precisely the question an audit trail exists to answer for a destructive
-operation. The asymmetry is therefore intentional and this note exists so a
-reader does not read it as an oversight. Auditing the plain `deploy` trigger for
-consistency is a deliberate non-goal here (§12).
+operation — and issue #26 pointed out the resulting asymmetry: the trail covered
+one of the two things an operator can trigger and not the other. Both are now
+recorded. The *push-driven* deploy is still deliberately unaudited: it has no
+actor to name and would add a row per push to `main`, so ADR 028's reasoning
+still holds for that path.
 
 ### 9. The UI requires deliberate confirmation, and states the consequence.
 
@@ -243,11 +272,19 @@ product is recorded here rather than by editing the wireframe.
 - **Two revisions of drift are possible** between what the ledger believes is
   running and what the cluster actually runs, if a report is lost (§5) or
   someone deploys outside Yggdrasil.
-- **No deploy currently records the triggering commit.** The ledger's `ref` is
-  populated from the job row, and deploy jobs are dispatched without one, so it
-  is usually NULL — the "which commit caused this" column is structurally
-  present but mostly empty today.
-- The in-flight guard is check-then-enqueue, not atomic (§6).
+- **The ledger's `ref` is populated but coarse.** Issue #26 wired every
+  dispatch site to record one, so a row now names the branch a deploy came from
+  ("main" for the primary deployment, the pushed ref for a webhook, the target
+  revision's ref for a rollback). What it still cannot answer is "which
+  *commit*", because the push webhook payload the API receives carries a ref and
+  not a SHA — two pushes to `main` produce two rows that both say `main`. A
+  commit-level answer needs the payload's `after` SHA threaded through, which is
+  a change to the webhook contract rather than to this ledger.
+- A manual `deploy` trigger is audited (§8) as of issue #26; a push-driven one
+  still is not, because it has no actor to name and would add a row per push to
+  `main`.
+- **A lost report leaves two revisions of drift** only in the narrow window the
+  retry does not cover (§5).
 - A rollback does not restore rotated secrets: project secrets are applied
   imperatively outside Helm (ADR 003 §16), so they are inputs to a release
   rather than part of it. Rolling back application code while keeping current
@@ -258,16 +295,24 @@ product is recorded here rather than by editing the wireframe.
 
 ### Follow-ups
 
-- **Transactional/atomic in-flight guard** — a partial unique index on
-  `jobs(project_id) WHERE kind IN ('deploy','rollback') AND status IN
-  ('pending','running')` would close §6's window at the database rather than in
-  the route.
-- **Report retry / outbox** for `/internal/jobs/:id/deploy-result`, so a lost
-  report cannot silently remove a revision from the rollback targets (§5).
-- **Record the triggering commit** on deploy jobs so `project_deploys.ref` is
-  meaningful (webhook and manual dispatch both currently omit it).
-- **Audit the `deploy` trigger** for symmetry with §8, which would mean moving a
-  row out of ADR 028's out-of-scope table.
+The first four were resolved by issue #26 (§6, §5, §4's `ref`, §8):
+
+- ~~**Transactional/atomic in-flight guard**~~ — done: the partial unique index
+  in §6, plus a route that turns the resulting conflict into the same 409.
+- ~~**Report retry / outbox**~~ — done as a bounded retry on the Orchestrator
+  side (§5). An outbox was rejected: the pod that would hold it is the thing
+  being evicted.
+- ~~**Record the triggering commit** on deploy jobs~~ — partially done: `ref` is
+  now populated at all four dispatch sites and on rollback, from the job row.
+  Recording the *commit* rather than the branch is still open (see the
+  trade-offs above) and needs the webhook payload's `after` SHA.
+- ~~**Audit the `deploy` trigger**~~ — done for the manual trigger. The
+  push-driven one stays out of scope deliberately.
+- **Stale-job reaping.** The in-flight index makes a job wedged in
+  `pending`/`running` block that project's deployments until someone cancels it.
+  Nothing reaps a stale job today, and the index turns that from an inconvenience
+  into a hard stop. It is visible (the deployments page explains it) and
+  recoverable (cancel the job), but a reaper is the real fix.
 - **History pagination** — the endpoint returns a bounded window with no cursor.
 - **Live cluster telemetry** (`/infrastructure`, `roadmap/open-questions.md` #15)
   remains unbuilt and unrelated: this ADR reads Yggdrasil's own ledger, not the
