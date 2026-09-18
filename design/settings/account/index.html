@@ -101,6 +101,10 @@
 
     .model-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; border: 1px solid var(--rime); border-radius: var(--radius-sm); margin-top: 12px; }
     .model-row:first-of-type { margin-top: 16px; }
+    /* The left-hand column of a row: the name/tag line above the id. Every other
+       class in this family was declared and this one was missed, so the column
+       took its width from content rather than growing into the space available. */
+    .model-info { flex: 1; min-width: 0; }
     .model-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .model-name { font-size: 14px; font-weight: 500; color: var(--frost); }
     .model-id { margin-top: 2px; }

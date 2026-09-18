@@ -136,6 +136,17 @@
    default in markup so groups start expanded, matching how the old
    always-open .nav-divider groups they replace used to read. */
 
+/* The wrapper. It carries no styling of its own and never has — its whole job is
+   to hold the toggle, label and items as *siblings*, which is what the `~`
+   combinators below require. It is declared here anyway so that relationship is
+   visible from the stylesheet: deleting this div in markup silently breaks the
+   expand/collapse behaviour, and nothing else in the file would say why the
+   three elements have to share a parent. */
+.nav-group {
+  display: flex;
+  flex-direction: column;
+}
+
 .nav-group-toggle {
   position: absolute;
   opacity: 0;
