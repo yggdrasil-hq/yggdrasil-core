@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Extensions — Organization — Yggdrasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/shared/tokens.css" />
+  <link rel="stylesheet" href="/shared/shell.css" />
+  <style>
+    .main-inner.narrow { max-width: 960px; }
+    .card-title { font-size: 16px; font-weight: 600; color: var(--frost); }
+    .card-desc { margin-top: 6px; font-size: 13px; max-width: 640px; }
+    .warn { display: flex; gap: 10px; border: 1px solid var(--rime); background: var(--surface-02); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; color: var(--mist); }
+    .warn .glyph { flex-shrink: 0; }
+    .ext-list { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+    .ext-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; border: 1px solid var(--rime-soft); background: var(--surface-01); border-radius: var(--radius-sm); padding: 12px; }
+    .ext-name { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: var(--frost); }
+    .ext-meta { margin-top: 2px; font-size: 12px; color: var(--shadow); }
+    .ext-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .badge-active { background: rgba(47, 212, 198, 0.15); color: var(--bifrost); border-color: rgba(47, 212, 198, 0.4); }
+    .source-file { margin-top: 12px; }
+    .source-file .path { font-size: 12px; font-weight: 500; color: var(--shadow); }
+    .source-file pre { margin: 4px 0 0; max-height: 260px; overflow: auto; border: 1px solid var(--rime-soft); background: var(--surface-01); border-radius: var(--radius-sm); padding: 12px; font-family: var(--font-mono); font-size: 12px; color: var(--frost); }
+    .enabled-line { font-size: 12px; color: var(--shadow); }
+    .upload-grid { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 16px; }
+    .upload-grid label { font-size: 12px; font-weight: 500; color: var(--shadow); display: block; }
+    .upload-grid .input { margin-top: 4px; width: 100%; }
+    .file-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+    .file-row .input { flex: 1; }
+    .file-body { min-height: 150px; width: 100%; margin-top: 4px; border: 1px solid var(--rime-soft); background: var(--surface-01); border-radius: var(--radius-sm); padding: 12px; font-family: var(--font-mono); font-size: 12px; color: var(--frost); resize: vertical; }
+    .ack { display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; font-size: 12px; color: var(--shadow); max-width: 640px; }
+    .ack input { margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="logo"><span class="mark">Y</span><span class="gg">gg</span><span class="drasil">drasil</span></span>
+      </div>
+
+      <div class="org-switcher sidebar-org-switcher">
+        <input type="checkbox" id="org-switcher-toggle" class="user-menu-toggle" />
+        <label for="org-switcher-toggle" class="sidebar-project">
+          <span style="display:flex; align-items:center; gap:8px; min-width:0;">
+            <span class="org-avatar sm">A</span>
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Acme Retail</span>
+          </span>
+          <span class="text-shadow">&#8964;</span>
+        </label>
+        <div class="user-menu-panel org-switcher-panel">
+          <div class="org-switcher-label">Organizations</div>
+          <a class="user-menu-item org-switcher-item active" href="/projects/index.html"><span class="org-avatar sm">A</span> Acme Retail</a>
+          <a class="user-menu-item org-switcher-item" href="/projects/index.html"><span class="org-avatar sm">N</span> Northwind Labs</a>
+          <div class="org-switcher-divider">
+            <a class="user-menu-item" href="/settings/organization/general/index.html">Organization settings</a>
+            <button class="user-menu-item" type="button">+ Create organization</button>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="/projects/index.html"><span class="icon">&#9638;</span> Projects</a>
+        <a class="nav-link" href="/deployments/index.html"><span class="icon">&#9650;</span> Deployments</a>
+
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-monitoring" class="nav-group-toggle" checked />
+          <label for="nav-group-monitoring" class="nav-group-label">
+            <span class="nav-group-title">Monitoring</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/usage/index.html"><span class="icon">&#128202;</span> Usage</a>
+            <a class="nav-link" href="/analytics/index.html"><span class="icon">&#128200;</span> Analytics</a>
+            <a class="nav-link" href="/infrastructure/index.html"><span class="icon">&#128421;</span> Infrastructure</a>
+          </div>
+        </div>
+
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-allocations" class="nav-group-toggle" checked />
+          <label for="nav-group-allocations" class="nav-group-label">
+            <span class="nav-group-title">Allocations</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/allocations/infra/index.html"><span class="icon">&#9881;</span> Infra</a>
+            <a class="nav-link" href="/allocations/api/index.html"><span class="icon">&#129302;</span> Agent API</a>
+          </div>
+        </div>
+
+        <div class="nav-group">
+          <input type="checkbox" id="nav-group-settings" class="nav-group-toggle" checked />
+          <label for="nav-group-settings" class="nav-group-label">
+            <span class="nav-group-title">Settings</span>
+            <span class="nav-group-chevron">&#9662;</span>
+          </label>
+          <div class="nav-group-items">
+            <a class="nav-link" href="/settings/organization/general/index.html"><span class="icon">&#9881;</span> General</a>
+            <a class="nav-link" href="/settings/organization/members/index.html"><span class="icon">&#128101;</span> Members</a>
+            <a class="nav-link" href="/settings/organization/providers/index.html"><span class="icon">&#129504;</span> Providers &amp; Models</a>
+            <a class="nav-link" href="/settings/organization/secrets/index.html"><span class="icon">&#128273;</span> Secrets</a>
+            <a class="nav-link" href="/settings/organization/cluster/index.html"><span class="icon">&#128421;</span> Kubernetes cluster</a>
+            <a class="nav-link" href="/settings/organization/audit/index.html"><span class="icon">&#128220;</span> Audit</a>
+            <a class="nav-link active" href="/settings/organization/extensions/index.html"><span class="icon">&#129513;</span> Extensions</a>
+          </div>
+        </div>
+
+        <a class="nav-link nav-link-bottom" href="/notifications/index.html"><span class="icon">&#128276;</span> Notifications</a>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="user-menu sidebar-account">
+          <input type="checkbox" id="user-menu-toggle" class="user-menu-toggle" />
+          <label for="user-menu-toggle" class="sidebar-account-trigger">
+            <span class="avatar">SC</span>
+            <span class="info">
+              <div class="name">Sarat Chandra</div>
+              <div class="handle">@saratc</div>
+            </span>
+            <span class="chevron">&#9662;</span>
+          </label>
+          <div class="user-menu-panel">
+            <a class="user-menu-item" href="/settings/account/index.html">Account settings</a>
+            <a class="user-menu-item" href="/settings/organization/general/index.html">Organization settings</a>
+            <a class="user-menu-item" href="/login/index.html">Log out</a>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="main-inner narrow">
+        <div class="design-note">
+          <b>Wireframe</b> · maps to <span class="mono">/settings/organization/extensions</span>
+          (web/app/settings/organization/extensions/page.tsx → web/components/settings/organization/org-extensions-settings.tsx).
+          <b>Added by issue #33</b> — the same class of gap as the four surfaces that issue lists, and the one it did not:
+          ADR 025 built this page and recorded its own drift ("no wireframe exists for this surface"), and the shipped
+          org-settings sidebar has had an "Extensions" item with no mockup to match. The item is new in the sibling pages'
+          sidebars here for the same reason.
+          <b>Built and real</b>, and admin-only. The trust warning, the acknowledgement copy, the status badge, the upload
+          rules and the "this is exactly what runs" source view are the component's own words.
+          <b>What makes this page different from every other settings page, and why the warning comes first</b>: an uploaded
+          extension is <em>arbitrary code</em> running inside the job container with the agent's own access — the project's
+          GitHub installation token and the model API key — so enabling one is not a configuration change but a decision to
+          run somebody's code with the organization's credentials. That is why the acknowledgement gates the upload button
+          rather than sitting beside it as a formality, and why a full source view exists at all.
+          <b>Not mocked</b>: the empty state ("No extensions uploaded."), the loading state, the success/failure notices, the
+          delete confirmation, the disabled-while-busy states, and the upload validation message
+          (<span class="mono">draftBundleIssue</span>: a missing name, a missing entry path, or an empty file set). The file
+          editor shows one file where the real form renders one textarea per file plus "Add file" and "Remove". Nothing here
+          is proposed.
+        </div>
+
+        <div class="page-header">
+          <div>
+            <h1>Extensions</h1>
+            <p>Pi extensions your organization has uploaded. These are arbitrary code: a project only loads them if it opts in.</p>
+          </div>
+        </div>
+
+        <div class="warn">
+          <span class="glyph">&#9888;</span>
+          <span>An extension is arbitrary code. It runs inside the job container with the same access as the agent itself: it can read the pod&rsquo;s environment &mdash; including the project&rsquo;s GitHub installation token and the model API key &mdash; make network requests, modify the workspace, and emit tool calls that Yggdrasil treats as the job&rsquo;s real result. There is no sandbox. Only upload code you have read and trust.</span>
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+          <div class="card-title">Installed</div>
+          <div class="card-desc">2 stored, 1 active, enabled in 1 project.</div>
+
+          <ul class="ext-list">
+            <li class="ext-row">
+              <div>
+                <div class="ext-name">House style checks <span class="badge badge-active">Active</span></div>
+                <div class="ext-meta">src/index.ts &middot; revision 4f2a91c8be07 &middot; uploaded by Sarat Chandra on 16 Sep 2026</div>
+                <div class="ext-meta">Enabled in 1 project</div>
+              </div>
+              <div class="ext-actions">
+                <button class="btn btn-outline btn-sm" type="button">View source</button>
+                <button class="btn btn-outline btn-sm" type="button">Disable</button>
+                <button class="btn btn-outline btn-sm" type="button">Delete</button>
+              </div>
+            </li>
+            <li class="ext-row">
+              <div>
+                <div class="ext-name">Legacy lint shim <span class="badge">Disabled</span></div>
+                <div class="ext-meta">dist/index.js &middot; revision 91de0c774a41 &middot; uploaded by Priya Raman on 9 Sep 2026</div>
+                <div class="ext-meta">Not enabled in any project</div>
+              </div>
+              <div class="ext-actions">
+                <button class="btn btn-outline btn-sm" type="button">View source</button>
+                <button class="btn btn-outline btn-sm" type="button">Enable</button>
+                <button class="btn btn-outline btn-sm" type="button">Delete</button>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- The expanded "View source" card, shown open so the one control that
+             makes this page trustworthy is visible in the mockup. -->
+        <div class="card" style="margin-top: 24px;">
+          <div class="card-title">House style checks &mdash; source (revision 4f2a91c8be07)</div>
+          <div class="card-desc">1 file &middot; 2.1 KB. This is exactly what runs: read it before enabling the extension anywhere.</div>
+          <div class="enabled-line" style="margin-top:12px;">Loaded by: Acme Storefront</div>
+
+          <div class="source-file">
+            <div class="path">src/index.ts &middot; 2.1 KB</div>
+            <pre>import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+
+export default function (pi: ExtensionAPI) {
+  pi.registerTool({
+    name: "house_style_check",
+    description: "Check a file against the organization's house style rules.",
+    parameters: Type.Object({ path: Type.String() }),
+    async execute(_toolCallId, params) {
+      return { content: [{ type: "text", text: check(params.path) }] };
+    },
+  });
+}</pre>
+          </div>
+
+          <div style="margin-top:16px;">
+            <button class="btn btn-outline btn-sm" type="button">Close</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+          <div class="card-title">Upload</div>
+          <div class="card-desc">Source files only. Dependencies cannot be installed inside a job container, so an uploaded extension must use only what the image already provides. Uploading with a name that already exists replaces that extension&rsquo;s files.</div>
+
+          <div class="upload-grid">
+            <label>
+              Name
+              <input class="input" type="text" value="House style checks" />
+            </label>
+            <label>
+              Entry path
+              <input class="input" type="text" value="src/index.ts" />
+            </label>
+          </div>
+
+          <div class="file-row">
+            <input class="input" type="text" value="src/index.ts" />
+            <button class="btn btn-outline btn-sm" type="button" disabled style="opacity:0.5;">Remove</button>
+          </div>
+          <textarea class="file-body">import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+
+export default function (pi: ExtensionAPI) {
+  // Register the organization's house-style tool.
+}</textarea>
+
+          <div style="margin-top:12px;">
+            <button class="btn btn-outline btn-sm" type="button">Add file</button>
+          </div>
+
+          <label class="ack">
+            <input type="checkbox" checked />
+            <span>I have read this extension&rsquo;s source and accept that it runs with my organization&rsquo;s credentials.</span>
+          </label>
+
+          <div style="margin-top:16px;">
+            <button class="btn btn-primary" type="button">Upload extension</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -91,16 +91,15 @@ page.
 | `/settings/organization/secrets` | `settings/organization/secrets/index.html` |
 | `/settings/organization/cluster` | `settings/organization/cluster/index.html` |
 | `/settings/organization/audit` | `settings/organization/audit/index.html` |
+| `/settings/organization/extensions` | `settings/organization/extensions/index.html` |
 
 `detail/` stands in for one sample record of a dynamic route segment.
 
 ### Known gaps in this map
 
-Two shipped surfaces have a route but no wireframe, both noted on the pages
-nearest to them rather than left for a reader to discover by looking:
+One shipped surface has a route but no wireframe, noted on the pages nearest to
+it rather than left for a reader to discover by looking:
 
-- `/settings/organization/extensions` (ADR 025) — the shipped org-settings
-  sidebar has an "Extensions" item and this map has neither the item nor a page.
 - `/projects/:projectId/designs/sessions/:sessionId` — the live
   `design_grill` session view. The designs pages above link to it, but those
   buttons are inert here.
