@@ -7,10 +7,9 @@ git/PR/merge workflow.
 
 ## START HERE — current state
 
-**75 closed, 6 open.** `api` 98 files / **1456 passed** (real DB), `web` 36 / **756**,
-`orchestrator` 22ccae1 / 11 packages gofmt-clean, relay harness **16/16**. No residue: no
-scratch databases, no `rv-*` objects; operator data at 1 project / 1 org / 7 jobs /
-55 events.
+**75 closed, 8 open.** `api` 103 files / **1515 passed** (real DB), `web` 37 / **769**,
+`orchestrator` 11 packages gofmt-clean, relay harness **16/16**. No residue; operator data
+at 1 project / 1 org / 7 jobs / 55 events / 0 sessions.
 
 ### Needs the OPERATOR — do not dispatch, do not decide unilaterally
 
@@ -22,17 +21,23 @@ scratch databases, no `rv-*` objects; operator data at 1 project / 1 org / 7 job
 ### One thing the OPERATOR can check in 10 seconds, and no agent can
 
 **The live app under relay protocol v2 has still not been exercised by a logged-in
-browser.** ADR 033 replaced v1 with v2. The server side is verified end to end (harness
-16/16, including socket + write through nginx with real auth, and the fan-out check
-writing once and landing on two topics across two replicas), but nginx shows **no
-`/api/ws` upgrade** since the API restart. A fresh `playwright-cli` browser redirects to
-`/login`; the operator's Chrome is **not attachable** (CDP 9222 answers 404, not a
-DevTools endpoint — confirmed independently by four agents now).
+browser.** Server side verified end to end (harness 16/16, including socket + write through
+nginx with real auth, and the fan-out check writing once and landing on two topics across
+two replicas), but nginx shows **no `/api/ws` upgrade** since the API restart. A fresh
+`playwright-cli` browser redirects to `/login`; the operator's Chrome is **not attachable**
+(CDP 9222 answers 404 — five agents have confirmed this).
 
 **To check:** reload the feature page and confirm the live status reaches `live` and a
-job's progress updates. A tab left open across the upgrade may hold a v2 client against
-the pre-restart v1 server, so reload first. If it does not go live the page still works
-via polling — that is §4's fallback working — but it means a regression in #99.
+job's progress updates. A tab open across the upgrade may hold a v2 client against a
+pre-restart v1 server, so reload first. If it does not go live, the page still works via
+polling — §4's fallback — but it means a regression in #99.
+
+### Decided by the coordinator — actionable, no input needed
+
+| Issue | Decision | Where |
+|---|---|---|
+| **#104** | **Option 1: make zero reachable**, with one shared parser and a test that `"0"` → `0`. Verified no deployment sets either variable to zero (examples commented at defaults; the running install does not set them at all), so this cannot change existing behaviour. | comment on #104 |
+| **#102** | **Option 1: mount the source read-only**, plus option 2 (print the build identity) if cheap. Proof required is that the **trap stops working** — a mutation the old invocation hid is now caught. | comment on #102 |
 
 ### Blocked on the ENVIRONMENT — complete, nothing here can exercise it
 
@@ -44,40 +49,20 @@ via polling — that is §4's fallback working — but it means a regression in 
 
 | Issue | Repos | State |
 |---|---|---|
-| **#28 part 1, API + Web halves** | `api` + `web` | ADR 032 items 1 (API side), 2, 3, 4, 5. Built against the orchestrator's **frozen, verified** contract below. |
+| **#103** | `orchestrator` + `api` + `web` | ADR 032 items 2 and 3 — capture `get_fork_messages` at collection, and the non-destructive "Resume from here". **This is what closes #28.** |
 
-### Small and free
+### Queued behind #103 (same repos, one writer per repo)
 
-| Issue | Notes |
-|---|---|
-| **#102** | `docker compose run test` **without `--build`** reuses the cached image and reports on the previous build — which makes a mutation look *caught* when the check was never run against it. A **false negative on a guard**, the expensive direction: it leads to a working check being rewritten. Filed with the reproduction and three options. **Until it is fixed, always pass `--build` or use the real-db script.** |
+**#102** (`api` + `web` harness) then **#104** (`api` config parser). Both are decided and
+small; they wait only on repo availability. Do #102 first — it affects how every later
+change is verified.
 
-**#28 part 1's contract — the orchestrator half shipped (`22ccae1`), the reader is being
-built now. The orchestrator's `TestPostJobSession_TreatsAMissingRouteAsAnError` pins the
-current 404 as a tripwire and should flip to 201 when the halves meet:**
-
-```
-POST /internal/jobs/:jobId/session?outcome=<o>[&sessionId=..][&podFilePath=..]
-body = raw JSONL bytes (empty for a failing outcome)
-201 recorded · 202 declined {reason} · 404 route absent (today)
-```
-
-`outcome ∈ collected | not_collected | unavailable | disabled`; **only `collected` permits
-a fork.** `disabled` is install-level and deliberately not reported.
-
-**Two things that must not be lost in transit:** `unavailable` (the terminal read never
-completed) and `not_collected` (Pi answered, no session) are **different facts** — paired
-with `rpc.SessionFile.Asked`, which exists because *"Go's zero value would make them
-identical."* And **`SessionArtifact.ByteSize` was deliberately removed** as a
-declared-but-never-sent field, so the API's own measurement is authoritative — **do not
-reintroduce it.**
-
-**Before dispatching anything, read the lessons below.** The recurring ones: a field
-declared, marshalled and discarded (**seven** times, most recently caught by an agent in
-its own work); a check whose *label* overstates what it proves; `tsc` cannot see an
-ambiguous SQL column (#61 proves a reviewer cannot either); **a mutation test is evidence
-only if the mutation is in the code**; and **when a check passes, verify it can fail
-before concluding it is broken.**
+**Before dispatching anything, read the lessons below.** Recurring: a field declared,
+marshalled and discarded (**seven** times, most recently caught by an agent in its own
+work); a check whose *label* overstates what it proves; `tsc` cannot see an ambiguous SQL
+column (#61 proves a reviewer cannot either); **a mutation test is evidence only if the
+mutation is in the code**; **when a mutation passes, suspect the harness before the guard**
+(#102); and **when a check passes, verify it can fail before concluding it is broken.**
 
 ## What this burn-down is
 
@@ -1416,3 +1401,104 @@ re-running with the artifact made certain.
   payload carries one scope (ADR 033 §5) so it must pick one, and the page renders runs and
   reports rather than progressive text, so a second copy would be published and consumed by
   nobody. Documented at the call site with the line to revisit.
+
+## Wave 17 — the session layer, and two findings that are about method rather than product
+
+**#28's API/Web halves landed** (ADR 032 items 1 API-side, 4 and 5; `api` `6304c7f`,
+`web` `b7986fb`). Items 2 and 3 split out to **#103**, correctly, with the reason. Filed
+**#104**. **75 closed, 8 open.** `api` 103 / **1515**, `web` 37 / **769**.
+
+### The `unavailable` / `not_collected` distinction is carried through all three layers
+
+This was the requirement I emphasised most, because the API half cannot invent a
+distinction the orchestrator did not record. It is kept apart deliberately at every layer,
+and *why* it is kept apart at each one is the interesting part:
+
+- **Storage** — a stored `outcome` column. The one place in this feature where a stored
+  value is justified over a derived one, and the migration explains why: **both failing
+  outcomes have no bytes**, so only the collector knows which happened. It also adds a
+  `CHECK` making a `collected` row with no bytes, or a failing outcome carrying a size,
+  unwritable — so the impossible combinations cannot be written rather than merely not being
+  written today.
+- **Read** — **five** states where the shared `ArtifactState` has three, because that model
+  collapses exactly this pair into `never_recorded`. A fifth, `unknown`, is what *no row*
+  means (a collection-disabled install), kept apart from `not_collected` **so the UI does not
+  blame the run for a configuration choice.**
+- **UI** — `request_failed` is deliberately *not* the API's `unavailable`: *"we could not
+  find out" must not render as "there is no session."*
+
+That last one is a nice piece of care — the same distinction has to survive a *transport*
+failure too, and collapsing them at the UI layer would have undone the work beneath it.
+
+### It declined to ship a field it could not populate, and it said so by name
+
+`get_fork_messages` is an RPC to a live Pi process and the pod is deleted at the terminal
+event (ADR 006, deliberately — it holds a live GitHub token and the model key). So nothing
+can populate fork points today. The API therefore reports only `canFork` and **carries no
+`forkPoints` field**, with the reasoning recorded at the type:
+
+> `forkPoints: []` here would be the seventh instance of this suite's declared-but-discarded
+> shape — a field whose emptiness reads as "there are none" when the truth is "nobody has
+> asked".
+
+That is #73's `null`-versus-`[]` rule applied **proactively**, to a field that does not exist
+yet, by a worker citing the count of prior instances. It is the clearest sign yet that the
+lesson has propagated.
+
+### Two findings that are about the method, not the product
+
+**#104 — a documented convention that cannot be expressed.** `config.ts` documents twice that
+zero is a *meaningful* value ("off"), and the code branches on it (`> maxBytes`,
+`maxBytesPerJob > 0`). But both parse with `Number(env) || default`, so `Number("0")` is
+falsy and the default is substituted — **the documented value is unreachable**. I reproduced
+it by running:
+
+```
+RECORDING_MAX_BYTES=0       -> 25000000  (DEFAULT SUBSTITUTED, not zero)
+LIVE_DELTA_BYTES_PER_JOB=0  -> 8000000   (DEFAULT SUBSTITUTED, not zero)
+```
+
+Found because ADR 032 item 4 told it to *follow* that convention, and the worker discovered
+the convention could not do what it says. It then **parsed sessions explicitly rather than
+copying the broken idiom**, and filed the siblings instead of quietly changing two shipped
+paths inside unrelated work — the correct scoping call. **Decided: option 1**, after I
+verified no deployment sets either variable to zero.
+
+**#102 — the trap that defeats mutation testing.** `docker compose run test` **without
+`--build`** reuses the cached image (only `test-results/` is mounted) and reports on the
+previous build. The worker hit this itself — its first falsification of a new guard reported
+a full pass, and the cause was a stale image, not a weak guard.
+
+**Why this one is worth a section:** it is a **false negative on a guard**, and that is the
+expensive direction — a false positive makes you fix working code, a false negative makes you
+**rewrite or delete a check that was working**. It also silently invalidates the rule this
+burn-down now leans on everywhere, because here the mutation **was** in the code and the
+suite still ran a build that never saw it. **Decided: option 1** — mount the source
+read-only, on the ground that option 2 only makes it *possible to notice* while option 1
+makes it *impossible to test the wrong thing*; the `api` real-database script already mounts
+the tree, which is both proof it works and the reason the two invocations can currently
+disagree about identical source.
+
+The rule that comes out of it, now in the agents' notes: **when a mutation "passes", suspect
+the harness before the guard.** I inverted exactly this a wave earlier.
+
+### It corrected me on the tripwire
+
+I told the worker the orchestrator's `TestPostJobSession_TreatsAMissingRouteAsAnError`
+"should flip from asserting an error to asserting a 201 when you land". **It does not, and
+cannot** — I read the test's *name* and reasoned about it. It uses `httptest.NewServer` with
+a hardcoded 404, so it covers the **client's** handling of a missing route and never observes
+this API. The worker said so and verified the real seam instead: a real-Postgres test that
+POSTs the Orchestrator's exact wire shape through the real app and asserts the row.
+
+That is my second instance of the same error in two waves — reasoning from a name rather
+than the body — and the reason the notes now say **read the check, not its label**.
+
+### A mutation it could not run, handled honestly
+
+Dropping the `CHECK` constraint to prove three rejection tests depend on it was **blocked by
+the sandbox's destructive-SQL gate**, and it did not retry (correctly — the gate says do not
+retry). Instead it read the constraint definition out of Postgres and reasoned that the tests
+assert rejection **by constraint name**, so an absent constraint would let the insert succeed
+and `.rejects` would fail. That is a weaker form of evidence than a mutation, and it **said
+so** rather than presenting the reasoning as a result.
