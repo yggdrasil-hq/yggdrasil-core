@@ -80,6 +80,26 @@ doc your task needs, so you do not have to read the whole `docs/` tree.
    comment saying what changed and where. If you only partly did it, say so in
    the comment and leave the issue open, or open a new issue for the remainder.
 
+5b2. **Ask where a check RUNS before asking whether it passes.** Three separate bugs this
+   burn-down found are one pattern: a check that cannot fail in the environment it is
+   normally run in, so its green is not evidence.
+
+   | issue | the check | why it could not fail here |
+   |---|---|---|
+   | #97 | the two-replica harness's fixture step | `psql` on stdin exits **0** after a failed statement, so a broken fixture printed "inserted" and the harness reported success |
+   | #102 | any mutation test through `compose run` | no `--build` reuses the image with the source `COPY`ed in, so the check never saw the mutation |
+   | #106 | `expect(storage_backend).toBe("postgres")` | true where Postgres is the only reachable store, false in CI where MinIO is — so it only failed in the one environment nobody ran locally |
+
+   The unifying question: **which environments does this assertion actually execute in, and
+   does the failure mode it describes exist in any of them?** A check that is skipped or
+   shadowed in the environment you run is not a weaker check, it is **no check** — and it
+   reads identically to a passing one.
+
+   Practical corollaries: a skip is not a pass; CI runs different code paths than a local
+   suite (here CI runs **0** skips against the compose run's 77, so CI covers *more*, not
+   less); and when you fix an assertion of this kind, fix it to name the **durable property**
+   (the bytes round-trip) rather than the incidental one (which column holds them).
+
 5c. **Read the check, not its label.** The coordinator has now made this error twice - he
    read a test named *"TreatsAMissingRouteAsAnError"*, reasoned that it must observe the
    service under test, and told a worker it "should flip from asserting an error to
