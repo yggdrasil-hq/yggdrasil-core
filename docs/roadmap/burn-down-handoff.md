@@ -21,19 +21,50 @@ at 1 project / 1 org / 7 jobs / 55 events. **CI green** on both `api` and `web`.
 | **#38** | **ENVIRONMENT** | Implemented across all four layers, hop-verified. Open only because **no agent job has ever completed here**, so no model has been induced to use the structured form. |
 | **#109** | **WORK — decided** (`api` + `orchestrator`) | Three shared integer caps are parsed by two services with **different rules** (`SCREENSHOT_MAX_BYTES`, `SESSION_MAX_BYTES`, `RECORDING_MAX_BYTES`). Decision: one rule — trim, then a plain decimal integer, else the default **logged** — applied to all three, with the cross-repo pin extended to cover the parse rule. |
 
-### Two things only the OPERATOR can settle, both worth seconds
+### The relay is VERIFIED live in a browser (2026-09-19)
 
-**1. The live app under relay protocol v2 has never been exercised by a logged-in browser.**
-Server side verified end to end (harness 16/16, including socket + write through nginx with real
-auth, and the fan-out check writing once and landing on two topics across two replicas), but
-nginx shows **no `/api/ws` upgrade** since the API restart. A fresh `playwright-cli` browser
-redirects to `/login`; the operator's Chrome is **not attachable** (CDP 9222 answers 404 — ten
-agents have now confirmed this). **Reload the feature page** and confirm the live status reaches
-`live` and a job's progress updates. A tab left open across the upgrade may hold a v2 client
-against a pre-restart v1 server, so reload first. If it does not go live the page still works via
-polling — ADR 033 §4's fallback — but it means a regression in #99.
+**Protocol v2 is confirmed working from a real logged-in browser**, so the one item that
+needed the operator is closed. Captured directly from the page's socket:
 
-**2. No fork has ever run end to end.** No agent job has completed here, so no session has ever
+```
+{"type":"ready","protocolVersion":2}
+{"type":"subscribed","scope":{"kind":"feature","id":"0cd9a850-e4b2-4ae3-b8ec-699f8d37392d"}}
+```
+
+That is `ready` announcing v2 and a **scope-tagged** subscription being *accepted* — the
+exact wire shape ADR 033 introduced, and `isSubscribed` (type `subscribed` **and** a matching
+scope) is what flips the client to `live`. So the server-to-browser half of the relay works
+under the new protocol, which was the last unverified piece of #99.
+
+**Still unverified, and it needs an agent job rather than a browser:** an *event* travelling
+DB → API → socket → browser. That requires a real run to produce a `job_events` row. The
+replica harness covers delivery including through nginx with real auth (16/16); the browser
+half is now confirmed too, but the two have not been observed together.
+
+### How to attach to the operator's Chrome (this cost five agents real time)
+
+`http://localhost:9222/json/*` **returns 404** — Chrome's HTTP DevTools endpoints are not
+serving, so every `curl` check and `playwright-cli attach --cdp=http://localhost:9222` fails
+with *"Unexpected status 404 … This does not look like a DevTools server"*. **The WebSocket
+endpoint is fine**, and its path is in Chrome's own file:
+
+```bash
+cat ~/.config/google-chrome/DevToolsActivePort     # -> port, then the browser path
+playwright-cli attach --cdp="ws://127.0.0.1:9222/devtools/browser/<id-from-that-file>"
+```
+
+**Do not conclude the browser is unattachable from the 404** — that is what five consecutive
+agents did, including me. `ss -ltnp | grep 9222` showed a `chrome` listener the whole time.
+
+Two working notes: the operator's tab is `chrome://inspect`, so **open a fresh tab for the app
+and close it afterwards** (that is what the "don't disturb their tabs" rule means in practice).
+And the **grill transcript lives at `/grill`**, not `/spec` — `/spec` is the ADR/superseded-runs
+view, and opening `/spec` shows *no* socket because the grill client is not mounted there. That
+cost time too: the absence of `/api/ws` on `/spec` looked like a relay failure and was not.
+
+### One thing only the OPERATOR can settle
+
+**No fork has ever run end to end.** No agent job has completed here, so no session has ever
 been collected and no `get_fork_messages` call has been made against a live run. Everything is
 verified at the seam: the parsers against a **real Pi 0.84.4 process**, authorisation, the
 refusal matrix, the state transition, the row written. **"A fork produces a working resumed
@@ -129,8 +160,11 @@ mechanism is not built).
 - **A real project exists**: `Luffy's Portfolio`
   (`b51e1313-d315-47bf-be25-038acc16d6a4`), with a feature
   (`0cd9a850-e4b2-4ae3-b8ec-699f8d37392d`) that has test runs and a deploy history.
-- **Browser**: `playwright-cli` is attached to a Chrome logged in as the operator.
-  Use it **only** against `http://localhost:8080` and the app's own pages.
+- **Browser**: `playwright-cli` is attached to a Chrome logged in as the operator. Use it
+  **only** against `http://localhost:8080` and the app's own pages. **Attach via the
+  WebSocket endpoint, not `http://localhost:9222`** — the HTTP `/json/*` endpoints return 404
+  (see the recipe in START HERE), and that 404 is not a sign the browser is unreachable.
+  Open a fresh tab, close it when done; the operator's own tab is `chrome://inspect`.
 - **Agent-image environment variables reach the Orchestrator only through
   `orchestrator/.env`, and only at container creation.** `deploy/docker-compose.dev.yml`
   gives the `orchestrator` service `env_file: ../orchestrator/.env` plus an explicit
