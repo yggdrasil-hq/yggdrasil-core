@@ -80,6 +80,17 @@ doc your task needs, so you do not have to read the whole `docs/` tree.
    comment saying what changed and where. If you only partly did it, say so in
    the comment and leave the issue open, or open a new issue for the remainder.
 
+5c. **Read the check, not its label.** The coordinator has now made this error twice - he
+   read a test named *"TreatsAMissingRouteAsAnError"*, reasoned that it must observe the
+   service under test, and told a worker it "should flip from asserting an error to
+   asserting a 201". It cannot: it uses `httptest.NewServer` with a hardcoded 404, so it
+   covers the *client's* handling and never touches the API. A name states an intent, not a
+   mechanism, and the two come apart exactly when the check is subtle - which is when you
+   are relying on it.
+
+   The same applies in reverse to a passing suite: a green run tells you the assertions
+   held, not what they asserted. Read the body before you trust, cite, or build on a check.
+
 6a. **A mutation test is evidence only if the mutation is in the code.** The
    coordinator invalidated his own falsification in wave 13 by editing a **comment**
    that contained the same text as the code — the check passed, and he nearly reported
