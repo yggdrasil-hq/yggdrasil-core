@@ -57,6 +57,21 @@
     .restart-confirm { margin-left: 4px; width: 90%; border: 1px solid var(--rime-soft); background: var(--surface-02); border-radius: var(--radius-sm); padding: 12px; }
     .restart-confirm p { margin: 0; font-size: 12px; color: var(--mist); }
     .restart-confirm .confirm-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+
+    /* ADR 032 item 3's resume control. A block above the transcript, NOT a per-turn
+       control beside `.turn-actions`: the points are Pi's own `get_fork_messages`
+       list, so the shape is a picker rather than a button per bubble. Deliberately
+       not visually symmetric with the rewind — the two gestures differ in whether
+       the conversation survives, and that has to be tellable at a glance. */
+    .resume-block { border: 1px solid var(--rime-soft); background: var(--surface-02); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 16px; font-size: 12px; color: var(--mist); }
+    .resume-block > p { margin: 0 0 8px 0; }
+    .resume-trigger { font-size: 12px; color: var(--shadow); background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; text-underline-offset: 2px; }
+    .resume-trigger:hover { color: var(--frost); text-decoration: underline; }
+    .resume-points { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+    .resume-point { border: 1px solid var(--rime-soft); background: var(--surface-01); border-radius: var(--radius-sm); padding: 8px; }
+    .resume-point .point-text { color: var(--shadow); }
+    .resume-point .confirm-copy { margin: 8px 0 0 0; }
+    .resume-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -133,13 +148,23 @@
           (<span class="mono">spec_ready</span>), so Stop isn't shown — it only applies while a grill is actually running
           (<span class="mono">draft</span>), which this page can't be in retroactively.
           <b>Corrected by issue #33: Restart from here is built</b> (ADR 024), and this note used to describe an unbuilt
-          proposal. Three corrections came with it, each of them a thing ADR 024 item 12 recorded as drift and this wireframe
-          now matches instead of contradicting: <b>"Resume from here" is gone</b> — ADR 024 item 1 scopes it out, and a control
-          that does not exist is worse than an absent one; the mock showed it on every turn. <b>The confirmation step is
+          proposal. Two of the three corrections that came with it still hold: <b>the confirmation step is
           shown</b> — the real control is two clicks, because a rewind discards every later turn *and* any ADR produced after
           it, so the first click only explains what is about to be lost (bottom turn above is the expanded state). And the
           control is <b>left-aligned under both speakers</b>, not right-aligned under a user turn, matching how the component
           renders it.
+          <b>Corrected by ADR 032 item 3: "Resume from here" is back, with a different meaning.</b> The third correction
+          above — that it was gone — was true when written and is not any more. ADR 024 item 1 scoped out a control that
+          would have been a second way to do what the reply composer already does; ADR 032 item 3 built a <b>true fork</b>
+          instead: a dispatched <span class="mono">spec_grill</span> job restores an earlier run's stored Pi session into a
+          new pod and branches it at a chosen entry. So the block above is <b>a picker, not a per-turn control</b> — the
+          points are Pi's own <span class="mono">get_fork_messages</span> list, and attaching them to bubbles would mean
+          comparing user-message *text*, the weaker second reading ADR 032 item 2 exists to avoid. The rewind stays per-turn
+          beside each bubble and the two are deliberately <b>not visually symmetric</b>, because the thing a reader has to
+          tell apart is whether the conversation survives: the rewind says everything after the chosen turn is discarded,
+          this one says the conversation is kept and the spec is rebuilt from that reply (an approved ADR stops being
+          current, which matters — the terminal <span class="mono">submit_adr</span> overwrites the ADR, so a surviving
+          approval would let a build launch against a document nobody approved).
           <b>What is still not mocked</b>: the control's real conditionality. It appears only where the API would accept it —
           a conversation turn (<span class="mono">agent_text</span> / <span class="mono">ask_user</span> /
           <span class="mono">user_message</span>, and the API enforces the same set), a <span class="mono">spec_grill</span>
@@ -227,6 +252,28 @@
               <div class="grill-status-row">
                 <span class="status-text">Grill finished &middot; spec_ready</span>
                 <span class="text-shadow" style="font-size:12px;">Stop only applies while a grill is running</span>
+              </div>
+              <!-- ADR 032 item 3. Shown expanded: the trigger is one click, and the
+                   picker below is what it opens. Each point is Pi's own reported user
+                   message, which is why the list shows the replies' text rather than
+                   attaching a button to a bubble — matching a point to a bubble would
+                   mean comparing user-message text, the weaker second reading ADR 032
+                   item 2 exists to avoid. -->
+              <div class="resume-block">
+                <p>Resume the agent's own session from one of these earlier messages. The conversation is kept, and a new run continues from the point you pick.</p>
+                <ul class="resume-points">
+                  <li class="resume-point">
+                    <p class="point-text">Multiple cards, with one marked default.</p>
+                    <p class="confirm-copy">Continue from here? This feature goes back to draft and a new run resumes the agent's own session from this message. The conversation so far is kept &mdash; nothing is discarded.</p>
+                    <div class="resume-actions">
+                      <button class="btn btn-outline btn-sm" type="button">Yes, resume from here</button>
+                      <button class="btn btn-ghost btn-sm" type="button">Cancel</button>
+                    </div>
+                  </li>
+                  <li class="resume-point">
+                    <p class="point-text">Require picking a new default first &mdash; don't guess for the customer.</p>
+                  </li>
+                </ul>
               </div>
               <div class="grill-log">
                 <div class="turn">

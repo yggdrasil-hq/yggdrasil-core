@@ -21,10 +21,10 @@ second, non-destructive control), `feature_build` (issue #28 scopes this to
 | Item | State |
 |---|---|
 | 1 — persist the session per job | **shipped** (`orchestrator` `6cbdd91`, `api` `6304c7f`); the API route is `POST /internal/jobs/:jobId/session` |
-| 2 — entry ids from `get_fork_messages` | **capture shipped** (`orchestrator` `ecea294`, `api` `b352cb0`, migration 055); the *use* is item 3 |
-| 3 — two controls, only one destructive | **not built.** Blocked on the pod-delivery decision, now made (see Follow-ups) |
+| 2 — entry ids from `get_fork_messages` | **shipped.** Capture at collection (`orchestrator` `ecea294`, `api` `b352cb0`, migration 055), and the dispatch that uses them (`api` `a3d00ea`, `web` `a7082bf`) |
+| 3 — two controls, only one destructive | **shipped** (`orchestrator` `37b1501`, `api` `d53f12a` + `a3d00ea`, `web` `a7082bf`; migrations 056, 057). "Resume from here" is `POST /projects/:projectId/features/:featureId/resume-from-message`, offering Pi's own reported points as a picker |
 | 4 — retention | **shipped** — migration 054, own `SESSION_MAX_BYTES` (5 MB), zero means reclaim-everything |
-| 5 — fail honestly | **shipped** for collection (`unavailable` vs `not_collected`, carried through storage, read and UI); the fork's own refusal path is item 3 |
+| 5 — fail honestly | **shipped** for collection (`unavailable` vs `not_collected`, carried through storage, read and UI) and for the fork, which records a `fork_stage` of `write` / `switch` / `fork` |
 
 Two things the implementation settled that this ADR did not anticipate: `get_session_stats`
 **also** returns `sessionFile` (and the Orchestrator was already calling it every run, so the
@@ -230,17 +230,21 @@ strictly better when it is possible; the reconstruction is what works when it is
   on the Spec page. The supersession relation is derived from `restarted_from_event_id`
   (`LEFT JOIN`), not stored, and a run replaced by ADR 012's *retry* is deliberately
   labelled differently from one a rewind actually discarded.
-- **How a restored session file reaches the fork pod.** Decided: the **Orchestrator writes
-  it into the pod** rather than the pod pulling it. The pod runs untrusted code and
+- **How a restored session file reaches the fork pod.** **Shipped.** The **Orchestrator
+  writes it into the pod** rather than the pod pulling it. The pod runs untrusted code and
   currently calls no internal service, so a pull would add an outbound channel *and* a third
   secret to the least-trusted process — one granting read access to another run's
   conversation. Writing in adds neither, and the exposure is not new: ADR 024's rewind
   already sends the earlier conversation into the new pod, under `GrillTranscriptSummary`.
   The write mirrors `k8s.ReadPodFile` (`cat` over SPDY exec) and takes the same rules — an
   argv slice rather than a shell string, and a bound drawn from `SESSION_MAX_BYTES`.
-- **Verifying the switch, not trusting it.** Because `switch_session` reports success for a
-  path that does not exist, the fork job must confirm `get_state` before forking. See item
-  3's note; this is a step, not an optional check.
+- **Verifying the switch, not trusting it.** **Shipped** as three conditions, not one: the
+  state question was answered, the reported path is the restored one, *and* the session holds
+  messages. Each is satisfiable by the failure another catches — a path match passes for a
+  file that exists but is empty, and a count alone passes for a session that loaded but is not
+  the one named. The write is also `tee` with **no `mkdir -p`**, since a second exec or a shell
+  would each violate the argv-slice rule, so the restore path is a `/tmp` location that needs
+  no setup and is correctly ephemeral for a one-run input.
 - **Generalise the fork to `feature_build`.** The same truncation argument applies to
   its seed, and issue #28 records it as unasked-for today.
 - **A per-project session retention setting**, if the single window proves wrong for
