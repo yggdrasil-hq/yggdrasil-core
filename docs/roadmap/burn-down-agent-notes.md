@@ -111,6 +111,21 @@ doc your task needs, so you do not have to read the whole `docs/` tree.
    The same applies in reverse to a passing suite: a green run tells you the assertions
    held, not what they asserted. Read the body before you trust, cite, or build on a check.
 
+5c2. **When a check passes for the wrong reason, the assertion is usually about
+   ABSENCE.** `expect(x).not.toBeNull()`, `not.toBeUndefined()`, `toBeFalsy()`, "no event was
+   delivered", "the column is empty" — all of these **pass on a value that was never looked
+   up**. So a missing `SELECT` column, an unset variable or an unsubscribed socket reads as
+   the success the check was written to confirm.
+
+   Found in wave 20: a test asserting the bytes were not in the `data` column passed because
+   `object_key` was absent from the `SELECT`, so `row.object_key` was `undefined` and
+   `undefined !== null` is true. It only failed on the other storage path.
+
+   The cure is to assert **both directions on a value you have confirmed is retrieved**: the
+   column is selected, then one of the two is null and the other is not. And the habit that
+   found it is worth copying — **run the configuration you are not debugging.** Had it run
+   only the failing path, the passing path would have shipped.
+
 5d. **A mutation surviving is evidence about the TEST SET, not about the code.** Three
    distinct things all look identical from outside — a green suite after a mutation:
 

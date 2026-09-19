@@ -7,16 +7,13 @@ git/PR/merge workflow.
 
 ## START HERE — current state
 
-**78 closed, 8 open.** `api` 103 files / **1534 passed** (real DB), `web` 37 / **769**,
+**79 closed, 7 open.** `api` 103 files / **1540 passed** (real DB), `web` 37 / **769**,
 `orchestrator` `ecea294` / 11 packages gofmt+vet clean, relay harness **16/16**. No residue;
-operator data at 1 project / 1 org / 7 jobs / 55 events / 0 sessions.
+operator data at 1 project / 1 org / 7 jobs / 55 events.
 
-**⚠ `main` IS RED on `api` CI.** The `Test` workflow fails on `27c98bd`, `f9069782` and
-`b352cb0`; `Build and push image` passes. Verified as predating the latest change. Tracked
-as **#106** and being fixed now — a session test asserts `storage_backend === "postgres"`,
-which is false in CI where MinIO is reachable (the bytes correctly go to the object backend).
-**Do not read a green local suite as CI health: CI runs 0 skips, so it exercises ~77 tests
-the compose run skips, including the failing one.**
+**`api` CI is GREEN on `main`** (`9688e43` and the two commits after it). It was red for a
+week on #106 — see the wave lesson. **CI runs 0 skips, so it exercises ~77 tests the local
+compose run skips; a green local suite is NOT evidence of CI health.**
 
 ### Needs the OPERATOR — do not dispatch, do not decide unilaterally
 
@@ -32,7 +29,7 @@ browser.** Server side verified end to end (harness 16/16, including socket + wr
 nginx with real auth, and the fan-out check writing once and landing on two topics across
 two replicas), but nginx shows **no `/api/ws` upgrade** since the API restart. A fresh
 `playwright-cli` browser redirects to `/login`; the operator's Chrome is **not attachable**
-(CDP 9222 answers 404 — six agents have now confirmed this).
+(CDP 9222 answers 404 — seven agents have now confirmed this).
 
 **To check:** reload the feature page and confirm the live status reaches `live` and a
 job's progress updates. A tab open across the upgrade may hold a v2 client against a
@@ -43,36 +40,29 @@ polling — §4's fallback — but it means a regression in #99.
 
 | Issue | Repos | State |
 |---|---|---|
-| **#106** (urgent), **#104**, **#105** | `api` | One worker, in that order. #106 un-reds CI; #104 makes the documented zero-cap reachable; #105 fixes two prose copies of a measured number (29 claimed, **77** measured). |
+| **#103 part 2** | `orchestrator` + `api` + `web` | The fork job — write the session in → `switch_session` → **verify `get_state`** → `fork` → `get_state` again. **Closes #28.** Web half lands with it (the dispatch path now exists, so the UI is no longer a control that does nothing). |
 
 ### Queued
 
-**#103 part 2** (`orchestrator` + `api` + `web`) — the fork job: write the session in →
-`switch_session` → **verify `get_state`** → `fork` → `get_state` again, storing the new
-file's path. Web half lands *with* it, not before. **Closes #28.** The decision is on #103
-and the Pi behaviours it depends on are in ADR 032 item 3.
+**#107** (`api`) — `SCREENSHOT_MAX_BYTES` / `SCREENSHOT_MAX_PER_JOB` have the same
+unreachable-zero idiom, and **one of them means the opposite thing** (byte cap 0 = refuse
+all, per-job cap 0 = no ceiling). **Decided**: make zero reachable for both, and fix the
+*discoverability* problem — state both readings on both variables, name which direction each
+fails, pin each with a test. Do not invent a third spelling for "unlimited".
 
-### The harness now cannot silently test the wrong build
+### Blocked on the ENVIRONMENT — complete, nothing here can exercise it
 
-`api` and `web` test compose files mount the source **read-only** (#102), with
-`test-results/` the only writable path, and `run-tests.sh` prints a **source digest and
-newest-file timestamp** so a run states what it verified. **`--build` is no longer needed
-for a source edit** — verified by me: a mutation to `permitsFork` run with plain
-`compose run test` is now **caught** where it used to be missed.
-
-**Two limits, both documented in the compose files rather than left implicit:**
-- **The mounts are enumerated.** A *new top-level directory* reverts to the built image.
-  The digest line exists to expose exactly that.
-- **`.:/app:ro` was tried and rejected**: it shadows the image's `node_modules` with the
-  host's (proved with a marker file) and vitest writes a temp config beside
-  `vitest.config.ts`, so read-only `/app` dies with `EROFS`.
+| Issue | Why |
+|---|---|
+| **#38** | Implemented across all four layers, hop-verified. Open only because no agent job has completed here. |
 
 **Before dispatching anything, read the lessons below.** Recurring: a field declared,
 marshalled and discarded (**seven** times); **read the check, not its label** (the
-coordinator has made this error twice); a check that **cannot fail where it is run** (#97,
-#102, #106 — three instances now, each in a different environment); `tsc` cannot see an
-ambiguous SQL column; and **a green suite after a mutation may mean no input reached the
-mutated line** rather than a weak guard.
+coordinator has made this error twice); **a check that cannot fail where it is run** (#97,
+#102, #106 — three instances, each in a different environment); `tsc` cannot see an
+ambiguous SQL column; **a green suite after a mutation may mean no input reached the mutated
+line**; and **when a check passes for the wrong reason, the assertion is usually about
+absence** (an unselected column reads as "not here").
 
 ## What this burn-down is
 
@@ -1688,3 +1678,97 @@ I put the harness fix ahead of everything else deliberately, and this wave vindi
 worker the same day found its local green did not mean CI was green, and the tooling it was
 verified through had itself been lying. **Fix the thing every other verification passes
 through before trusting any of it.**
+
+## Wave 20 — CI un-reddened, and a check that passed for the wrong reason
+
+Closed **#106**, **#104**, **#105**. Filed **#107**. **79 closed, 7 open.** `api` main at
+`9688e43`; **CI green on `main`** and on the two commits after it.
+
+### #106 reproduced before it was fixed, which is why the fix is trustworthy
+
+The worker did not start from the failure message. It **reproduced CI locally first** by
+pinning the compose test network to a subnet the VPN mesh does not claim (the default
+`172.20.0.0/16` is one it shadows), which makes both Postgres *and* MinIO reachable — the CI
+configuration. Same failure, same line. Then it fixed the assertion and **observed the
+workflow go green on the merge commit**, not just locally.
+
+That ordering matters: the three environments disagree, so "it passes here" was the exact
+evidence that had been worthless for a week.
+
+### The fix asserts a relationship instead of a literal
+
+`expect(row.storage_backend).toBe("postgres")` became:
+
+- **the durable round trip** — bytes come back through `findContent`, *the method the Web
+  download route calls*, on **a second independently constructed repository**. That is the
+  property a user depends on, and it is backend-agnostic.
+- **the relationship the table's own `CHECK` encodes** — exactly one of `data` / `object_key`
+  carries the bytes, matching `storage_backend` — with the backend asserted against
+  `config.storage.configured` rather than a hardcoded string.
+
+An environment assumption wearing an invariant's clothes is fixed by asserting the invariant.
+
+### And then it made the same class of mistake itself, caught it, and said so
+
+Its **first** version of the new check **passed on the object path for the wrong reason**:
+the `SELECT` did not include `object_key`, so `row.object_key` was `undefined`, and
+`expect(undefined).not.toBeNull()` **passes**. I confirmed that predicate independently —
+`undefined !== null` is true.
+
+So the assertion that the bytes were absent from the column they shouldn't be in **passed
+because the column wasn't selected at all.** It only surfaced when it ran the *other* path.
+Both halves now assert present-ness **and** absence, and the column is selected.
+
+**The generalisable form, now in the agents' notes: when a check passes for the wrong reason,
+the assertion is usually about absence.** `not.toBeNull()`, `not.toBeUndefined()`,
+`expect(x).toBeFalsy()` and "no event was delivered" all pass on a value that was never
+looked up. The cure is to assert **both** directions on a value you have confirmed is
+retrieved.
+
+It also found this by running a configuration it was not debugging — the same instinct as
+reproducing CI first. Had it only run the failing configuration, it would have shipped.
+
+### #104: one parser, and the wrapper deleted
+
+Before/after on the real module, all set to `0`:
+
+```
+before  recordings.maxBytes=25000000  live.deltaBytesPerJob=8000000  sessions.maxBytes=5000000
+after   recordings.maxBytes=0         live.deltaBytesPerJob=0        sessions.maxBytes=0
+unset   recordings.maxBytes=25000000  live.deltaBytesPerJob=8000000  sessions.maxBytes=5000000
+```
+
+`sessionMaxBytesFrom` was **deleted rather than kept as a wrapper** — one implementation, one
+name — with the reasoning that **three copies of a parse rule are *why* one accepted zero and
+two didn't.** That is the correct reading of the bug: it was not three mistakes but one rule
+written three times. The intervals and retention values keep their floors, with a comment
+saying zero there would be a busy loop rather than a meaning.
+
+One deliberate tightening recorded rather than buried: `recordings.maxBytes` now floors where
+it previously did not (`25000000.5` → `25000000`).
+
+### #105: two prose copies of one number, plus a third nobody had noticed
+
+The claimed **29** skips / 19 recovered became the measured **77** / 67. And **a third number
+in the same paragraph was also wrong** — "five files verify against a real database" is
+**ten** (worth 64 tests).
+
+The durable part is not the corrected numbers but that the script now **reports its own skip
+count** and names that line as the authority, so the same drift cannot happen silently again.
+Verified by me: the run prints `This run: 10 skipped.` Two prose copies of a measurement is a
+claim with no owner; the measurement naming itself is a claim that maintains itself.
+
+### Three small drift fixes it made without being asked, and one it refused
+
+**Made** (same paragraph, same drift): `--build` was documented as *required*, which #102's
+read-only mounts made stale — corrected to "image changes only".
+
+**Refused, correctly**: #104's inventory was incomplete, and it filed **#107** rather than
+folding it in, because `SCREENSHOT_MAX_PER_JOB=0` means **unlimited**, the *opposite* of
+`SCREENSHOT_MAX_BYTES=0`. It called that a convention question rather than "the same answer
+again"[1] — which is exactly the judgment that stops a fix from propagating a trap.
+
+[1] I decided it: make zero reachable for both, since the code's `> 0` guards are the
+specification, and fix the *discoverability* problem — two adjacent `SCREENSHOT_` variables
+reading oppositely at zero is the actual defect. Decision recorded on #107, including
+permission to stop and argue the opposite if implementing it reveals the convention is wrong.
