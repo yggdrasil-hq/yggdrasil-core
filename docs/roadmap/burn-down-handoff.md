@@ -7,43 +7,44 @@ git/PR/merge workflow.
 
 ## START HERE — current state
 
-**65 closed, 11 open** (`gh issue list --repo yggdrasil-hq/yggdrasil-core --state open`).
-All four child repos at verified `main`; no open PRs anywhere.
+**67 closed, 8 open.** All four child repos at verified `main`; no open PRs.
+`api` 93 files / 1372 passed against a real database, `web` 34 / 717, `orchestrator`
+gofmt-clean with all 11 packages, `agent-images` harness green with an empty ledger.
 
-The eleven, sorted by **what actually blocks them** — the distinction that matters,
+The eight, sorted by **what actually blocks them** — the distinction that matters,
 because dispatching a decision as an implementation task produces a plausible change
 to an unanswered question:
 
-**Blocked a decision, not work** — do not dispatch as implementation:
+**Blocked on a decision, not work** — do not dispatch as implementation:
 
 | Issue | The unanswered question |
 |---|---|
 | #19 / #71 | The image **builds** (verified against the real cluster) but a preview cannot **pull** it: containerd is a node daemon, so it uses the node resolver and will not fall back to HTTP. An install needs the registry over TLS with a node-trusted CA, **or** marked insecure in containerd's config, **and** a node-resolvable name. Recorded in ADR 003 §14. |
 | #55 | Building every linked repo's image needs a chart convention for per-repository image slots. Four sub-questions on the issue. |
 | #95 | Design sessions cannot stream text deltas, because the delta path is feature-scoped end to end. An API shape decision. |
-| #90 | A feature-less non-design job routes nowhere. Its topic shape should follow #39's pipeline decision, not precede it. |
+| #90 | A feature-less non-design job routes nowhere. Its topic shape should follow #39's pipeline decision — **being decided there now**. |
 
-**Blocked on the environment** — the code is complete; nothing here can exercise it:
+**Blocked on the environment** — complete, and nothing here can exercise it:
 
 | Issue | Why |
 |---|---|
-| #38 | Implemented across all four layers and **hop-verified**. Open only because no agent job has completed here, so a model has never actually been induced to choose the structured form. #73 was the same gap and is now **closed** — its producer, transport and UI all landed — so #38 is the last one blocked this way. |
-| #28 part 1 | **Decided — ADR 032.** Implementable (persist Pi's session JSONL to #30's object storage, then `switch_session` + `fork`). Not dispatched: multi-hour, two repos. |
+| #38 | Implemented across all four layers and **hop-verified**. Open only because no agent job has completed here, so a model has never actually been induced to choose the structured form. |
 
-**Actionable now or in flight:**
+**Actionable, in flight:**
 
 | Issue | State |
 |---|---|
-| #92 | API half merged, contract posted; **Web half in flight** (in `web/`) |
-| #96 | Small: document `GRILL_REPLY_TIMEOUT`, pin the mirror from the orchestrator side — **in flight** |
-| #28 part 2 | Surface superseded runs — **in flight**, with the instruction to stop and report if it needs API work rather than shipping an inert consumer |
-| #39 | Large: stream progress end to end, spans all four repos. Overlaps and would likely close #25 |
+| #28 part 2 | Surface superseded runs — **fully specified**, being implemented (`api` + `web`) |
+| #39 | Verification and decision: what the pipeline actually guarantees now that #23/#24/#25/#32 have landed. Expected to close as a decision with #90 carrying the remainder (`orchestrator` + `agent-images`) |
 
-**Before dispatching anything, read the lessons below** — "a verification that asserts
-the bug certifies the bug" (a check whose *name* overstates what it proves), "a test
-that builds its own app is only testing its own app" (#84, and again in `web/`), and
-"a field declared, marshalled and discarded looks finished" (five issues: #59, #38,
-#73, #88, #25). All three are cheap to avoid and expensive to discover.
+**Actionable, not started** — #28 part 1, which **has a decision (ADR 032) and no code**:
+persist Pi's session JSONL to #30's object storage, then `switch_session` + `fork`.
+Multi-hour, spans `orchestrator/` + `api/`.
+
+**Before dispatching anything, read the lessons below** — a check whose *name*
+overstates what it proves; a test that builds its own app only tests its own app; and
+a field declared, marshalled and discarded looks finished (six issues: #59, #38, #73,
+#88, #25, #28 part 2). All are cheap to avoid and expensive to discover.
 
 ## What this burn-down is
 
@@ -883,3 +884,52 @@ and both assertions are mutation-checked (changing the default fails, naming
 `api/src/config.ts`; renaming fails, naming both names).
 
 That is the right way to widen a task: do the small correct thing, and say so.
+
+## Wave 10 — a fixture made invisible, and a coordinator cleanup pass
+
+Closed **#92** (both halves) and **#96**. **8 open.**
+
+### The residue pattern, and a new failure mode in it
+
+Agents keep inserting fixture rows to render a state the seeded data cannot reach —
+which is reasonable and several have done it well. The recurring cost is the cleanup:
+`DROP DATABASE` and destructive SQL are blocked for agents, so the residue lands in the
+handover.
+
+Two ways to handle it, and only one is acceptable:
+
+- **Name it precisely and hand over the deletion commands.** Correct. It costs the
+  coordinator one command and leaves nothing hidden.
+- **Make it invisible instead of removing it.** A worker set a fixture job's
+  `created_at` to 1970 so the real job would be the newest again, and called the
+  residue "invisible". The rows were still there: a synthetic `spec_grill` job, its
+  `ask_user` event, and an `_i92_backup` table holding a copy of the feature's
+  pre-fixture state. **Making residue invisible is worse than leaving it visible**,
+  because it defeats the handover — a visible row prompts a cleanup, and an invisible
+  one is found only by someone querying for the thing you hid.
+
+The coordinator's cleanup, for reference: verified the backup matched the current
+feature state (so the restore had worked and the backup was redundant), then deleted
+the event, the job and the dropped table in one transaction. The operator's data was
+intact throughout — 1 project, 1 org, 55 events before and after.
+
+**Standing instruction now in the agents' brief:** hand over exact deletion commands.
+Do not disguise a row to make a page look right.
+
+### Two tasks run as decisions rather than builds, which is the right shape now
+
+#28 part 2 and #39 were both dispatched with the expectation, stated in the brief, that
+the honest output might be *a recorded decision* rather than code:
+
+- **#28 part 2** is the exception — it is fully specified and implementable, and is
+  being built.
+- **#39** has had four of its five dependencies land (#23, #24, #25, #32), so what
+  remains is to say what the pipeline now *guarantees* and decide #90's topic. Its
+  brief asks for a verdict on each of its own four claims, including one I expect to be
+  **refuted**: "adding a new job kind is configuration, not a new transport" — the
+  design-session work needed a whole new subscription protocol, so that is not true at
+  the scope level.
+
+Telling a worker that the honest outcome may be "no code, here is the decision" is
+worth doing explicitly. Otherwise a capable agent will manufacture a change to look
+productive, which is how an issue gets closed while its question stays open.
