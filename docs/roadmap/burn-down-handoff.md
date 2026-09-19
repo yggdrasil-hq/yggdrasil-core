@@ -398,3 +398,62 @@ serialised to work), #77 (a probe subscribed too early and got silence), and #78
 (a test case that "passed" because the route accepted what the publisher dropped).
 **Verifying one thing found three others** — which is the argument for running the
 real thing rather than reasoning about it, made concrete.
+
+## Wave 4 — three bugs the verification itself found, and one lesson worth more
+
+Closed #76, #77, #78 plus **#80** (found while fixing #77). **11 issues open.**
+
+### The lesson: a verification that asserts the bug certifies the bug
+
+The #32 harness contained this, for an oversize delta payload:
+
+```
+record(name, status === 202 && !frame, ...)   // accepted, then dropped
+```
+
+That is #78 — the silent drop — **encoded as a passing assertion**. The harness was
+green and the bug was in it. It now asserts the invariant (`status === 400 && !frame`:
+refused, nothing delivered), with a comment saying why.
+
+This is the sharpest form of the pattern this burn-down kept hitting: not a test
+that fails to catch a bug, but one that *certifies* it. Every other "green suite
+proved nothing" case (#43, #56, #61, #68, #69) was a test looking at the wrong
+thing; this one was looking at the right thing and calling the wrong outcome
+correct.
+
+**The generalisation worth carrying:** when writing a test for a failure mode,
+assert what *should* happen, not what *does*. A `false` assertion copied from
+observed behaviour is a snapshot of the bug.
+
+### Four defects found by running things
+
+| Issue | Found by | Fix |
+|---|---|---|
+| #76 | the harness had to serialise its own replica startup to work at all | bounded advisory-lock retry around the migration pass |
+| #77 | a probe that subscribed before `ready` and got silence | frames buffered until the handshake finishes, discarded on failed auth |
+| #78 | a case that "passed" because the route accepted what the publisher dropped | both sides ask the publisher's own `JSON.stringify` |
+| #80 | fixing #77 exposed out-of-order frame handling leaving a stale subscription | fixed in the same PR |
+
+### Measured, not assumed
+
+The #76 fix's design came from a **measurement that changed it**: an advisory lock
+belongs to its session, and a client SIGKILLed at +0s left it held past **+103s**
+with the backend still `active`. A plain `pg_advisory_lock` could have stalled every
+other replica for up to Linux's 7200s keepalive default, so the wait is bounded at
+120s. The worker measured this rather than reasoning about it, and the number is
+the reason the design is what it is.
+
+### Two of the worker's own tests passed for the wrong reason
+
+Both reported rather than quietly fixed: one asserted a frame order that is
+legitimately async, another used a harness that always authenticated. Same
+discipline as the rest of this burn-down.
+
+### A trap for the next person
+
+This harness cannot exercise a body between **100kb and 2mb**: the test
+`express.json()` sets no limit, so it takes Express's default 100kb, while
+production passes `2mb`. A 200,000-character payload therefore 413s in the harness
+before reaching the route under test. I hit this while adding a test and nearly
+filed it as a bug. Payloads in a test want to be over the *feature's* limit and
+under the *parser's*.
