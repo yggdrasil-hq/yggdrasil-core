@@ -223,6 +223,37 @@ returns null and the event is dropped from the socket path rather than guessed
 onto a topic. A design-session surface would need its own topic shape; the hub
 takes an opaque topic string precisely so that is additive.
 
+**Verified in a real two-replica deployment (issue #32).** This item's reasoning
+was sound when it was written but had never been *observed* — by construction,
+since it is unobservable in a single-process test. It has now been measured, with
+a reproducible harness committed at `api/scripts/verify-live-relay/`:
+
+- **The load-bearing claim holds.** An event written through one replica's HTTP
+  surface reaches a socket held by another — **both directions, both channels**
+  (stored events and deltas). This is the claim a bug would have hidden in
+  production only.
+- **The 8000-byte `pg_notify` cap is real**: 7999 bytes accepted, 8000 rejected
+  (`payload string too long`). That is the constraint that makes the
+  stored-event payload an event *id* rather than event data.
+- **The nginx timeouts work as configured**: a 90-second idle socket survived and
+  still delivered, which is past nginx's *default* 60s `proxy_read_timeout` — so
+  the test distinguishes the configured 3600s from the default rather than passing
+  under either.
+- **What is still not verified: a real browser client.** The harness uses a `ws`
+  client, so the Web app's own silent degradation to 2s polling was not exercised.
+  A broken socket path *in a browser* therefore remains unobserved — and because
+  that degradation makes a failure look like success, it is the half worth
+  distrusting (item 13's follow-up 3).
+
+**A protocol precondition this exposed (issue #77).** A `subscribe` frame sent
+before the server's `ready` frame is **silently dropped**: the socket stays open
+and still answers `ping`, so nothing fails and no client can tell. The cause is
+that the server performs its session lookup before attaching a message listener,
+and `ws` does not buffer for a listener that does not yet exist. This is worse than
+the graceful degradation item 13 anticipated — degradation at least triggers the
+polling fallback, whereas a silently-ignored `subscribe` leaves a client that
+believes it is subscribed. Stated on the wire, or buffered, until it is fixed.
+
 ### 7. The Web app keeps REST as its only state path; the socket only says "re-read".
 
 The relay notifies; the existing REST read is what updates the page. The grill
