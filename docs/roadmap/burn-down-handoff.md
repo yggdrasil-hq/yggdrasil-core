@@ -5,6 +5,43 @@ fresh one). It exists so nothing below has to be re-derived. Pair it with
 `burn-down-agent-notes.md`, which has the repo layout, the hard rules and the
 git/PR/merge workflow.
 
+## START HERE — current state
+
+**64 closed, 9 open** (`gh issue list --repo yggdrasil-hq/yggdrasil-core --state open`).
+
+The nine, sorted by **what actually blocks them** — this is the distinction that
+matters, because dispatching a decision as an implementation task produces a
+plausible change to an unanswered question:
+
+**Blocked on a decision, not work** — do not dispatch as implementation:
+
+| Issue | The unanswered question |
+|---|---|
+| #19 / #71 | The image **builds** (verified against the real cluster) but a preview cannot **pull** it: containerd is a node daemon, so it uses the node resolver and will not fall back to HTTP. An install needs the registry over TLS with a node-trusted CA, **or** marked insecure in containerd's config, **and** a node-resolvable name. Install-shape decision, recorded in ADR 003 §14. |
+| #55 | Building every linked repository's image needs a chart convention for per-repository image slots. Four sub-questions are enumerated on the issue. |
+
+**Blocked on the environment** — the code is complete; nothing here can exercise it:
+
+| Issue | Why |
+|---|---|
+| #38 | Fully implemented across all four layers (tool, transport, persistence, control) and **hop-verified**. Open only because no agent job has ever completed in this environment, so a model has never actually been induced to choose the structured form. |
+| #28 part 1 | **Decision made — ADR 032.** Now implementable (persist Pi's session JSONL to the object storage #30 built, then `switch_session` + `fork`). Not dispatched: multi-hour, two repos. |
+
+**Actionable now or in flight:**
+
+| Issue | State |
+|---|---|
+| #25 | Two of three surfaces converted; the **design-session view** is in flight |
+| #92 | API half in flight (grill wait age); needs a cross-repo value decision |
+| #28 part 2 | **Smallest useful piece remaining.** Surface superseded runs — a read over history that already exists, and it also fixes the shipped rewind's write-only discard |
+| #39 | Large: stream progress end to end, spans all four repos. Overlaps #25 and would likely close it |
+| #90 | Needs #39's decision about a topic for a feature-less non-design job |
+
+**Before dispatching anything, read the two sections below on how things have gone
+wrong here** — "a verification that asserts the bug certifies the bug" and "a test
+that builds its own app is only testing its own app". Both are cheap to avoid and
+expensive to discover.
+
 ## What this burn-down is
 
 The operator asked for: work through the open GitHub issues on
@@ -494,11 +531,12 @@ field from here on.
   success. It was told which half is verified and which is not, and to say which in
   its report.
 
-### Remaining open issues (11 → see issues for current)
+### Remaining open issues
 
-#19/#71 and #55 are **blocked on decisions** (registry trust; chart convention) and
-must not be dispatched as implementation. #25, #28, #39 are larger features. #31 (web
-half), #35, #38, #73, #74 are in flight or queued.
+**See "START HERE — current state" at the top of this document.** It is the single
+source of truth for what remains and what blocks it; this per-wave narrative is kept
+only for the lessons, and state recorded here would otherwise go stale twice a wave.
+
 
 ## Wave 6 — premise checks that changed the work, and a cross-check that worked
 
