@@ -7,44 +7,46 @@ git/PR/merge workflow.
 
 ## START HERE — current state
 
-**67 closed, 8 open.** All four child repos at verified `main`; no open PRs.
-`api` 93 files / 1372 passed against a real database, `web` 34 / 717, `orchestrator`
-gofmt-clean with all 11 packages, `agent-images` harness green with an empty ledger.
+**68 closed, 10 open.** All four child repos at verified `main`; no open PRs.
+`api` 93+ files / 1372+ passed against a real database, `web` 34 / 717,
+`orchestrator` gofmt-clean with all 11 packages, `agent-images` harness green with an
+empty ledger.
 
-The eight, sorted by **what actually blocks them** — the distinction that matters,
-because dispatching a decision as an implementation task produces a plausible change
-to an unanswered question:
+The ten, sorted by **what actually blocks them**:
 
 **Blocked on a decision, not work** — do not dispatch as implementation:
 
 | Issue | The unanswered question |
 |---|---|
 | #19 / #71 | The image **builds** (verified against the real cluster) but a preview cannot **pull** it: containerd is a node daemon, so it uses the node resolver and will not fall back to HTTP. An install needs the registry over TLS with a node-trusted CA, **or** marked insecure in containerd's config, **and** a node-resolvable name. Recorded in ADR 003 §14. |
-| #55 | Building every linked repo's image needs a chart convention for per-repository image slots. Four sub-questions on the issue. |
-| #95 | Design sessions cannot stream text deltas, because the delta path is feature-scoped end to end. An API shape decision. |
-| #90 | A feature-less non-design job routes nowhere. Its topic shape should follow #39's pipeline decision — **being decided there now**. |
+| #55 | Building every linked repo's image needs a chart convention for per-repository image slots. |
+| #95 | Design sessions cannot stream text deltas — the delta path is feature-scoped end to end. |
+| #99 | Generalise the relay's subscription protocol so a new scope is data, not a protocol. **A design decision with a proposal on the issue.** |
 
 **Blocked on the environment** — complete, and nothing here can exercise it:
 
 | Issue | Why |
 |---|---|
-| #38 | Implemented across all four layers and **hop-verified**. Open only because no agent job has completed here, so a model has never actually been induced to choose the structured form. |
+| #38 | Implemented across all four layers and hop-verified. Open only because no agent job has completed here. |
 
-**Actionable, in flight:**
+**Small, actionable, in flight or free:**
 
 | Issue | State |
 |---|---|
-| #28 part 2 | Surface superseded runs — **fully specified**, being implemented (`api` + `web`) |
-| #39 | Verification and decision: what the pipeline actually guarantees now that #23/#24/#25/#32 have landed. Expected to close as a decision with #90 carrying the remainder (`orchestrator` + `agent-images`) |
+| #90 | A feature-less job routes nowhere. **The topic is decided** (`test:<testId>`), the change is recorded — needs implementation in `api/` |
+| #98 | Two of four relay surfaces do not re-read on connect, though the shared module claims all do — `web/`, and a small fix |
+| #97 | The two-replica harness can run fixtures before migrations finish — a test-harness bug that produced a **false regression** once |
+| #28 part 2 | API half **merged** (#33); Web half in flight |
 
-**Actionable, not started** — #28 part 1, which **has a decision (ADR 032) and no code**:
-persist Pi's session JSONL to #30's object storage, then `switch_session` + `fork`.
-Multi-hour, spans `orchestrator/` + `api/`.
+**Actionable, not started** — #28 part 1: **decided (ADR 032), no code.** Persist Pi's
+session JSONL to #30's object storage, then `switch_session` + `fork`. Multi-hour,
+spans `orchestrator/` + `api/`.
 
-**Before dispatching anything, read the lessons below** — a check whose *name*
-overstates what it proves; a test that builds its own app only tests its own app; and
-a field declared, marshalled and discarded looks finished (six issues: #59, #38, #73,
-#88, #25, #28 part 2). All are cheap to avoid and expensive to discover.
+**Before dispatching anything, read the lessons below.** Six issues were one shape —
+a field declared, marshalled and discarded looks finished (#59, #38, #73, #88, #25,
+#28 part 2). Others: a check whose label overstates what it proves; a test that builds
+its own app only tests its own app; and "I cannot verify this here" is a claim to state,
+not to gloss.
 
 ## What this burn-down is
 
@@ -933,3 +935,69 @@ the honest output might be *a recorded decision* rather than code:
 Telling a worker that the honest outcome may be "no code, here is the decision" is
 worth doing explicitly. Otherwise a capable agent will manufacture a change to look
 productive, which is how an issue gets closed while its question stays open.
+
+## Wave 11 — a task that produced no code and was right not to
+
+Closed **#39** as *answered*. Filed #97, #98, #99. **10 open.**
+
+### #39 was dispatched expecting a decision, and that is what it produced
+
+Its brief said: "your verdict on each of the four claims — verified / refuted /
+could-not-verify — and if the honest answer is 'the pipeline is dependable for
+feature-scoped surfaces and #90 is the remaining gap', then say that." It did.
+
+| claim | verdict |
+|---|---|
+| a mid-run connect receives enough state | **verified** — the socket carries no state to miss (it is a signal; each surface reads REST) |
+| a transient disconnect recovers without a gap | **verified**, with a corrected mechanism — see below |
+| the live path and a plain GET never disagree | **verified, structurally** — `events-repository` inserts the row and *then* NOTIFYs its **id**, and NOTIFY is delivered on commit, so a listener can never be woken for a row a GET cannot already see |
+| a new job kind is configuration, not a transport | **REFUTED** |
+
+**Ten issues into this burn-down, the refutation is the valuable part** — and I
+predicted it, which makes it worth recording that the prediction held for a checkable
+reason rather than a hunch: adding the design-session scope cost a parallel protocol
+across seven files (topic builder, `relayEnvelopeFor` branch, `jobKind` in the scope
+read, a new authoriser, three client frames plus a server frame type, a second Web
+reader, a separate hook). The *transport* is shared; a new **scope** is a new protocol,
+because a session id is not a feature id. Filed as #99 with a generalisation proposal.
+
+**Claim 2's correction is the kind of finding only a careful reader gets.** The shared
+module's comment says "the page re-reads on connect, so the REST read *is* the
+catch-up". I verified the deps by hand: true for `feature-grill-client` and
+`build-progress-panel` (`[poll, isLive]`), **not** for `testing-panel` and
+`design-session-client` (immediate read in a separate `[poll]` effect). Worst-case
+staleness ≤30s — bounded, so the contract is met — but the stated mechanism is only
+half true. It also noticed the justification for splitting those effects miscounts:
+`isLive` is a **boolean**, so the effect flips once, not "from `off` to `connecting` to
+`live`". Filed as #98.
+
+**And it refused to invent a change.** It found a real inefficiency — deltas are
+forwarded for every agent kind but only the grill surface consumes them — and gave four
+reasons not to suppress them, the load-bearing one being that routing is the API's job
+and suppression would be silent and lossy. Reporting that is better than a speculative
+optimisation, and it is the behaviour the brief asked for.
+
+### It nearly reported a false regression against a colleague's uncommitted work
+
+Its harness failed once with `subscribe refused … "Feature not found"`, which reads as
+a relay regression, and it initially attributed it to the concurrent `api/` edit.
+**It then disproved that** by running the same harness against clean `HEAD` exported
+with `git archive` — so the other agent's tree was never involved — and got 12/12, as
+a re-run of the working tree did too. The real cause was #97's fixture/migration race.
+
+That is the discipline this burn-down has needed repeatedly: **before reporting someone
+else's work as broken, isolate it.** Had it not, a false regression would have been
+filed against an edit that was fine.
+
+### #28 part 2's security assertion, and why it was worth specifying
+
+The API half merged (#33) and implements the extra check the spec required — the path's
+`jobId` must belong to the path's `featureId`, not merely to the project. I verified it
+is in place, uses **404 rather than 403** so it does not leak whether the job exists,
+and is tested against the subtle case: a job with a **null** `featureId` (a deploy or a
+scheduled run) must fail the comparison, because `null === null` is exactly the accident
+that would let one through.
+
+That check exists because a grill transcript is the whole prior conversation, including
+anything a human typed into it — so the failure mode was reading another feature's
+conversation by pasting a uuid.
