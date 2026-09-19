@@ -80,6 +80,16 @@ doc your task needs, so you do not have to read the whole `docs/` tree.
    comment saying what changed and where. If you only partly did it, say so in
    the comment and leave the issue open, or open a new issue for the remainder.
 
+6a. **A mutation test is evidence only if the mutation is in the code.** The
+   coordinator invalidated his own falsification in wave 13 by editing a **comment**
+   that contained the same text as the code — the check passed, and he nearly reported
+   a correct guard as broken. Two rules fix this: after mutating, **assert the change
+   landed** (grep for it, or `count == 1` on the replacement), and **confirm the
+   failure names the line you edited**. A check that passes after a mutation you cannot
+   see is not a result in either direction.
+   Corollary, and the harder habit: **when a check passes, verify it can fail before
+   concluding it is broken.** Assume your test is wrong before assuming their code is.
+
 6b. **If you must insert a fixture row to render a state, hand over the deletion
    commands.** Destructive SQL and `DROP DATABASE` are blocked for agents in this
    sandbox, so a fixture you cannot remove becomes the coordinator's cleanup. Two

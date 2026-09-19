@@ -7,57 +7,41 @@ git/PR/merge workflow.
 
 ## START HERE — current state
 
-**68 closed, 10 open.** All four child repos at verified `main`; no open PRs.
-`api` 95 files / 1396 passed against a real database, `web` 35 / 725,
-`orchestrator` gofmt-clean all 11 packages, `agent-images` harness green, ledger empty.
-
-The ten, by **what actually blocks them** — the distinction that matters, because
-dispatching a decision as an implementation task produces a plausible change to an
-unanswered question:
+**71 closed, 8 open.** All four child repos at verified `main`; no open PRs.
+`api` 96 files / **1412 passed** against a real database, `web` 36 / **740**,
+`orchestrator` gofmt-clean / 11 packages, `agent-images` harness green, ledger empty.
 
 ### Needs the OPERATOR — do not dispatch, do not decide unilaterally
 
 | Issue | The question only the operator can answer |
 |---|---|
-| **#19 / #71** | The image **builds** (verified against the real cluster) but a preview cannot **pull** it: containerd is a node daemon, so it uses the node resolver and will not fall back to HTTP. This is an **install-shape** choice: registry over TLS with a node-trusted CA, or marked insecure in containerd's config, **and** a node-resolvable name. Recorded in ADR 003 §14. |
-| **#55** | Building every linked repo's image needs a **chart convention** for per-repository image slots. Four sub-questions on the issue. |
-
-### Decided by the coordinator — actionable, no further input needed
-
-| Issue | Decision | Where |
-|---|---|---|
-| #99 | Relay frames become **scope-tagged**; the scope is a closed union of kind+id, so a new scope costs a kind value, a topic builder and an authoriser. Version 1 is **replaced**, conditional on *proving by running* that a v1 client meeting a v2 server degrades to the poll. | **ADR 033** + comment on #99 |
-| #95 | Design sessions **do** stream. Not a separate change: #99's scope-tagged delta frame *is* the scope field #95 asks for, so this is #99's first new scope. Ceiling stays per-job; topic `design:<jobId>` (a session id **is** its job id). | **ADR 033 §5** + comment on #95 |
-| #90 | Topic `test:<testId>`, mirroring the one REST read that consumes it. | comment on #90 — **implementation in flight** |
+| **#19 / #71** | The image **builds** (verified against the real cluster) but a preview cannot **pull** it: containerd is a node daemon, so it uses the node resolver and will not fall back to HTTP. An **install-shape** choice: registry over TLS with a node-trusted CA, or marked insecure in containerd's config, **and** a node-resolvable name. ADR 003 §14. |
+| **#55** | Per-repository image slots need a **chart convention**. Four sub-questions on the issue. |
 
 ### Blocked on the ENVIRONMENT — complete, nothing here can exercise it
 
 | Issue | Why |
 |---|---|
-| #38 | Implemented across all four layers, hop-verified. Open only because no agent job has completed here. |
+| **#38** | Implemented across all four layers, hop-verified. Open only because no agent job has completed here. |
 
-### In flight (this wave)
+### In flight
 
-| Issue | Owner |
+| Issue | Repos | State |
+|---|---|---|
+| **#99 + #95** | `api` + `web` | ADR 033 — scope-tagged frames, two `kind`-keyed registries, design deltas as the first new scope |
+| **#28 part 1** | `orchestrator` + `agent-images` | Persist the Pi session JSONL to object storage. **Died silently once**; resumed with ~75 min. Its API/Web halves (fork route, entry ids, "Resume from here", retention) are the next wave and need its report. |
+
+### Small and free
+
+| Issue | Notes |
 |---|---|
-| #90 + #97 | `api/` — the test scope, and the two-replica harness's fixture/migration race |
-| #98 | `web/` — two of four surfaces do not re-read on connect |
-| #28 part 1 | `orchestrator/` — the first half (persist the Pi session JSONL to object storage); the API/Web halves follow next wave |
+| **#100** | A feature-driven `test_run` has both ids and feature wins, so the Test-entity page gets no live signal. **Asserted in a test** by #90's work, so it cannot be rediscovered as a surprise. Its shape is "one job, two scopes", which ADR 033 makes expressible — likely a follow-up once #99 lands. |
 
-### Next wave
-
-1. **#99 + #95** — `api/` + `web/`, per ADR 033. One worker owning both, since it is one
-   protocol change; #90 folds in as the second scope if it has landed.
-2. **#28 part 1's API + Web halves** — the fork route, `get_fork_messages`-driven entry
-   ids, the "Resume from here" control, retention. Must read the orchestrator half's
-   storage key and failure-recording contract from its report.
-
-**Before dispatching anything, read the lessons below.** Six issues were one shape — a
-field declared, marshalled and discarded looks finished (#59, #38, #73, #88, #25, #28
-part 2). Others: a check whose *label* overstates what it proves; a test that builds its
-own app only tests its own app; `tsc` cannot see an ambiguous SQL column (#61 proves a
-reviewer cannot either); and "I cannot verify this here" is a claim to state, not to
-gloss.
+**Before dispatching anything, read the lessons below.** The recurring ones: a field
+declared, marshalled and discarded (#59, #38, #73, #88, #25, #28 — six times); a check
+whose *label* overstates what it proves; a test that builds its own app only tests its
+own app; `tsc` cannot see an ambiguous SQL column (#61 proves a reviewer cannot either);
+and **when a check passes, verify it can fail before trusting it.**
 
 ## What this burn-down is
 
@@ -1094,3 +1078,81 @@ It also verified the security assertion the same way — removing the job-scoped
   ledger is for pre-existing gaps — which is the ratchet working as intended rather than
   being quietened.
 - One scratch database named precisely and dropped by the coordinator.
+
+## Wave 13 — my own falsification was invalid, and the worker's guard was fine
+
+Closed **#90**, **#97**, **#98**. Filed **#100**. **8 open.** This wave's real value is a
+method lesson, and it is mine.
+
+### I reported a guard as broken when my test was broken
+
+#98's worker claimed a source-scanning guard fails when a relay poll effect stops being
+keyed on `isLive`, naming `testing-panel.tsx`. I tested it: dropped `isLive` from the
+deps, ran the suite, got **740 passed**. It looked like a false claim — the exact
+"a check whose name overstates what it proves" pattern this burn-down keeps finding.
+
+**It was my test that was wrong.** The string `[poll, isLive]` appeared **twice** in the
+file: once in the deps at line 157, and once in a **comment** at line 130 explaining the
+change. My edit replaced the first occurrence — the comment — because it was textually
+first. The component was untouched, so it passed, and I nearly filed a false regression
+against correct work.
+
+Two things saved it, and both are the point:
+
+- The scanner reads the **TypeScript AST**, so a `useEffect` inside a comment is
+  invisible to it. That is the trap issue #83 hit, and it is why the worker chose the
+  parser over the text. My comment-mutation was not merely missed — it was *correctly*
+  ignored.
+- I re-ran with an **assertion that the edit landed** and that the failure named the
+  right line. Then it failed properly: `testing-panel.tsx:150 … not keyed on the live
+  status`.
+
+**Standing rule, now in the agents' brief:** a mutation test is only evidence if the
+mutation is in the code, and the failure names the line you edited. And in the
+coordinator's own direction: *when a check passes, verify it can fail before concluding
+it is broken* — the same discipline as "verify before trusting", applied to my own
+verification.
+
+### #98 was not cosmetic, and the worker was right to say so
+
+I had signed off on the issue's framing — a comment that overstates a mechanism, bounded
+staleness, "not a live-feed outage". The worker found the reason the fix matters:
+**the hub keeps no backlog** (`api/src/live/hub.ts` keeps a `Set` per topic and fans out
+only to whoever is subscribed *at that instant*), and the socket carries no cursor. So
+events published between a surface's last read and its server-side subscription
+registration reach **nobody**. On the two surfaces that only restarted their interval,
+that window was the safety interval. The read at connect is the only thing that closes
+it; the interval is a watchdog, not the catch-up. I verified the hub myself.
+
+So the change was a real fix to a real gap, not a comment correction — and I would have
+shipped the comment correction.
+
+### #90's worker answered the question I actually asked
+
+I asked it to check that `test_id` is genuinely **populated** before building a reader on
+it, since a correct topic over a null column is #59/#88's "looks finished, does nothing".
+It did, and its new test file is a model of the reasoning: a real scheduler tick, real
+`JobRepository`, migrated database, row read back, **following the row all the way to the
+topic** — because "the column is populated" and "the relay routes on it" are two claims
+and the bug lives in the seam between them. It also cited #43 and #61 as the precedent
+for why a fake pool cannot test either.
+
+Its two corrections to #97 were measured, not reasoned: `psql` fed fixtures on **stdin**
+exits **0** after a failed statement (with `-c` it exits 1), so `&& echo inserted` printed
+*inserted* over a fixture that never landed — the harness reported success *at the fixture
+step*. And the migration window was fourteen migrations, not one.
+
+### Residue, handled by the book this time
+
+Six scratch databases, named exactly, with the `DROP` command included — and the worker
+pre-empted the failure mode (`DROP DATABASE` takes one name, so the multi-name form had
+to be split). Dropped individually; no fixture rows; operator data verified unchanged at
+1 project / 1 org / 7 jobs / 55 events. This is the correct handover, and it is what the
+invisible-residue wave got wrong.
+
+### A worker died silently
+
+The #28 part 1 worker stopped after **10 minutes** mid-sentence with no error, no rate
+limit, nothing in its log. Resumed with the remaining ~75 minutes and told to commit
+incrementally and keep notes as it goes — a silent termination means an end-of-run report
+is the one artifact that can be lost entirely.
