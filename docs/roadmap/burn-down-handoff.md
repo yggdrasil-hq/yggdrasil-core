@@ -8,45 +8,56 @@ git/PR/merge workflow.
 ## START HERE — current state
 
 **68 closed, 10 open.** All four child repos at verified `main`; no open PRs.
-`api` 93+ files / 1372+ passed against a real database, `web` 34 / 717,
-`orchestrator` gofmt-clean with all 11 packages, `agent-images` harness green with an
-empty ledger.
+`api` 95 files / 1396 passed against a real database, `web` 35 / 725,
+`orchestrator` gofmt-clean all 11 packages, `agent-images` harness green, ledger empty.
 
-The ten, sorted by **what actually blocks them**:
+The ten, by **what actually blocks them** — the distinction that matters, because
+dispatching a decision as an implementation task produces a plausible change to an
+unanswered question:
 
-**Blocked on a decision, not work** — do not dispatch as implementation:
+### Needs the OPERATOR — do not dispatch, do not decide unilaterally
 
-| Issue | The unanswered question |
+| Issue | The question only the operator can answer |
 |---|---|
-| #19 / #71 | The image **builds** (verified against the real cluster) but a preview cannot **pull** it: containerd is a node daemon, so it uses the node resolver and will not fall back to HTTP. An install needs the registry over TLS with a node-trusted CA, **or** marked insecure in containerd's config, **and** a node-resolvable name. Recorded in ADR 003 §14. |
-| #55 | Building every linked repo's image needs a chart convention for per-repository image slots. |
-| #95 | Design sessions cannot stream text deltas — the delta path is feature-scoped end to end. |
-| #99 | Generalise the relay's subscription protocol so a new scope is data, not a protocol. **A design decision with a proposal on the issue.** |
+| **#19 / #71** | The image **builds** (verified against the real cluster) but a preview cannot **pull** it: containerd is a node daemon, so it uses the node resolver and will not fall back to HTTP. This is an **install-shape** choice: registry over TLS with a node-trusted CA, or marked insecure in containerd's config, **and** a node-resolvable name. Recorded in ADR 003 §14. |
+| **#55** | Building every linked repo's image needs a **chart convention** for per-repository image slots. Four sub-questions on the issue. |
 
-**Blocked on the environment** — complete, and nothing here can exercise it:
+### Decided by the coordinator — actionable, no further input needed
+
+| Issue | Decision | Where |
+|---|---|---|
+| #99 | Relay frames become **scope-tagged**; the scope is a closed union of kind+id, so a new scope costs a kind value, a topic builder and an authoriser. Version 1 is **replaced**, conditional on *proving by running* that a v1 client meeting a v2 server degrades to the poll. | **ADR 033** + comment on #99 |
+| #95 | Design sessions **do** stream. Not a separate change: #99's scope-tagged delta frame *is* the scope field #95 asks for, so this is #99's first new scope. Ceiling stays per-job; topic `design:<jobId>` (a session id **is** its job id). | **ADR 033 §5** + comment on #95 |
+| #90 | Topic `test:<testId>`, mirroring the one REST read that consumes it. | comment on #90 — **implementation in flight** |
+
+### Blocked on the ENVIRONMENT — complete, nothing here can exercise it
 
 | Issue | Why |
 |---|---|
-| #38 | Implemented across all four layers and hop-verified. Open only because no agent job has completed here. |
+| #38 | Implemented across all four layers, hop-verified. Open only because no agent job has completed here. |
 
-**Small, actionable, in flight or free:**
+### In flight (this wave)
 
-| Issue | State |
+| Issue | Owner |
 |---|---|
-| #90 | A feature-less job routes nowhere. **The topic is decided** (`test:<testId>`), the change is recorded — needs implementation in `api/` |
-| #98 | Two of four relay surfaces do not re-read on connect, though the shared module claims all do — `web/`, and a small fix |
-| #97 | The two-replica harness can run fixtures before migrations finish — a test-harness bug that produced a **false regression** once |
-| #28 part 2 | API half **merged** (#33); Web half in flight |
+| #90 + #97 | `api/` — the test scope, and the two-replica harness's fixture/migration race |
+| #98 | `web/` — two of four surfaces do not re-read on connect |
+| #28 part 1 | `orchestrator/` — the first half (persist the Pi session JSONL to object storage); the API/Web halves follow next wave |
 
-**Actionable, not started** — #28 part 1: **decided (ADR 032), no code.** Persist Pi's
-session JSONL to #30's object storage, then `switch_session` + `fork`. Multi-hour,
-spans `orchestrator/` + `api/`.
+### Next wave
 
-**Before dispatching anything, read the lessons below.** Six issues were one shape —
-a field declared, marshalled and discarded looks finished (#59, #38, #73, #88, #25,
-#28 part 2). Others: a check whose label overstates what it proves; a test that builds
-its own app only tests its own app; and "I cannot verify this here" is a claim to state,
-not to gloss.
+1. **#99 + #95** — `api/` + `web/`, per ADR 033. One worker owning both, since it is one
+   protocol change; #90 folds in as the second scope if it has landed.
+2. **#28 part 1's API + Web halves** — the fork route, `get_fork_messages`-driven entry
+   ids, the "Resume from here" control, retention. Must read the orchestrator half's
+   storage key and failure-recording contract from its report.
+
+**Before dispatching anything, read the lessons below.** Six issues were one shape — a
+field declared, marshalled and discarded looks finished (#59, #38, #73, #88, #25, #28
+part 2). Others: a check whose *label* overstates what it proves; a test that builds its
+own app only tests its own app; `tsc` cannot see an ambiguous SQL column (#61 proves a
+reviewer cannot either); and "I cannot verify this here" is a claim to state, not to
+gloss.
 
 ## What this burn-down is
 
