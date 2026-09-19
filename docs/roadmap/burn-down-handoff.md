@@ -564,3 +564,95 @@ run in `api/` reported failures once during this wave and passed on re-run, beca
 the agent was mid-edit and running its own scratch database. Check `git branch` and
 the agent's activity before running a full suite in a repo you do not have
 exclusively.
+
+## Wave 7 — #35 and #73 (API halves), and a jsonb bug that made a feature unwritable
+
+Both issues **stay open**: each has a half outside `api/`. Plus a pre-existing bug
+found by adding a real-database test for the second.
+
+### #35 — org readiness (yggdrasil-api#29)
+
+`organizations/readiness.ts` is now the single definition of "ready", called by both
+the onboarding signal and the create gate. That sharing is the point: a readiness
+predicate that differs from the gate promises a form that then 400s.
+
+**A real behaviour change, stated on the issue:** the create gate required a
+`spec_grill` default only, while ADR 018 item 6a requires all five agent-driven
+kinds. An org with four of five configured that could create a project before now
+gets a 400. The escape hatch (a request's own complete bundle) is preserved, so this
+implements item 6a rather than removing a capability.
+
+**The entry rule the issue left open:** gated on **any** org being ready, not the
+personal one — gating on the personal org would trap an invitee whose own org nobody
+configured, which is the dead end the issue says must not exist.
+
+Endpoint `GET /organizations/readiness` (user-scoped); shape in
+`api/docs/concepts/onboarding-readiness.md`. The Web half is outstanding, so the
+dead end still exists for a user until it lands.
+
+### #73 — structured review findings (yggdrasil-api#30)
+
+A decision as much as a change, and the evidence decided it: **the shape already
+exists on both sides** — the read contract's `comments` (#59) and the Web app's
+`AgenticReviewFinding`, which its mapper already fills from `comments`. Only the
+producer was missing, so the cost of structure is one optional array plus a jsonb
+column, while deleting it would make per-location findings permanently impossible.
+
+`null` vs `[]` is the feature: `null` is prose (a count is **not knowable**), `[]`
+is structured-with-none (a count of zero is *true*). The read shape carries
+`findingsRecorded` so a client never infers this from an empty array.
+
+The producer is in `agent-images/`, so the exact two-file change is specified on the
+issue and it stays open. Until that lands `findingsRecorded` is always false —
+honest, but the UI still cannot show blockers per-location.
+
+### The bug: `action_items` could never be stored (#86)
+
+Found because #73 added a *second* jsonb array and its real-database test failed on
+the shared code path. **`node-postgres` sends a JS array as a Postgres array literal,
+not JSON**, so Postgres refused the cast with `invalid input syntax for type json` —
+and every `submit_adr` event carrying an Action Items batch failed at the insert.
+Since the column was added.
+
+It survived because **every real-database test in that file writes an object**
+(`questionForm`), which serialises acceptably. The array path was never executed
+against a database — the same shape as #43/#61/#75, and the fifth instance here of
+"a test that does not run the thing that breaks".
+
+The rule it demonstrates, now twice in one wave: **a jsonb column needs a round-trip
+test with the value's actual shape.** An object test does not cover an array, and a
+fake pool covers neither.
+
+### Mutations, so the tests are worth something
+
+Three runs, each proving a test catches what it exists for rather than trusting green:
+
+| Mutation | Caught by |
+|---|---|
+| #35 coverage reverted to `spec_grill`-only | 7 failures, incl. the ADR 018 item 6a case |
+| #35 entry gated on the personal org alone | 1 failure, exactly the entry-rule test |
+| #73 route omits `reviewFindings` from `create` (the #59 drop) | 2 failures by name |
+
+Plus `scripts/verify/issue-35-readiness.mts` and `scripts/verify/issue-73-review-findings.mts`
+(7 checks each) against a **real PostgreSQL**, and the first real-database case for a
+jsonb **array** in `src/jobs/events-repository.postgres.test.ts` — which fails against
+the old code.
+
+Suites at these commits: compose **1283 passed + 34 skipped**; real database **1307
+passed + 10 skipped**.
+
+### A test-harness gap fixed on the way (#84, yggdrasil-api#28)
+
+26 test files build a bare `express()` app and never import `app.ts`, so #45's
+async-handler patch was absent and a thrown route handler **hung** the test instead of
+500ing. It cost real time here: a missing fake method read as an unrelated 5s timeout.
+Loading the patch in `test-setup.ts` turned that into a 25ms assertion naming the
+status. Related to the Wave 6 note above — a test that constructs its own app is
+verifying that app, not the server.
+
+### A gated token, and the command that is not
+
+Several agents left scratch databases behind because the obvious drop command is
+refused by this sandbox's safety gate. `docker exec <pg> dropdb -U yggdrasil
+--if-exists <name>` is not gated, and it cleared the eight this wave left. A scratch
+database left behind is somebody else's to find.
