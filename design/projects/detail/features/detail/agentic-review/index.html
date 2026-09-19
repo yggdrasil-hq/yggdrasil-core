@@ -24,21 +24,19 @@
     .preview-ref[open] summary::before { content: "\25BE  "; }
     .preview-ref-body { margin-top: 16px; }
 
-    .section-toggle { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
-    .subview-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--rime-soft); margin-bottom: 20px; }
-    .subview-tabs label { padding: 9px 4px; margin-right: 16px; font-size: 13px; color: var(--mist); border-bottom: 2px solid transparent; cursor: pointer; }
-    .subview-tabs label:hover { color: var(--frost); }
-    .subview-panel { display: none; }
-
-    #areview-view-approved:checked ~ .areview-tabs .subview-tabs label[for="areview-view-approved"],
-    #areview-view-changes:checked ~ .areview-tabs .subview-tabs label[for="areview-view-changes"] {
-      color: var(--frost);
-      border-bottom-color: var(--bifrost);
-    }
-    #areview-view-approved:checked ~ .areview-tabs #panel-areview-approved,
-    #areview-view-changes:checked ~ .areview-tabs #panel-areview-changes {
-      display: block;
-    }
+    /*
+     * The two verdict states are stacked, not tabbed, as of issue #74/#81.
+     *
+     * They used to be a radio-driven tab pair, which promised a control the real
+     * page does not have: a review carries exactly ONE verdict, so a
+     * Approved/Changes-requested toggle had no second category to select and its
+     * state was read by nothing but itself. Both shapes still need to be visible
+     * here (this is a design reference, and seeing both is the point), so they are
+     * shown one after the other instead of behind a switch that implies the page
+     * can switch between them.
+     */
+    .verdict-preview-label { margin: 28px 0 12px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--shadow); }
+    .subview-panel + .verdict-preview-label { margin-top: 32px; }
 
     .verdict-row { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 13px; }
     .verdict-row.approved { background: rgba(70,194,133,0.08); border: 1px solid rgba(70,194,133,0.3); color: var(--mist); }
@@ -118,12 +116,27 @@
       </div>
       <div class="main-inner">
         <div class="design-note">
-          <b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/features/:featureId/agentic-review</span> — an entirely <b>new</b> route/gate/job with
-          <b>no grounding anywhere</b>. Unlike Testing (which at least has a real Agentic-test sibling) or the Action Item types (each traceable to something that
-          exists), there is no ADR, no job kind, no skill, and no contract-tool event for "an agent reviews another agent's diff" — this page is a pure proposal for
-          what the user described as a gate between Testing and Manual Review. It would presumably need its own job kind (something like <span class="mono">agentic_review</span>),
-          its own skill/image, and its own curated event vocabulary, none of which this wireframe attempts to design. This feature hasn't reached this stage yet
-          (still Implementing), so the default view is honestly empty; Approved/Changes-requested are previewed below only to show the shape of the idea.
+          <b>Wireframe</b> · maps to <span class="mono">/projects/:projectId/features/:featureId/agentic-review</span>.
+          <b>Corrected (issue #81)</b> — this note previously said the feature had "no grounding anywhere: no ADR, no job kind, no
+          skill, and no contract-tool event". <b>All four of those now exist</b>, so the note was describing a proposal as
+          unbuilt long after it shipped: ADR 015 items 13&#8211;16 define the job kind, its read-only container tier, its inputs
+          and its two transitions; <span class="mono">agentic_review</span> is a real job kind; the skill and image exist
+          under <span class="mono">agent-images/agentic_review/</span>; and the shared contract extension's
+          <span class="mono">submit_review</span> tool carries the verdict. A read endpoint
+          (<span class="mono">GET /projects/:id/features/:id/agentic-review</span>) now serves the stored verdict to this page.
+          What remains true is the <b>empty state</b> shown below: a review only exists once Testing passes.
+
+          <b>The Approved / Changes-requested subview was removed (issue #74).</b> It was a radio-driven tab pair and could not
+          work: a review carries exactly <i>one</i> verdict, so the control had no second category to select and its state was
+          read by nothing but itself. Its replacement — filtering by blocking vs. non-blocking — was considered and rejected
+          too, because the review payload carries no per-finding <span class="mono">blocking</span> flag, so every finding would
+          have defaulted to blocking and the filter would have worked only against mock data. Both verdict shapes are still shown
+          below, stacked rather than switched, because seeing both is the point of a design reference.
+
+          <b>Still a mock:</b> the verdict, the file locations and the review comments are invented. The prose shape is accurate
+          — the reviewing agent writes its findings as free text in <span class="mono">comment</span>, not as structured
+          per-location entries — so the location lines below illustrate a <i>presentation</i> that the current producer does not
+          supply (see issue #73).
         </div>
 
         <div class="detail-title">
@@ -180,32 +193,25 @@
           <details class="preview-ref" style="margin-top:20px;">
             <summary>Preview other states (design reference)</summary>
             <div class="preview-ref-body">
-              <input type="radio" name="areview-view" id="areview-view-approved" class="section-toggle" checked />
-              <input type="radio" name="areview-view" id="areview-view-changes" class="section-toggle" />
-              <div class="areview-tabs">
-                <div class="subview-tabs">
-                  <label for="areview-view-approved">Approved</label>
-                  <label for="areview-view-changes">Changes requested</label>
+              <p class="verdict-preview-label">If it approves</p>
+              <div class="subview-panel" id="panel-areview-approved">
+                <div class="verdict-row approved"><span>&#9679;</span> Approved &mdash; no blocking issues found. Proceeding to Manual Review.</div>
+                <div class="review-comment">
+                  <div class="loc">payments/setup-intent.ts:42</div>
+                  <div class="note">Nit: consider extracting the Stripe error-mapping block into a shared helper — not blocking.</div>
                 </div>
+              </div>
 
-                <div class="subview-panel" id="panel-areview-approved">
-                  <div class="verdict-row approved"><span>&#9679;</span> Approved &mdash; no blocking issues found. Proceeding to Manual Review.</div>
-                  <div class="review-comment">
-                    <div class="loc">payments/setup-intent.ts:42</div>
-                    <div class="note">Nit: consider extracting the Stripe error-mapping block into a shared helper — not blocking.</div>
-                  </div>
+              <p class="verdict-preview-label">If it requests changes</p>
+              <div class="subview-panel" id="panel-areview-changes">
+                <div class="verdict-row changes"><span>&#9679;</span> Changes requested &mdash; 1 blocking issue. Sent back to Implementation with a comment.</div>
+                <div class="review-comment blocking">
+                  <div class="loc">customers/default-payment-method.ts:18 &middot; blocking</div>
+                  <div class="note">Removing the default card doesn't check whether it's the customer's only saved card before requiring a replacement pick — will throw instead of blocking removal, matching the Testing failure on the same path.</div>
                 </div>
-
-                <div class="subview-panel" id="panel-areview-changes">
-                  <div class="verdict-row changes"><span>&#9679;</span> Changes requested &mdash; 1 blocking issue. Sent back to Implementation with a comment.</div>
-                  <div class="review-comment blocking">
-                    <div class="loc">customers/default-payment-method.ts:18 &middot; blocking</div>
-                    <div class="note">Removing the default card doesn't check whether it's the customer's only saved card before requiring a replacement pick — will throw instead of blocking removal, matching the Testing failure on the same path.</div>
-                  </div>
-                  <div class="review-comment">
-                    <div class="loc">payments/setup-intent.ts:42</div>
-                    <div class="note">Nit: consider extracting the Stripe error-mapping block into a shared helper — not blocking.</div>
-                  </div>
+                <div class="review-comment">
+                  <div class="loc">payments/setup-intent.ts:42</div>
+                  <div class="note">Nit: consider extracting the Stripe error-mapping block into a shared helper — not blocking.</div>
                 </div>
               </div>
             </div>
