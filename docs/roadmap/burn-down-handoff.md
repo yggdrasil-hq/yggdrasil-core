@@ -457,3 +457,45 @@ production passes `2mb`. A 200,000-character payload therefore 413s in the harne
 before reaching the route under test. I hit this while adding a test and nearly
 filed it as a bug. Payloads in a test want to be over the *feature's* limit and
 under the *parser's*.
+
+## Wave 5 — and a blocker caught before it shipped
+
+Three agents' worth of scope, plus one escalation that is worth recording as a
+*success* rather than an incident.
+
+### The #59 pattern, caught early this time
+
+An agent building #38's backend half found that the structured question it had just
+implemented **would never arrive**: the tool emits `header`/`multiSelect`/`options`,
+but the Orchestrator drops them twice — `rpc.Translate`'s `EventAskUser` case carries
+only `Question`, and `apiclient.PostJobEvent`'s request struct has no such fields. So
+the API's `question_form` column would stay NULL forever, the Web control would have
+nothing to render, and **every test on both sides would pass**.
+
+That is exactly #59 (a verdict that reached the API and was dropped because `create`
+never declared it), and this time it was caught by the person writing it, before
+merge, by checking rather than assuming. It escalated rather than reaching into a
+repo it did not own, and named the precise two call sites and the additive fix.
+
+**The generalisable test:** for a field that travels pod → Orchestrator → API, "does
+my side compile and pass" is not the question. The question is *which hop drops it*,
+and there are always at least three. Worth asking explicitly on any new cross-service
+field from here on.
+
+### Two coordination rules this validated
+
+- **Grants are a condition, not a policy.** The scope rule exists to stop two writers
+  colliding in one checkout. When the repo is free and the escalating agent already
+  has the context loaded, extending scope is cheaper than re-dispatching — so the
+  thing to check is "is there another writer", not "whose repo is it".
+- **The dependent agent gets told, immediately.** The Web agent was building a control
+  for a field that would be null; without a steer it would have spent its budget
+  chasing a client bug that did not exist, or worse, mocked the contract and reported
+  success. It was told which half is verified and which is not, and to say which in
+  its report.
+
+### Remaining open issues (11 → see issues for current)
+
+#19/#71 and #55 are **blocked on decisions** (registry trust; chart convention) and
+must not be dispatched as implementation. #25, #28, #39 are larger features. #31 (web
+half), #35, #38, #73, #74 are in flight or queued.
