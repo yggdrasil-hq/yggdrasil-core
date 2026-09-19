@@ -268,6 +268,20 @@ Constraints:
     Postgres queue's concurrent-consumer pattern (`SKIP LOCKED`) is safe with N
     consumers with no additional coordination work.
 
+    **Amended (issue #76): replicas are safe once running, but not while
+    starting.** `runMigrations` reads the applied set and then applies what is
+    missing — a check-then-act — so two replicas booting together both apply the
+    same migration and the loser exits with `23505` on
+    `schema_migrations_pkey`. Nothing about `SKIP LOCKED` prevents that; it is a
+    startup race in a different subsystem.
+
+    The consequence is specific and worth knowing during a rollout: an overlapping
+    rollout can **silently lose a replica**, and the surviving one looks healthy.
+    An advisory lock around the migration pass is the fix; until it lands, this is
+    a real limitation of "run 2 replicas", not a theoretical one. It was found by
+    building the two-replica harness for issue #32, which had to serialise replica
+    startup to get past it.
+
 ## Consequences
 
 ### Positive
