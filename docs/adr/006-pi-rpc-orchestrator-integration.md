@@ -218,6 +218,32 @@ Constraints:
     `internal/queue`'s own claim pattern) once notified. The returned
     content becomes the *next turn's* prompt — a fresh `runTurn`/attach call
     (item 3), not a second write into the turn that produced `ask_user`.
+    - **Amended by issue #82: the wait is bounded.** It was originally
+      unbounded, so a question nobody answered held a pod — and a live
+      GitHub token and model key with it (ADR 004) — indefinitely. Each
+      wait now has a 24h bound; exceeding it **fails the run** with the
+      question quoted into `jobs.last_error`, rather than cancelling, since
+      `cancelled` already means "a human stopped this" and a failure carries
+      ADR 012's retry semantics.
+
+      **24h, generously rather than tightly, and per wait rather than per
+      run.** The grill is human-gated *by design*, so the bound exists to
+      catch "nobody is coming", not "the human is slow" — a bound that fires
+      on a slow but real human discards a run that was going to finish, and
+      teaches operators to distrust the timeout. Per-wait is the substance:
+      a twelve-question interview answered within twenty minutes each would
+      total three hours, and a whole-run bound would kill it partway, which
+      is exactly what a grill is for. Bounding each wait measures what
+      actually went wrong — *this* question, unanswered.
+
+      `GRILL_REPLY_TIMEOUT` configures it, and **no value disables it** (`0`
+      falls back to the default, following the `previewTTL` convention), so
+      no configuration reproduces the bug this closed. A typo also falls
+      back rather than erroring.
+
+      **Not recorded here, and open:** the API has no notion of *how long* a
+      grill has been waiting — `awaiting_user_input` is a boolean, so no
+      surface can show the age or warn before the bound (issue #92).
     - The feature's `awaiting_user_input` flag (`features/repository.ts`'s
       `setAwaitingUserInput`) is kept in sync with this: the internal
       `POST /internal/jobs/:jobId/events` handler
