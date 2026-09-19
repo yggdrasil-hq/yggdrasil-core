@@ -499,3 +499,68 @@ field from here on.
 #19/#71 and #55 are **blocked on decisions** (registry trust; chart convention) and
 must not be dispatched as implementation. #25, #28, #39 are larger features. #31 (web
 half), #35, #38, #73, #74 are in flight or queued.
+
+## Wave 6 — premise checks that changed the work, and a cross-check that worked
+
+Closed **#74, #81, #84**. **#25 is two-thirds done** and deliberately left open.
+**11 issues open.**
+
+### Two premise checks that changed what got built
+
+**#25: the API work was not needed.** I flagged that two of the three polling
+surfaces might need an `api/` topic and told the agent to verify before building.
+It checked `relayEnvelopeFor` and found it routes **every** stored event carrying a
+`feature_id`, with no event-type filter — so build progress and the Testing tab
+were already receiving events on the topic the grill client subscribes to, and the
+work was `web/`-only. Only the design-session surface genuinely needs an API topic
+(it is project-scoped, so `relayEnvelopeFor` returns null for it by design).
+
+Worth noting *why* this was cheap: the instruction was "verify the premise, stop
+and report if it does not hold", not "build this". A confident wrong scope would
+have had an agent write an API topic that already existed.
+
+**#81: the wireframe's stale note was the bigger half.** The issue was that a
+removed subview was still in the mockup. Opening the file showed the note also
+claimed agentic review had "no ADR, no job kind, no skill, no contract-tool event".
+**All four exist** — ADR 015 items 13–16, the job kind, `agent-images/agentic_review/`,
+and `submit_review`. So the note described a shipped feature as a proposal. That is
+the #50 class, and it is worse than the thing the issue reported, because the note
+is what a reader trusts.
+
+### A cross-check between two agents that caught a wrong claim
+
+One agent filed a finding that `options: []` reaches the client unguarded (an empty
+zod array being truthy while the schema had `.max(20)` and no `.min(1)`). The next
+agent **disagreed and said so** — the API rejects it explicitly in a `superRefine`
+("A question with options must offer at least one"), and the client's comment had
+claimed otherwise because reading the array modifier alone does not show the
+`superRefine`. It corrected the comment in the repo it owned and filed nothing.
+
+That is the behaviour worth having: the second agent had no stake in the first
+one's finding, checked it, and said so rather than either deferring or quietly
+dropping it. A second pair of eyes on a claim is cheap; a wrong issue is not.
+
+### "#84 — a test that builds its own app is only testing its own app"
+
+26 test files build a bare `express()` app and never import `app.ts`, so the #45
+async-handler patch was loaded in production and **not** in those tests. A thrown
+handler produced an unhandled rejection and a hung request — a 5s timeout with the
+cause buried in vitest's epilogue.
+
+Verified causally, both directions: with the central `setupFiles` import the probe
+passes with a 500; with that one line commented out it times out.
+
+**This is #56 again** — a route test mounting a router the way `app.ts` does not, so
+it passed while the app 404'd. Two instances of one shape in a single burn-down, so
+the generalisation is worth keeping: **a test that constructs its own app is
+verifying that app, not the server.** It also explains a 5s hang the coordinator hit
+and backed out of during #26, then re-derived from scratch here instead of
+recognising — which is the argument for filing the class separately from the fix.
+
+### Coordination note
+
+Running anything heavy in a repo while an agent is mid-task there can race: a suite
+run in `api/` reported failures once during this wave and passed on re-run, because
+the agent was mid-edit and running its own scratch database. Check `git branch` and
+the agent's activity before running a full suite in a repo you do not have
+exclusively.
