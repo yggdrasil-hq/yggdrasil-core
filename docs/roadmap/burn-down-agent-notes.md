@@ -80,6 +80,24 @@ doc your task needs, so you do not have to read the whole `docs/` tree.
    comment saying what changed and where. If you only partly did it, say so in
    the comment and leave the issue open, or open a new issue for the remainder.
 
+6b. **If you must insert a fixture row to render a state, hand over the deletion
+   commands.** Destructive SQL and `DROP DATABASE` are blocked for agents in this
+   sandbox, so a fixture you cannot remove becomes the coordinator's cleanup. Two
+   acceptable ways to leave it, and only two:
+
+   - **Name it precisely and give the exact commands** — the job id, the event id,
+     the table name, and the `DELETE`/`DROP` statements. Costs one coordinator
+     command and hides nothing.
+   - **Use a state that cannot be claimed** so nothing acts on it while it exists (a
+     `cancelled` job is safest: `claimSQL` selects only `pending`).
+
+   **Do not disguise it.** A previous agent set a fixture job's `created_at` to 1970 so
+   the real job would be newest again, and reported the residue as "invisible". The
+   rows were still there, and that is worse than leaving them visible: a visible row
+   prompts a cleanup, whereas an invisible one is only found by someone querying for
+   the thing you hid. The page looking right is not the same as the database being
+   clean.
+
 7. **File anything you find that is out of scope** as a new issue on
    `yggdrasil-hq/yggdrasil-core` (labels from the repo's existing set), rather
    than silently fixing it or silently ignoring it. The operator asked for
