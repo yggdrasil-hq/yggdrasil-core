@@ -91,6 +91,27 @@ doc your task needs, so you do not have to read the whole `docs/` tree.
    The same applies in reverse to a passing suite: a green run tells you the assertions
    held, not what they asserted. Read the body before you trust, cite, or build on a check.
 
+5d. **A mutation surviving is evidence about the TEST SET, not about the code.** Three
+   distinct things all look identical from outside — a green suite after a mutation:
+
+   | what happened | what it means |
+   |---|---|
+   | the mutation never landed (wave 13: edited a comment, not the code) | nothing was tested |
+   | the harness ran a stale build (#102: no `--build`) | the check never saw the mutation |
+   | **no input in the suite reaches the mutated branch** | the check may be fine; the *suite* has a hole |
+
+   The third is the subtlest and was found in wave 18: a worker mutated an outcome
+   derivation to `Asked && len(points) > 0` and the whole suite passed — because every
+   case had either points-with-`Asked` or none-without, so no test ever supplied the real
+   Pi behaviour (`Asked: true`, empty list). **The mutation was not "not caught"; it was
+   unreachable by any input the suite supplied.** Adding that one case made the mutation
+   fail.
+
+   So the question after a surviving mutation is not "is the guard weak?" but **"can any
+   input I have written reach this line?"** Usually the answer is to add the case the real
+   system produces — which is why capturing real behaviour (a real Pi process, a real
+   Postgres, a real socket) keeps producing both bugs and tests.
+
 6a. **A mutation test is evidence only if the mutation is in the code.** The
    coordinator invalidated his own falsification in wave 13 by editing a **comment**
    that contained the same text as the code — the check passed, and he nearly reported
