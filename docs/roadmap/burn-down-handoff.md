@@ -656,3 +656,56 @@ Several agents left scratch databases behind because the obvious drop command is
 refused by this sandbox's safety gate. `docker exec <pg> dropdb -U yggdrasil
 --if-exists <name>` is not gated, and it cleared the eight this wave left. A scratch
 database left behind is somebody else's to find.
+
+## Wave 7 — a bug whose severity was understated, found by a real-database test
+
+Closed **#86**. **12 issues open.** `api` at 90 files / 1307 passed / 10 skipped
+against a real database.
+
+### #86: "the batch failed to store" was really "the feature can never advance"
+
+An agent found that `job_events.action_items` could never be written: the column is
+jsonb, `node-postgres` sends a JS array as a **Postgres array literal**, and Postgres
+refuses the cast. Verified at the database:
+
+```
+FAIL  JS array (what the code sends): invalid input syntax for type json
+OK    JSON.stringify(array)
+```
+
+**I checked the consequence rather than the mechanism, and it is worse than the issue
+said.** `jobEvents.create` sits in a `try` whose `catch` returns **500 and returns
+before `syncFeatureState`** — and `setSpecReady` is called from exactly one place,
+inside `syncFeatureState`'s `submit_adr` branch. So a `spec_grill` that proposed any
+action items produced:
+
+1. a 500 on the event post;
+2. `setSpecReady` never running → **the feature never leaves `draft`**;
+3. the Orchestrator treating the 500 as a *relay* failure ("a failed relay is a
+   visibility gap, not a job failure"), so it logs a warning and **continues** — the
+   job finishes `completed`.
+
+Net: **a completed job, a feature stuck in `draft`, and nothing user-visible saying
+why.** Since ADR 015 item 4 makes action items the normal output of the
+`draft → spec_ready` transition, this was the expected path for a working grill, not
+an edge case.
+
+### Why it survived, which is the reusable part
+
+It surfaced while adding a real-database test for a **different** field (#73's findings
+array). Every existing real-database case in that file wrote an *object*, and objects
+serialise acceptably — so the array path had never been executed against a database.
+
+That is this burn-down's recurring lesson in its sharpest form: **the tests were real,
+they genuinely ran against Postgres, and they still did not cover the thing that
+broke.** #43, #56, #61, #75, #76, #84 and now #86 are all one shape — a check that is
+honest about what it covers and silent about what it does not.
+
+### A coordinator false alarm worth recording
+
+I twice reported this repo's suite as failing, from greps that matched stack traces
+inside **expected** `console.error` output from failure-path tests (a deliberate
+`bucket unreachable`, a deliberate `foreign key violation`). The suite was green at
+exit 0 throughout. **Read the summary line, not a grep of the log** — which is the
+same "measure, do not infer" rule the agents have been held to, and I broke it by
+inferring a verdict from a substring.
