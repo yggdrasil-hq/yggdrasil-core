@@ -53,6 +53,7 @@ Each ADR is numbered sequentially: `NNN-short-title.md`.
 | [029](029-test-run-screen-recording.md) | Test-run screen recording | Accepted |
 | [030](030-resource-allocation-caps.md) | Resource allocation caps (token cap, per-project quota) | Accepted |
 | [031](031-preview-deployment-access-control.md) | Preview deployment access control | Accepted |
+| [032](032-durable-pi-sessions-and-true-fork.md) | Durable Pi sessions and a true grill fork | Accepted |
 
 When adding an ADR, update this index, add a routing row in root `CLAUDE.md`, and
 link from `docs/CONTEXT.md` if the decision affects suite-wide context.
