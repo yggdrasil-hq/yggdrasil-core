@@ -7,9 +7,16 @@ git/PR/merge workflow.
 
 ## START HERE — current state
 
-**75 closed, 8 open.** `api` 103 files / **1534 passed** (real DB), `web` 37 / **769**,
+**78 closed, 8 open.** `api` 103 files / **1534 passed** (real DB), `web` 37 / **769**,
 `orchestrator` `ecea294` / 11 packages gofmt+vet clean, relay harness **16/16**. No residue;
 operator data at 1 project / 1 org / 7 jobs / 55 events / 0 sessions.
+
+**⚠ `main` IS RED on `api` CI.** The `Test` workflow fails on `27c98bd`, `f9069782` and
+`b352cb0`; `Build and push image` passes. Verified as predating the latest change. Tracked
+as **#106** and being fixed now — a session test asserts `storage_backend === "postgres"`,
+which is false in CI where MinIO is reachable (the bytes correctly go to the object backend).
+**Do not read a green local suite as CI health: CI runs 0 skips, so it exercises ~77 tests
+the compose run skips, including the failing one.**
 
 ### Needs the OPERATOR — do not dispatch, do not decide unilaterally
 
@@ -32,35 +39,40 @@ job's progress updates. A tab open across the upgrade may hold a v2 client again
 pre-restart v1 server, so reload first. If it does not go live, the page still works via
 polling — §4's fallback — but it means a regression in #99.
 
-### Decided, actionable, no input needed
+### In flight
 
-| Issue | Decision |
-|---|---|
-| **#104** | Option 1 — make zero reachable, one shared parser, test that `"0"` → `0`. Verified no deployment sets either variable to zero. |
-| **#102** | Option 1 — mount the source read-only, plus option 2 if cheap. **In flight.** |
-| **#103** | **Write-into-pod**, not a pod-side pull — the pod runs untrusted code and calls no internal service, so a pull adds both an outbound channel and a third secret to the least-trusted process. Mirrors `k8s.ReadPodFile`; argv slice, never a shell string. ADR 032 updated. |
-
-### Blocked on the ENVIRONMENT — complete, nothing here can exercise it
-
-| Issue | Why |
-|---|---|
-| **#38** | Implemented across all four layers, hop-verified. Open only because no agent job has completed here. |
+| Issue | Repos | State |
+|---|---|---|
+| **#106** (urgent), **#104**, **#105** | `api` | One worker, in that order. #106 un-reds CI; #104 makes the documented zero-cap reachable; #105 fixes two prose copies of a measured number (29 claimed, **77** measured). |
 
 ### Queued
 
-| Order | Issue | Repos | Why the order |
-|---|---|---|---|
-| 1 | **#102** | `api` + `web` | **In flight.** Do this before more verification — it is the harness every later change is verified through. |
-| 2 | **#104** | `api` | Small, decided. After #102 so it is verified by a harness that cannot lie. |
-| 3 | **#103 part 2** | `orchestrator` + `api` + `web` | The fork job: write the session in → `switch_session` → **verify `get_state`** → `fork` → `get_state` again, storing the new file. **Closes #28.** Web half lands *with* it, not before. |
+**#103 part 2** (`orchestrator` + `api` + `web`) — the fork job: write the session in →
+`switch_session` → **verify `get_state`** → `fork` → `get_state` again, storing the new
+file's path. Web half lands *with* it, not before. **Closes #28.** The decision is on #103
+and the Pi behaviours it depends on are in ADR 032 item 3.
+
+### The harness now cannot silently test the wrong build
+
+`api` and `web` test compose files mount the source **read-only** (#102), with
+`test-results/` the only writable path, and `run-tests.sh` prints a **source digest and
+newest-file timestamp** so a run states what it verified. **`--build` is no longer needed
+for a source edit** — verified by me: a mutation to `permitsFork` run with plain
+`compose run test` is now **caught** where it used to be missed.
+
+**Two limits, both documented in the compose files rather than left implicit:**
+- **The mounts are enumerated.** A *new top-level directory* reverts to the built image.
+  The digest line exists to expose exactly that.
+- **`.:/app:ro` was tried and rejected**: it shadows the image's `node_modules` with the
+  host's (proved with a marker file) and vitest writes a temp config beside
+  `vitest.config.ts`, so read-only `/app` dies with `EROFS`.
 
 **Before dispatching anything, read the lessons below.** Recurring: a field declared,
-marshalled and discarded (**seven** times, most recently caught by an agent in its own
-work); **read the check, not its label** (the coordinator has made this error twice); a
-check whose *label* overstates what it proves; `tsc` cannot see an ambiguous SQL column;
-**a mutation test is evidence only if the mutation is in the code**; **when a mutation
-passes, suspect the harness before the guard** (#102); and **when a check passes, verify
-it can fail before concluding it is broken.**
+marshalled and discarded (**seven** times); **read the check, not its label** (the
+coordinator has made this error twice); a check that **cannot fail where it is run** (#97,
+#102, #106 — three instances now, each in a different environment); `tsc` cannot see an
+ambiguous SQL column; and **a green suite after a mutation may mean no input reached the
+mutated line** rather than a weak guard.
 
 ## What this burn-down is
 
@@ -1594,3 +1606,85 @@ Over budget, it **stopped rather than starting part 2 on a decision it should no
 and spent the overrun on the Pi verification, real-database tests and the mutation. That is
 the right allocation: the verification is what part 2 will be built on, and a decision taken
 to appear productive is exactly how an issue closes with its question still open.
+
+## Wave 19 — the harness stopped lying, and three environments disagreed
+
+Closed **#102**. Filed **#105**, **#106**. **78 closed, 8 open.** This wave's value is that
+the fix was proved by making the **trap** stop working, not by the suite passing.
+
+### The proof, which I reproduced myself
+
+`docker compose run test` without `--build` used to test the previous image. The worker's
+evidence was before/after on the same mutation with the same invocation. I re-ran the api
+half independently — mutated `permitsFork` to invert its return, ran plain
+`compose run test` (no `--build`), and it is now **caught**:
+
+```
+× permitsFork > permits a fork only for an available session
+FAIL  src/sessions/routes.test.ts > … reports an available session and says a fork is possible
+```
+
+That is the right shape of verification for a harness change: **the deliverable is that the
+old failure mode is gone**, so a green suite proves nothing and the mutation is the test.
+
+It also gave the web repo an isolation the api could not: with the mutation **baked into the
+image** and the source reverted, the no-rebuild run came back **green** while `grep` inside
+the container still showed it — which is the trap demonstrated directly rather than inferred.
+And it re-confirmed on merged `main`, not just on a branch.
+
+### The read-only mount needed one writable thing, and exposed a latent bug
+
+**`.:/app:ro` was tried first and rejected** — and rejected *with evidence*: a single mount
+shadows the image's `node_modules` with the host's, proved by creating a marker file in the
+host's `node_modules` and seeing it under the mount, and vitest writes a temp config beside
+`vitest.config.ts` so read-only `/app` dies with `EROFS`. So the mounts are **enumerated**,
+which is a real limitation it documented rather than hid: **a new top-level directory
+silently reverts to the built image.** The printed source digest exists to expose exactly
+that case.
+
+**And it found a latent bug worth the paragraph.** `scripts/run-tests.sh` was tracked
+`100644` in git while the Dockerfile's `RUN chmod +x` made the CMD work — so the bit was
+never in the repository, only in the image. A bind mount removes it, and the CMD died with
+`ERR_UNKNOWN_FILE_EXTENSION`. Fixed at source (`100755` in git). **A file whose permissions
+live only in a Dockerfile is a file that breaks the moment anything else provides it**, and
+nothing would have surfaced it except mounting the tree.
+
+### #106 — a third instance of "a check that cannot fail where it is run"
+
+`main` is red, and the worker proved it predates its change by comparing three commits
+(`27c98bd`, `f9069782`, `b352cb0` — `Test` fails on all three, `Build and push image` passes
+on all three). I verified that independently. It merged with the comparison on the PR rather
+than holding a harness fix behind an unrelated red, which is the right call.
+
+The interesting part is **why it survived** — the same environment-dependence as #97 and
+#102, now with a three-row table:
+
+| environment | Postgres | MinIO | outcome |
+|---|---|---|---|
+| `compose … up --build` | unreachable (VPN-shadowed subnet) | unreachable | **skips the file** (one of 77) |
+| `test-against-real-db.sh` | reachable | not published | runs, takes the **postgres** path, **passes** |
+| CI | reachable | reachable | runs, takes the **object** path, **fails** |
+
+A test asserting `storage_backend === "postgres"` is an **environment assumption wearing an
+invariant's clothes**: it can only fail in one of three environments, and that one is the
+one nobody ran locally. The fix is to assert the durable property (the bytes round-trip)
+rather than which column holds them.
+
+**It also stated the limit honestly**: CI runs **0 skips**, so it exercises ~77 tests the
+local compose run skips — including the failing one. Its green compose run covers *less*
+than CI does, and it said so rather than letting "green" stand for both.
+
+### #105 — two prose copies of a measured number
+
+The real-db script's header and `api/docs/conventions/testing.md` both say the compose run
+skips **29** (recovering 19). Measured: **77** (recovering 67). Measured before *and* after
+the harness change, so neither caused nor hid it. Both are the kind of number that is cheap
+to write once and expensive to keep true, which is why the fix asks for one checkable source
+rather than two corrected copies.
+
+### A note on sequencing
+
+I put the harness fix ahead of everything else deliberately, and this wave vindicated it: a
+worker the same day found its local green did not mean CI was green, and the tooling it was
+verified through had itself been lying. **Fix the thing every other verification passes
+through before trusting any of it.**
