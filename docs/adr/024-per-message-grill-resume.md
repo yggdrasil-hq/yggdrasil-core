@@ -254,13 +254,24 @@ stage, not a new page — so the route-map parity ADR 017 establishes is intact.
 
 ### Follow-ups
 
-- **The real implementation: persist Pi's session file and fork at a genuine
-  entry id.** Copy the session JSONL to object storage at (or during) each run,
-  keep it addressable from the job, and on restart re-create the pod and issue
-  `switch_session` + `fork` at the requested entry. That is the only version
-  that preserves reasoning and working state, and it would let "resume from
-  here" exist as a distinct, non-destructive control. Requires a decision about
-  session retention and a new Orchestrator/Pi contract.
+- ~~**The real implementation: persist Pi's session file and fork at a genuine
+  entry id.**~~ **Decided in [ADR 032](../adr/032-durable-pi-sessions-and-true-fork.md)**
+  (issue #28 part 1). That ADR answers the decision this follow-up asked for —
+  session retention, and the Orchestrator/Pi contract — and records two things
+  worth knowing from here:
+
+  - **The contract needed no designing.** `switch_session`, `fork`,
+    `get_fork_messages` and `get_state` are all documented RPC commands in Pi's
+    `docs/rpc.md`, not a surface to be invented. The blocker was always the durable
+    home, which issue #30's object storage has since supplied.
+  - **The entry ids come from `get_fork_messages`**, not from a mapping between
+    this ADR's `restartedFromEventId` and a Pi entry id. Those are different id
+    spaces, and a bridge between them would have been fragile in exactly the way
+    that matters — that is the single most useful thing ADR 032 settles.
+
+  ADR 032 keeps this ADR's reconstruction rather than replacing it: a true fork is
+  unavailable precisely when it is most wanted (a pod that died, or a session the
+  retention sweep reclaimed), so the seeded re-run remains the fallback.
 - **A member-visible history of superseded runs.** The rows exist; nothing
   surfaces them, so the earlier conversation is effectively write-only today.
 - **Surface that a build resolved conflicts / a run was rewound** in the
