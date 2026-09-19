@@ -62,6 +62,16 @@ same "read the artifact out of the pod before `DeleteJob` destroys it" posture
 `collectRecording` already uses (ADR 029). No new storage mechanism, and no new
 credential: this is the third artifact type through one layer.
 
+**`get_session_stats` also reports `sessionFile`, and this is worth knowing before
+you look for a separate call.** The Orchestrator has called that command at the end of
+every agent run since ADR 023 landed, so the path is already in flight on a turn it
+already opens — the implementation added one line to an existing command batch rather
+than a new round trip (issue #101, verified against a real Pi process, Pi 0.84.4 in the
+pinned image, not from the docs). This ADR still names `get_state` because that command's
+*documented purpose* is the session's state, and reading the session path out of a
+*statistics* response would pin us to a by-product. The two agree and there is no window
+between them, but a reader choosing between them should know both carry it.
+
 **The shape is a session object per job**, not per feature: a re-run is a new job
 (ADR 012's precedent, which ADR 024 item 1 also follows), so each job's session is its
 own artifact and the lineage is the job chain, not a mutable file.
