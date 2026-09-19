@@ -217,11 +217,42 @@ throws is **removed and the fan-out continues** — one half-closed tab must not
 deprive its siblings of an event, and leaving it in the set would make every
 later publish throw.
 
-**Not relayed:** a job with no `feature_id` (ADR 014's project-scoped
-`design_grill`). There is no feature topic to route by, so `relayEnvelopeFor`
-returns null and the event is dropped from the socket path rather than guessed
-onto a topic. A design-session surface would need its own topic shape; the hub
-takes an opaque topic string precisely so that is additive.
+**Two topics now, routed by job kind (issue #25).** The paragraph this replaces
+said a `design_grill` event was dropped because it has no `feature_id`, and that a
+design-session surface "would need its own topic shape; the hub takes an opaque
+topic string precisely so that is additive". That prediction held, and the addition
+turned out to need one thing it did not foresee:
+
+**A design session id *is* a job id.** The REST route resolves its `:sessionId`
+through `findByIdForProject(projectId, sessionId)` plus a `kind === "design_grill"`
+check — so the id itself says nothing about what it identifies, and a feature-less
+event is therefore indistinguishable from a **scheduled `test_run`**, which also has
+no `feature_id` and also emits events. `JobEventWithScope` had to gain the job's
+`kind` (it carried only `projectId`/`featureId`/`event`), and `relayEnvelopeFor`
+branches on it:
+
+| scope | topic |
+|---|---|
+| has a `feature_id` | `feature:<featureId>` |
+| `kind === "design_grill"` | `design:<sessionId>` |
+| neither — a scheduled `test_run` | **null**, still dropped deliberately |
+
+The design frame is its own type (`design_session_event`) rather than a reused
+`job_event`, whose only scope field is named `featureId`; putting a session id in a
+field called `featureId` is a lie an over-eager reader could act on, and making it
+nullable would break a shape every existing client parses.
+
+**The third case is now its own issue (#90) rather than an oversight.** A
+feature-less job that is not a design session routes nowhere, because there is no
+surface subscribed to it — and inventing a topic nobody reads would be noise
+pretending to be a feature. Choosing that topic's shape belongs with issue #39's
+general pipeline question rather than ahead of it.
+
+**Verified cross-process**, in the two-replica harness: an event written by one
+replica reaches a socket on the other over the design topic, **and** a feature event
+does not appear on it. That second check is the negative case, and it had to be
+rewritten to be falsifiable — its first version watched the feature topic while
+writing a design event, which could not fail even with routing entirely wrong.
 
 **Verified in a real two-replica deployment (issue #32).** This item's reasoning
 was sound when it was written but had never been *observed* — by construction,
