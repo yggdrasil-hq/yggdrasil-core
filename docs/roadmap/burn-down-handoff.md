@@ -108,6 +108,37 @@ The gateway now offers `Anera/aneramodel`, `opencode-go/deepseek-v4.1-flash` and
 OpenRouter id fixed it, with no code change. **A model id in a config row rots upstream, and
 the failure reads like an application error** — worth knowing the next time a grill "fails".
 
+### The Orchestrator was running STALE CODE — a service, not a bug (2026-09-19)
+
+**The second reason nothing was ever collected, and the one that would have wasted a
+dispatch.** The `orchestrator` container was started at **2026-09-18T23:03** and runs
+`CMD ["go", "run", "./cmd/server"]`, which **compiles at process start**. The session/fork
+work merged at **12:22–13:29 the next day**. So the running process executed a binary that
+predated the entire ADR 032 feature.
+
+Verified rather than assumed — the compiled child binary and its strings:
+
+```
+/tmp/go-build…/b001/exe/server   built Sep 19 14:26   (after the restart)
+  yggdrasil-session-   1     <- the fork restore path
+  fork_failed          1     <- the fork stage event
+  not_collected        1     <- item 5's outcome
+```
+
+Before the restart, none of those existed in the running process. **This is #102's shape
+again, one layer up:** #102 was a *test harness* reporting on a previous build; this is a
+*service* running one. Both are the same failure — a confident result from an artifact other
+than the code under test.
+
+**`api` and `web` were fine**, and the difference is worth knowing: both run source-watching
+dev servers (`tsx watch`, `next dev`) over the mounted tree, so they pick up edits. **Only the
+Orchestrator compiles once.** So:
+
+- **After merging anything in `orchestrator/`, restart it** or the change is not live. Check
+  with `strings <child exe> | grep <a distinctive new string>` rather than assuming.
+- The API serving the #28 part-2 route (`200` on `…/jobs/:jobId/session`) is a quick proof the
+  API *is* current — it was, throughout.
+
 ### One thing that genuinely still needs a run
 
 **No fork has run end to end yet** — it needs a *collected session*, and collection shipped
