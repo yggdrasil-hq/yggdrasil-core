@@ -16,6 +16,22 @@ commands; the ephemeral pod and its deletion), [ADR 029](029-test-run-screen-rec
 second, non-destructive control), `feature_build` (issue #28 scopes this to
 `spec_grill`), and the transcript rendering (`web/components/features/`)
 
+## Implementation status (updated after the work, 2026-09-19)
+
+| Item | State |
+|---|---|
+| 1 — persist the session per job | **shipped** (`orchestrator` `6cbdd91`, `api` `6304c7f`); the API route is `POST /internal/jobs/:jobId/session` |
+| 2 — entry ids from `get_fork_messages` | **capture shipped** (`orchestrator` `ecea294`, `api` `b352cb0`, migration 055); the *use* is item 3 |
+| 3 — two controls, only one destructive | **not built.** Blocked on the pod-delivery decision, now made (see Follow-ups) |
+| 4 — retention | **shipped** — migration 054, own `SESSION_MAX_BYTES` (5 MB), zero means reclaim-everything |
+| 5 — fail honestly | **shipped** for collection (`unavailable` vs `not_collected`, carried through storage, read and UI); the fork's own refusal path is item 3 |
+
+Two things the implementation settled that this ADR did not anticipate: `get_session_stats`
+**also** returns `sessionFile` (and the Orchestrator was already calling it every run, so the
+path was in flight rather than needing a new round trip — issue #101), and the fork-point
+capture has to be a **sibling route** rather than a field on the session post, because that
+request's body is the raw JSONL artifact and base64 would inflate it by a third.
+
 ## Context
 
 ADR 024 shipped "restart from here" as a **context-seeded re-run**: the feature
@@ -102,13 +118,40 @@ With a real fork available, the two gestures separate and should stay separate:
 
 | control | what it does | keeps the old conversation? |
 |---|---|---|
-| **Resume from here** (new) | forked session continues from that point; the original session file is untouched | **yes** |
+| **Resume from here** (new) | forked session continues from that point; the original conversation is untouched | **yes** |
 | **Restart from here** (shipped, ADR 024) | rewind + re-seed, as today | only as unread job history |
 
 ADR 024's own trade-offs say the rewind "is approximate, and should be a real fork",
 and that a fork would "also let *resume from here* exist as a distinct,
 non-destructive control". That is this decision, and it is the product value: the
 destructive gesture stops being the only one.
+
+**"Untouched" means the conversation, not the file.** Loading a session makes Pi append
+bookkeeping entries to it — a real Pi 0.84.4 process, given a hand-built session file and
+asked to `switch_session` to it, appended a `thinking_level_change` entry. Nothing is
+truncated and no message is lost, which is the property this row is claiming, but a reader
+should not take "untouched" as byte-identical.
+
+**Three behaviours of the real RPC surface that item 3's implementation depends on**, all
+captured from that same process rather than from the documentation, and all recorded because
+two of them contradict what the ADR would lead an implementer to assume:
+
+- **`switch_session` does not report a missing file as a failure.** Pointed at a path that
+does not exist it answers `{"success":true,"cancelled":false}` — no error, no file
+  created, and a subsequent `get_state` shows no `sessionFile` and `messageCount: 0`.
+  **So `success` cannot be item 5's refusal signal**; a fork must verify `get_state`
+  afterwards. That is the difference between "the fork was refused" and "the fork silently
+  ran on an empty session", which is precisely the failure item 5 exists to forbid.
+- **Responses are not necessarily in send order** once a command touches the session tree —
+  sending `fork`, `get_state`, `get_fork_messages` was answered `get_state`,
+  `get_fork_messages`, `fork`. Matching each response by its own `command` field is
+  therefore load-bearing, and anything reading "the next response" positionally is wrong.
+- **`fork` at a valid entry id creates a new file** whose header carries
+  `parentSession`, and the forked context ends *before* the fork point — the fork point's
+  own text is returned so the caller re-sends it. That is the right semantics for "resume
+  from here", and it is `get_state`'s path afterwards that the next collection stores. An
+  unknown entry id is an honest failure (`invalid entry id`), unlike the `switch_session`
+  case above.
 
 ### 4. Retention follows ADR 029's shape, and the window is the same by default.
 
@@ -182,10 +225,22 @@ strictly better when it is possible; the reconstruction is what works when it is
   routine.
 - **`get_entries`'s `since` cursor** as the basis for resuming a *live* run after a
   reconnect, which is the other thing a durable session makes possible.
-- **Surface superseded runs** (issue #28 part 2). Strictly a different change: it is a
-  read over history that already exists, and is neither required by nor enabled by
-  this ADR. Worth doing independently, since it also improves ADR 024's existing
-  rewind, whose discarded conversation is currently write-only.
+- **Surface superseded runs** (issue #28 part 2) — **shipped.** Two routes
+  (`GET …/features/:featureId/jobs/:jobId/events` and `…/grill-runs`) and a read-only list
+  on the Spec page. The supersession relation is derived from `restarted_from_event_id`
+  (`LEFT JOIN`), not stored, and a run replaced by ADR 012's *retry* is deliberately
+  labelled differently from one a rewind actually discarded.
+- **How a restored session file reaches the fork pod.** Decided: the **Orchestrator writes
+  it into the pod** rather than the pod pulling it. The pod runs untrusted code and
+  currently calls no internal service, so a pull would add an outbound channel *and* a third
+  secret to the least-trusted process — one granting read access to another run's
+  conversation. Writing in adds neither, and the exposure is not new: ADR 024's rewind
+  already sends the earlier conversation into the new pod, under `GrillTranscriptSummary`.
+  The write mirrors `k8s.ReadPodFile` (`cat` over SPDY exec) and takes the same rules — an
+  argv slice rather than a shell string, and a bound drawn from `SESSION_MAX_BYTES`.
+- **Verifying the switch, not trusting it.** Because `switch_session` reports success for a
+  path that does not exist, the fork job must confirm `get_state` before forking. See item
+  3's note; this is a step, not an optional check.
 - **Generalise the fork to `feature_build`.** The same truncation argument applies to
   its seed, and issue #28 records it as unasked-for today.
 - **A per-project session retention setting**, if the single window proves wrong for
