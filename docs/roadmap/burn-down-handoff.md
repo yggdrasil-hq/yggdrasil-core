@@ -827,3 +827,59 @@ its own work and found **it was not** — the clause closes a same-instant race 
 test can reach. It kept the code and rewrote the comment to say *reasoned, not
 guarded*. That distinction — "this is covered" versus "this is argued" — is the honest
 one to make, and cheaper than a test that pretends to cover it.
+
+## Wave 9 — a mis-assignment the worker caught, and the sixth inert consumer avoided
+
+Closed **#96**. **11 open.** All four repos verified green and clean.
+`api` 93 files / 1372 passed, `web` 33 / 690, `orchestrator` gofmt-clean with all 11
+packages, `agent-images` harness green.
+
+### I routed #28 part 2 to the wrong repo, and the worker proved it
+
+I assigned it to `orchestrator/` on the assumption that "surface superseded runs" was
+orchestrator-adjacent. **It is not.** The worker checked before building and I verified
+each claim afterwards:
+
+| claim | evidence |
+|---|---|
+| the orchestrator has no rewind handling | `grep -rniE "superseded\|rewind" internal/**/*.go` → **comments only** (its whole involvement is prompt wording) |
+| the feature events read cannot reach an older job | `projects/routes.ts:1957` resolves `findLatestJob(featureId)` — one job, the newest |
+| nothing can enumerate a feature's grill runs | `jobs/repository.ts` has `findLatestJob` and `listFeatureTestRuns`, the latter filtered to test kinds |
+| the transcript read already exists | `jobEvents.listByJob(jobId)`, public, used by three routes |
+
+So part 2 is **two small API edits plus Web**, and the worker wrote the exact shapes
+into the issue rather than implementing them in a repo that cannot host them.
+
+**Two things it did right that are worth naming**, because both are judgement rather
+than instruction-following:
+
+- **It built nothing.** Building a reader before the endpoints exist would have been
+  the sixth instance of this burn-down's most repeated failure — #38, #59, #73, #88
+  and #25 were all a feature built on one side while the other never supplied the
+  data, so it looked complete and did nothing.
+- **It declined to file a duplicate issue**, on the grounds that part 2 *is* the
+  remaining work on #28 and a second tracker would be two for one change. I agreed,
+  and added a routing table to the issue so the two halves are findable by repo.
+
+### The lesson: my routing was an assumption, not a check
+
+I assigned a task by *label proximity* — the issue carries `orchestrator` and part 2
+sounded orchestrator-ish — without checking whether the data it needs is reachable
+from there. The worker's first move was to check, and that is exactly the discipline
+this burn-down has been asking of agents; I owed it the same before dispatching.
+
+**When routing a task, the question is not "which repo is this issue labelled with"
+but "where does the data live, and is it reachable from there".** For part 2 that is
+`api/` + `web/`, and the label was misleading because part 1 genuinely is
+orchestrator work.
+
+### #96: a third honesty mechanism, found by widening the ask
+
+The task asked to document `GRILL_REPLY_TIMEOUT` and pin the API's mirror from this
+side. The worker added a third assertion nobody asked for — **pinning the variable
+*name*** — because a rename in one env file would leave a value settable in one place
+and *silently ignored* in the other. It flagged the widening rather than burying it,
+and both assertions are mutation-checked (changing the default fails, naming
+`api/src/config.ts`; renaming fails, naming both names).
+
+That is the right way to widen a task: do the small correct thing, and say so.
