@@ -7,9 +7,9 @@ git/PR/merge workflow.
 
 ## START HERE — current state
 
-**75 closed, 8 open.** `api` 103 files / **1515 passed** (real DB), `web` 37 / **769**,
-`orchestrator` 11 packages gofmt-clean, relay harness **16/16**. No residue; operator data
-at 1 project / 1 org / 7 jobs / 55 events / 0 sessions.
+**75 closed, 8 open.** `api` 103 files / **1534 passed** (real DB), `web` 37 / **769**,
+`orchestrator` `ecea294` / 11 packages gofmt+vet clean, relay harness **16/16**. No residue;
+operator data at 1 project / 1 org / 7 jobs / 55 events / 0 sessions.
 
 ### Needs the OPERATOR — do not dispatch, do not decide unilaterally
 
@@ -25,19 +25,20 @@ browser.** Server side verified end to end (harness 16/16, including socket + wr
 nginx with real auth, and the fan-out check writing once and landing on two topics across
 two replicas), but nginx shows **no `/api/ws` upgrade** since the API restart. A fresh
 `playwright-cli` browser redirects to `/login`; the operator's Chrome is **not attachable**
-(CDP 9222 answers 404 — five agents have confirmed this).
+(CDP 9222 answers 404 — six agents have now confirmed this).
 
 **To check:** reload the feature page and confirm the live status reaches `live` and a
 job's progress updates. A tab open across the upgrade may hold a v2 client against a
 pre-restart v1 server, so reload first. If it does not go live, the page still works via
 polling — §4's fallback — but it means a regression in #99.
 
-### Decided by the coordinator — actionable, no input needed
+### Decided, actionable, no input needed
 
-| Issue | Decision | Where |
-|---|---|---|
-| **#104** | **Option 1: make zero reachable**, with one shared parser and a test that `"0"` → `0`. Verified no deployment sets either variable to zero (examples commented at defaults; the running install does not set them at all), so this cannot change existing behaviour. | comment on #104 |
-| **#102** | **Option 1: mount the source read-only**, plus option 2 (print the build identity) if cheap. Proof required is that the **trap stops working** — a mutation the old invocation hid is now caught. | comment on #102 |
+| Issue | Decision |
+|---|---|
+| **#104** | Option 1 — make zero reachable, one shared parser, test that `"0"` → `0`. Verified no deployment sets either variable to zero. |
+| **#102** | Option 1 — mount the source read-only, plus option 2 if cheap. **In flight.** |
+| **#103** | **Write-into-pod**, not a pod-side pull — the pod runs untrusted code and calls no internal service, so a pull adds both an outbound channel and a third secret to the least-trusted process. Mirrors `k8s.ReadPodFile`; argv slice, never a shell string. ADR 032 updated. |
 
 ### Blocked on the ENVIRONMENT — complete, nothing here can exercise it
 
@@ -45,24 +46,21 @@ polling — §4's fallback — but it means a regression in #99.
 |---|---|
 | **#38** | Implemented across all four layers, hop-verified. Open only because no agent job has completed here. |
 
-### In flight
+### Queued
 
-| Issue | Repos | State |
-|---|---|---|
-| **#103** | `orchestrator` + `api` + `web` | ADR 032 items 2 and 3 — capture `get_fork_messages` at collection, and the non-destructive "Resume from here". **This is what closes #28.** |
-
-### Queued behind #103 (same repos, one writer per repo)
-
-**#102** (`api` + `web` harness) then **#104** (`api` config parser). Both are decided and
-small; they wait only on repo availability. Do #102 first — it affects how every later
-change is verified.
+| Order | Issue | Repos | Why the order |
+|---|---|---|---|
+| 1 | **#102** | `api` + `web` | **In flight.** Do this before more verification — it is the harness every later change is verified through. |
+| 2 | **#104** | `api` | Small, decided. After #102 so it is verified by a harness that cannot lie. |
+| 3 | **#103 part 2** | `orchestrator` + `api` + `web` | The fork job: write the session in → `switch_session` → **verify `get_state`** → `fork` → `get_state` again, storing the new file. **Closes #28.** Web half lands *with* it, not before. |
 
 **Before dispatching anything, read the lessons below.** Recurring: a field declared,
 marshalled and discarded (**seven** times, most recently caught by an agent in its own
-work); a check whose *label* overstates what it proves; `tsc` cannot see an ambiguous SQL
-column (#61 proves a reviewer cannot either); **a mutation test is evidence only if the
-mutation is in the code**; **when a mutation passes, suspect the harness before the guard**
-(#102); and **when a check passes, verify it can fail before concluding it is broken.**
+work); **read the check, not its label** (the coordinator has made this error twice); a
+check whose *label* overstates what it proves; `tsc` cannot see an ambiguous SQL column;
+**a mutation test is evidence only if the mutation is in the code**; **when a mutation
+passes, suspect the harness before the guard** (#102); and **when a check passes, verify
+it can fail before concluding it is broken.**
 
 ## What this burn-down is
 
@@ -1502,3 +1500,97 @@ retry). Instead it read the constraint definition out of Postgres and reasoned t
 assert rejection **by constraint name**, so an absent constraint would let the insert succeed
 and `.rejects` would fail. That is a weaker form of evidence than a mutation, and it **said
 so** rather than presenting the reasoning as a result.
+
+## Wave 18 — three behaviours of a real Pi process, and a decision about trust
+
+**#103's capture half shipped** (`orchestrator` `ecea294`, `api` `b352cb0`; migration 055).
+`api` 103 / **1534 passed**, orchestrator 11 packages gofmt+vet clean. **75 closed, 8 open.**
+#28 still cannot close, and the worker said so rather than stretching a definition.
+
+### It drove a real Pi process three times over and found the docs wrong in three places
+
+I asked it to verify the RPC shapes against the binary rather than the documentation, because
+an ADR that misstates an upstream contract is a bug *in the ADR* — and the previous wave's
+doing so is what produced #101. It ran Pi 0.84.4 in `--mode rpc` against a hand-built session
+and captured the actual answers. `get_fork_messages` matches the docs. Three others do not:
+
+1. **`switch_session` lies about a missing file.** Pointed at a path that does not exist it
+   answers `{"success":true,"cancelled":false}` — **no error, no file created**, and a
+   subsequent `get_state` shows no `sessionFile` and `messageCount: 0`. So its own success
+   flag **cannot** be item 5's refusal signal, which means the fork job must verify
+   `get_state` afterwards. Without that, "the fork was refused" and "the fork silently ran
+   on an empty session" are the same observable — precisely the failure item 5 exists to
+   forbid.
+2. **Responses are not in send order** once a command touches the session tree: sending
+   `fork`, `get_state`, `get_fork_messages` was answered `get_state`, `get_fork_messages`,
+   `fork`. Matching by each response's own `command` field is load-bearing; anything reading
+   "the next response" positionally is wrong. The code already matched by name — it now
+   knows *why*.
+3. **`fork` at a valid entry id creates a new file** whose header carries `parentSession`,
+   and the forked context ends *before* the fork point (the fork point's text is returned so
+   the caller re-sends it — correct semantics for "resume from here"). `get_state`'s path
+   afterwards is what the next collection stores, which makes "the artifact chain is the job
+   chain" true rather than aspirational. An unknown entry id *is* an honest failure, unlike
+   case 1.
+
+All three are now in ADR 032 item 3, where the work will be done, plus a correction: item 3's
+table said the original session file is "untouched" under a fork. **The conversation is
+untouched; the file is not** — loading a session makes Pi append bookkeeping entries
+(observed: a `thinking_level_change` entry appeared on load). Nothing truncated, no message
+lost, but a reader should not read "untouched" as byte-identical.
+
+### The mutation that survived its own test set, and how it was found
+
+It mutated the outcome derivation to `Asked && len(points) > 0` and **every test still
+passed** — because each existing case had either points-with-`Asked` or none-without. The
+real Pi behaviour (`Asked: true`, empty list) was the uncovered input. It added that case and
+the mutation then fails with `outcome = "unavailable", want "captured"`.
+
+I reproduced this myself, and it is the most useful thing in the wave: **a mutation surviving
+is evidence about the test set, not about the code.** The mutation was not "not caught by the
+guard" — it was **not reachable by any input the suite supplied**. That is a third distinct
+failure mode alongside #102 (the harness ran the wrong build) and my wave-13 error (the
+mutation never landed), and all three look identical from outside: a green suite.
+
+It also caught a **second false result of its own** — `-run 'ForkPoint'` did not match the
+new test's name, so the re-run proved nothing until it renamed the test. Both are the traps
+the notes warn about, hit from both sides, and both were reported.
+
+### The pod-delivery decision, made on a trust argument rather than a convenience one
+
+The question it escalated: how does a restored session file reach the fork pod? It declined
+to pick, correctly calling it a decision rather than an implementation detail. **I decided
+write-into-pod**, and the argument is about what the pod is allowed to talk to:
+
+- **A pod-side pull is not reuse of an existing path** — I verified the pod **never calls the
+  API today** (no API URL in its env; `jobrunner.go` builds env from `spec.Env` alone). So a
+  pull adds an outbound channel *and* a third secret to the process that clones user repos
+  and runs their build code. ADR 006's stance is that a pod holds what it must and nothing
+  adjacent — it deletes the Job at the terminal event *because* the pod holds the GitHub
+  token and the model key. A session-reading token is exactly the adjacent thing, and its
+  blast radius is *other runs' conversations*, unlike the GitHub token whose reach is the
+  repo the pod is already working in.
+- **The exposure objection does not apply, and I checked**: ADR 024's shipped rewind
+  **already** sends the earlier conversation into the new pod, via `GrillTranscriptSummary`
+  over `rpc.Send(prompt)`. So this is the same content through a different channel, and
+  strictly *less* than happens today — the true session rather than a truncated summary.
+- **One actor, one operation.** The orchestrator must already tell Pi which path and which
+  entry id, and must already verify afterwards. A pull would split that: the orchestrator
+  says "switch to `/path`" while the pod is separately responsible for what is at `/path`.
+- **The mechanism is symmetric with one that exists.** `k8s.ReadPodFile` is already a
+  `cat` over SPDY exec, deliberately argv-slice and never a shell string, because its comment
+  argues a tar stream could be walked outside the given path. A write mirrors it, takes the
+  same rules, and draws its bound from `SESSION_MAX_BYTES`.
+
+### It left the web half undone, and that was right
+
+Rendering fork points now would be a control with **no dispatch path** — the shape this
+burn-down has found seven times. It said so instead of shipping a plausible-looking surface.
+Recorded as a correct call, not as incomplete work.
+
+### The scoping judgment worth noting
+
+Over budget, it **stopped rather than starting part 2 on a decision it should not take**,
+and spent the overrun on the Pi verification, real-database tests and the mutation. That is
+the right allocation: the verification is what part 2 will be built on, and a decision taken
+to appear productive is exactly how an issue closes with its question still open.
