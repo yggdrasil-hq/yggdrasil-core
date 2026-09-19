@@ -8,8 +8,9 @@ git/PR/merge workflow.
 ## START HERE — current state
 
 **74 closed, 6 open.** `api` 97 files / **1444 passed** (real DB), `web` 36 / **750**,
-relay harness **13/13**, `orchestrator` 11 packages. No residue: no scratch databases,
-no `rv-*` containers or images, operator data at 1 project / 1 org / 7 jobs / 55 events.
+`orchestrator` 11 packages / gofmt-clean, relay harness **13/13**. No residue anywhere:
+no scratch databases, no `rv-*` objects, operator data at 1 project / 1 org / 7 jobs /
+55 events.
 
 ### Needs the OPERATOR — do not dispatch, do not decide unilaterally
 
@@ -20,19 +21,17 @@ no `rv-*` containers or images, operator data at 1 project / 1 org / 7 jobs / 55
 
 ### One thing the OPERATOR can check in 10 seconds, and no agent can
 
-**The live app under the new wire protocol has not been exercised by a logged-in
-browser.** ADR 033 replaced relay protocol v1 with v2, and while the server side is
-verified end to end (harness 13/13, including socket + write through nginx with real
-auth), **no logged-in client has connected to v2 since the API restart** — nginx shows
-no `/api/ws` upgrade at all. A fresh `playwright-cli` browser is redirected to `/login`,
-and the operator's Chrome is not attachable (**CDP 9222 answers 404, not a DevTools
-endpoint** — confirmed independently, matching an earlier agent's report).
+**The live app under relay protocol v2 has not been exercised by a logged-in browser.**
+ADR 033 replaced v1 with v2; the server side is verified end to end (harness 13/13,
+including socket + write through nginx with real auth), but nginx shows **no `/api/ws`
+upgrade** since the API restart. A fresh `playwright-cli` browser redirects to `/login`,
+and the operator's Chrome is **not attachable** (CDP 9222 answers 404, not a DevTools
+endpoint — confirmed independently twice).
 
 **To check:** reload the feature page and confirm the live status reaches `live` and a
-job's progress updates. If it does not, that is #99's regression, and the fallback to
-polling means the page still works — which is the point of §4. A browser tab open across
-the upgrade may be running a v2 client against the pre-restart v1 server, so a reload is
-the honest first step.
+job's progress updates. A tab left open across the upgrade may hold a v2 client against
+the pre-restart v1 server, so reload first. If it does not go live, the page still works
+via polling — that is the point of §4's fallback — but it means a regression in #99.
 
 ### Blocked on the ENVIRONMENT — complete, nothing here can exercise it
 
@@ -40,26 +39,44 @@ the honest first step.
 |---|---|
 | **#38** | Implemented across all four layers, hop-verified. Open only because no agent job has completed here. |
 
-### Small and free
+### In flight / queued
 
-| Issue | Notes |
-|---|---|
-| **#100** | **In flight** (`api` + `web`). A feature-driven `test_run` carries both ids and reaches only `feature:`. **Decided**: one envelope per scope, each scope-tagged — not a two-scope frame — and the Web half is required, since an API-only change would be the seventh instance of this burn-down's "published and never consumed" shape. |
+| Issue | Repos | State |
+|---|---|---|
+| **#100** | `api` + `web` | **In flight.** Feature-driven `test_run` reaches only `feature:`. Decided: one envelope per scope, each scope-tagged. Web half mandatory. |
+| **#28 part 1, API + Web halves** | `api` + `web` | **Queued — blocked on #100**, since it needs the same two repos and there is one writer per repo. The contract below is frozen and verified on the orchestrator side. |
 
-### In flight
+**#28 part 1's contract — the orchestrator half shipped (`22ccae1`), this is what the
+reader must match:**
 
-**#28 part 1** (`orchestrator/`) — the session-file collection has **shipped**
-(`6cbdd91` collect, `798f34a` wire-shape test), and the worker is finishing the ADR item
-5 distinction: *an unanswered terminal read is `unavailable`, not `not_collected`*
-(unpushed at last check). Its report is the input for the API/Web halves — the fork
-route, `get_fork_messages` entry ids, "Resume from here", retention.
+```
+POST /internal/jobs/:jobId/session?outcome=<o>[&sessionId=..][&podFilePath=..]
+body = raw JSONL bytes (empty for a failing outcome)
+201 recorded · 202 declined {reason} · 404 route absent (today)
+```
+
+`outcome ∈ collected | not_collected | unavailable | disabled`; **only `collected`
+permits a fork.** `disabled` is install-level and deliberately not reported, so a
+switched-off deployment posts no per-job noise. **The route does not exist yet**, and the
+orchestrator pins that as `TestPostJobSession_TreatsAMissingRouteAsAnError` so it surfaces
+as an error rather than a silent success.
+
+**The distinction the API half must not lose** (ADR 032 item 5): `unavailable` means the
+terminal read never completed; `not_collected` means Pi answered and there was no session.
+`rpc.SessionFile.Asked` exists so those cannot collapse — Go's zero value would have made
+them identical. The API must surface them differently, since a caller cannot otherwise
+tell a retrieval failure from a fact about the run.
+
+**Also: `SessionArtifact.ByteSize` was deliberately removed.** It was declared, documented
+as contract, and never sent — the shape this burn-down has found seven times. The bytes
+*are* the body, so the API's own measurement is authoritative. **Do not reintroduce it.**
 
 **Before dispatching anything, read the lessons below.** The recurring ones: a field
-declared, marshalled and discarded (#59, #38, #73, #88, #25, #28 — six times); a check
-whose *label* overstates what it proves; `tsc` cannot see an ambiguous SQL column (#61
-proves a reviewer cannot either); **a mutation test is evidence only if the mutation is
-in the code** (the coordinator invalidated his own falsification by mutating a comment);
-and **when a check passes, verify it can fail before concluding it is broken.**
+declared, marshalled and discarded (#59, #38, #73, #88, #25, #28 — **seven** times now,
+most recently caught by an agent in its own work); a check whose *label* overstates what
+it proves; `tsc` cannot see an ambiguous SQL column (#61 proves a reviewer cannot either);
+**a mutation test is evidence only if the mutation is in the code**; and **when a check
+passes, verify it can fail before concluding it is broken.**
 
 ## What this burn-down is
 
@@ -1258,3 +1275,66 @@ It is a second source for one fact, which is this burn-down's recurring shape �
 it is benign (one command, one session, no window between them), and the worker said so
 instead of inflating it. The suggestion is a one-line ADR note, no code change. That is
 the correct size of response to the correct size of problem.
+
+## Wave 15 — an agent found two bugs of the hunted shape in its own work
+
+**#28 part 1's orchestrator half shipped** (`orchestrator` `22ccae1`; 11 packages pass,
+gofmt clean). **74 closed, 6 open.** The wave's real value is that the worker turned the
+burn-down's recurring bug-hunt on its own diff and reported what it found.
+
+### It found the declared-then-discarded shape in its own code, twice
+
+**1. `SessionArtifact.ByteSize` — declared, documented, never sent.** This is the seventh
+instance of the shape (#59, #38, #73, #88, #25, #28 part 2), and the first an agent caught
+in its own work rather than under review. It **removed** the field rather than wiring it,
+with the reasoning that the bytes *are* the request body, so the API's own measurement is
+authoritative — a client-supplied size would be a second record of one fact. That is the
+correct call in both directions: not just "wire it up", but "does this field need to
+exist".
+
+**2. An unanswered terminal read reported `not_collected` instead of `unavailable`.** The
+terminal turn can fail, leaving no path — and a path that is empty *because nobody looked*
+is indistinguishable from one that is empty *because Pi answered and there was no session*.
+The first is a retrieval failure; the second is a fact about the run. Reporting the first
+as the second asserts something the code does not know. **This is the same class as
+`null` versus `[]` in #73**, and it is the more dangerous direction: a fact-shaped absence
+is never questioned.
+
+**The fix is a boolean with a precise justification.** `rpc.SessionFile` gained `Asked`,
+documented as: *"Go's zero value would make them identical."* I falsified it — removing the
+`Asked: true` assignment fails `TestSessionFileAskedIsSetOnlyByAnAnswer` with
+`a parsed answer must record that it was asked: {FilePath:/s.jsonl SessionID:abc Asked:false}`.
+The guard bites, and the type carries the distinction rather than a convention.
+
+### It verified ADR 032's Pi RPC table against the binary, not the docs
+
+I asked for this specifically, because an ADR that misstates an upstream contract is a bug
+in the ADR. It found Pi's own `rpc.md` inside the pinned base image **and then ran a real
+Pi 0.84.4 process in RPC mode** to capture actual answers. The table holds. That also
+produced #101 (`get_session_stats` carries `sessionFile` too), which is now recorded in
+ADR 032 and closed.
+
+### The frozen contract, and why pinning the 404 matters
+
+The orchestrator posts session bytes to a route **the API has not built yet**. The risk in
+that gap is a call that 404s and *looks like success* — so the worker pinned it as
+`TestPostJobSession_TreatsAMissingRouteAsAnError`. When the API half lands, that test
+flips from asserting an error to asserting a 201; until then it is a tripwire that makes
+the missing route visible rather than silent.
+
+The contract is recorded verbatim in START HERE, because the next wave builds the reader
+against it and **the failure distinction must not be lost in transit**: `unavailable` and
+`not_collected` are different outcomes, and only `collected` permits a fork.
+
+### Queued rather than parallel, on purpose
+
+#28 part 1's API + Web halves need `api/` and `web/` — the same two repos #100's worker
+holds. **One writer per repo**, so it queues behind #100 rather than racing it. The
+contract is frozen and verified on the orchestrator side, so nothing is lost by the wait.
+
+### A worker died silently earlier in this wave
+
+It stopped mid-sentence after 10 minutes with no error in its log. Resumed with the
+remaining budget and instructed to commit incrementally and keep notes as it went — which
+is why this report exists at all. A silent termination means an end-of-run summary is the
+one artifact that can vanish entirely.
