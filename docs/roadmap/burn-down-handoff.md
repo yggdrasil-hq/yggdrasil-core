@@ -336,3 +336,65 @@ worker reports that something is impossible, reproduce it against the *intended
 input* before accepting it, and prefer the simplest harness — for #32 that meant
 two API processes against the **already-running** dev Postgres, not two
 brand-new containers whose networking then became a research project.
+
+## Wave 3 complete — verified state
+
+**51 issues closed, 14 open.** All four repos at verified `main`, clean, pointers
+recorded:
+
+| Repo | Commit | Verified |
+|---|---|---|
+| `api` | `a4cb40c` | 82 files, 1202 passed + 29 skipped |
+| `web` | `1b67982` | 28 files, 548 passed |
+| `orchestrator` | `6fc4d74` | gofmt clean, all packages pass |
+| `agent-images` | `e54b8e9` | unchanged |
+
+### The remaining fourteen, sorted by what blocks them
+
+**Blocked on a decision, not work** — do not dispatch as implementation:
+
+- **#19 / #71** — the build is verified end to end against the real cluster; the
+  preview *pull* is not, because containerd is a node daemon (node resolver, no
+  HTTP fallback). An install needs the registry served over TLS with a
+  node-trusted CA, or marked insecure in containerd's config, **and** a
+  node-resolvable name. Install-shape decision; recorded in ADR 003 §14.
+- **#55** — building every linked repository's image needs a chart convention for
+  per-repository image slots. Four sub-questions enumerated on the issue.
+
+**Clean bugs found by running things** — the best-scoped remaining work:
+
+- **#76** — two replicas starting together crash one on the `runMigrations`
+  check-then-act. An advisory lock; verified by starting two processes at once.
+- **#77** — a `subscribe` frame before `ready` is silently dropped; the socket
+  looks healthy. Buffer or reject — a real contract choice.
+- **#78** — the delta route bounds in characters, the publisher in bytes, so
+  multi-byte text clears the route and is dropped.
+
+**Features:** #25, #28, #35, #38, #39. **Small:** #73, #74 (both Agentic Review).
+
+#76/#77/#78 were dispatched together in wave 4, since they were all found by the
+same verification and share a shape: **a validation or coordination boundary that
+does not match the boundary enforcing it.**
+
+### What wave 3 verified that waves 1-2 could not
+
+The relay's fan-out claim is now **measured, not argued**: 9/9 checks in a real
+two-replica deployment, including an event written through one replica reaching a
+socket held by the other in both directions, the `pg_notify` cap at 8000 bytes,
+and a 90s idle socket past nginx's 60s default. The harness is committed at
+`api/scripts/verify-live-relay/` and I re-ran it from its committed location to
+prove it runs there — its `HERE` was hardcoded to `/tmp`, so the committed copy
+could not have run, which made the "reproducible harness" claim false until fixed.
+
+**The honest gap:** a real browser WebSocket was never exercised, so the Web app's
+silent degradation to 2s polling remains unobserved — and because degradation
+makes a broken socket look like a working one, that is the half to distrust.
+Stated in ADR 019 rather than omitted.
+
+### Three defects found *by* the verification it was verifying
+
+Worth noting as a pattern: the #32 harness found #76 (its own startup had to be
+serialised to work), #77 (a probe subscribed too early and got silence), and #78
+(a test case that "passed" because the route accepted what the publisher dropped).
+**Verifying one thing found three others** — which is the argument for running the
+real thing rather than reasoning about it, made concrete.
