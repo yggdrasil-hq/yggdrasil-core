@@ -100,6 +100,27 @@ doc your task needs, so you do not have to read the whole `docs/` tree.
    less); and when you fix an assertion of this kind, fix it to name the **durable property**
    (the bytes round-trip) rather than the incidental one (which column holds them).
 
+5b3. **A `switch` over an event/type union is a silent-drop site.** Adding a variant to a
+   union does **not** add it to any `switch` — so a new event falls to `default:` and vanishes
+   where the switch's job is to render or handle it. In wave 22 a `fork_failed` event reached
+   the reader as **nothing at all**: the run went `failed`, and neither the agent's sentence
+   nor the failure stage appeared.
+
+   **Why it is hard to notice:** the missing arm produces **less output**, not an error. A
+   dropped render looks like an event that never happened, and a dropped handler looks like a
+   feature no one used. There is nothing to grep for, because the bug *is* the absence.
+
+   So when you add a value to a union, grep for every `switch` over that type and decide each
+   one explicitly. And prefer an exhaustive form where the language offers it (`Record<K, V>`
+   makes a missing key a **compile error** — that is what ADR 033 uses, and I verified it by
+   adding a fourth kind and watching `tsc` reject it in both registries). This is the same
+   family as the marshalled-and-discarded field bugs, one layer up: a value produced and
+   never consumed.
+
+   Related, and worth the same reflex: a guard listing which types have side effects (e.g.
+   which events touch feature state) needs the new type added too, or the event is stored and
+   acted on by nothing.
+
 5c. **Read the check, not its label.** The coordinator has now made this error twice - he
    read a test named *"TreatsAMissingRouteAsAnError"*, reasoned that it must observe the
    service under test, and told a worker it "should flip from asserting an error to
