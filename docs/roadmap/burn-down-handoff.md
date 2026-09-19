@@ -7,51 +7,43 @@ git/PR/merge workflow.
 
 ## START HERE — current state
 
-**82 closed, 5 open. #28 IS CLOSED** — the real Pi fork shipped, after being open since the
+**83 closed, 5 open. #28 IS CLOSED** — the real Pi fork shipped, after being open since the
 beginning of this burn-down. `api` 104 files / **1566 passed** (real DB), `web` 38 / **785**,
 `orchestrator` 11 packages gofmt+vet clean, relay harness **16/16**. No residue; operator data
-at 1 project / 1 org / 7 jobs / 55 events.
+at 1 project / 1 org / 7 jobs / 55 events. **CI green** on both `api` and `web`.
 
-**`api` CI is GREEN on `main`. CI runs 0 skips, so it exercises paths the local compose run
-skips — a green local suite is NOT evidence of CI health** (that is how #106 hid for a week).
-
-### The five that remain — and three of them are yours
+### The five that remain — and four of them are not work
 
 | Issue | Kind | What it needs |
 |---|---|---|
 | **#19 / #71** | **OPERATOR** | The image **builds** (verified against the real cluster) but a preview cannot **pull** it: containerd is a node daemon, so it resolves the registry with the node's DNS and will not fall back to HTTP. An **install-shape** choice: registry over TLS with a node-trusted CA, or marked insecure in containerd's config, **and** a node-resolvable name. ADR 003 §14. |
 | **#55** | **OPERATOR** | Per-repository image slots need a **chart convention**. Four sub-questions on the issue. |
 | **#38** | **ENVIRONMENT** | Implemented across all four layers, hop-verified. Open only because **no agent job has ever completed here**, so no model has been induced to use the structured form. |
-| **#107** | **IN FLIGHT** (`api`) | `SCREENSHOT_MAX_BYTES` / `SCREENSHOT_MAX_PER_JOB`: the last two unreachable zeros, and they mean **opposite things** (byte cap 0 = refuse all, per-job cap 0 = no ceiling). Decided: make zero reachable and fix the *discoverability* problem. |
+| **#109** | **WORK — decided** (`api` + `orchestrator`) | Three shared integer caps are parsed by two services with **different rules** (`SCREENSHOT_MAX_BYTES`, `SESSION_MAX_BYTES`, `RECORDING_MAX_BYTES`). Decision: one rule — trim, then a plain decimal integer, else the default **logged** — applied to all three, with the cross-repo pin extended to cover the parse rule. |
 
-### One thing the OPERATOR can check in 10 seconds, and no agent can
+### Two things only the OPERATOR can settle, both worth seconds
 
-**The live app under relay protocol v2 has still not been exercised by a logged-in
-browser.** Server side verified end to end (harness 16/16, including socket + write through
-nginx with real auth, and the fan-out check writing once and landing on two topics across
-two replicas), but nginx shows **no `/api/ws` upgrade** since the API restart. A fresh
-`playwright-cli` browser redirects to `/login`; the operator's Chrome is **not attachable**
-(CDP 9222 answers 404 — nine agents have now confirmed this).
-
-**To check:** reload the feature page and confirm the live status reaches `live` and a
-job's progress updates. A tab open across the upgrade may hold a v2 client against a
-pre-restart v1 server, so reload first. If it does not go live, the page still works via
+**1. The live app under relay protocol v2 has never been exercised by a logged-in browser.**
+Server side verified end to end (harness 16/16, including socket + write through nginx with real
+auth, and the fan-out check writing once and landing on two topics across two replicas), but
+nginx shows **no `/api/ws` upgrade** since the API restart. A fresh `playwright-cli` browser
+redirects to `/login`; the operator's Chrome is **not attachable** (CDP 9222 answers 404 — ten
+agents have now confirmed this). **Reload the feature page** and confirm the live status reaches
+`live` and a job's progress updates. A tab left open across the upgrade may hold a v2 client
+against a pre-restart v1 server, so reload first. If it does not go live the page still works via
 polling — ADR 033 §4's fallback — but it means a regression in #99.
 
-### And one thing only a real run can settle
+**2. No fork has ever run end to end.** No agent job has completed here, so no session has ever
+been collected and no `get_fork_messages` call has been made against a live run. Everything is
+verified at the seam: the parsers against a **real Pi 0.84.4 process**, authorisation, the
+refusal matrix, the state transition, the row written. **"A fork produces a working resumed
+session" is NOT verified**, and neither is the Web control's rendering.
 
-**No fork has ever run end to end.** No agent job has completed here, so no session has ever
-been collected and no `get_fork_messages` call has been made against a live run. Everything
-is verified at the seam: authorisation, validation, the refusal matrix, the state transition,
-the row written, the parsers against a real Pi process. **"A fork produces a working resumed
-session" is NOT verified**, and neither is the Web control's rendering (a fresh browser has
-no login).
-
-**Before dispatching anything, read the lessons below.** Recurring: a field declared,
-marshalled and discarded (**eight** times, most recently caught by an agent in its own
-change); **read the check, not its label**; **a check that cannot fail where it is run**
-(#97, #102, #106); and three ways a green suite lies after a mutation — the edit never
-landed, the filter matched no test, or no input reaches the line.
+**Before dispatching anything, read the lessons below.** Recurring: a field declared, marshalled
+and discarded (**eight** times); **read the check, not its label**; **a check that cannot fail
+where it is run** (#97, #102, #106); **a `switch` over a union is a silent-drop site**; and three
+ways a green suite lies after a mutation — the edit never landed, the filter matched no test, or
+no input reaches the line.
 
 ## What this burn-down is
 
@@ -1921,3 +1913,75 @@ about what a pod is allowed to talk to. It took six waves (15 through 22) and it
 judgement about a cluster and a chart, and one is blocked because this environment cannot run
 an agent job to completion. That is a materially different position from where the list stood
 at the start of this session.
+
+## Wave 23 — #107 landed, and it disproved a claim I had made
+
+**Closed #107.** Filed **#109**, then widened it myself after checking. **83 closed, 5 open.**
+`api` 104 / **1566**, `web` 38 / **785**, CI green.
+
+### It disproved my framing, with evidence in the other repo
+
+My decision on #107 argued the fix on **consistency with the code** — the `> 0` guards are the
+specification, so zero must be reachable. The worker found something stronger: the Orchestrator's
+`.env.example` **already said**, in shared documentation,
+
+> Should agree with the API's `SCREENSHOT_MAX_BYTES` (2 MB by default), which is the authoritative
+> cap. **Set `SCREENSHOT_MAX_BYTES=0` on both sides to keep the feature off.**
+
+I verified it. So the statement *did* exist, and **the API was the side not honouring it** — the
+issue's claim that there was "no statement to contradict, only unreachable code" was wrong, and my
+decision inherited that error. The fix was right for a better reason than I gave: it made the API
+stop substituting a 2 MB cap that the other service's documentation called off.
+
+**The lesson, and it is one I have now learned twice:** a cross-service contract may be written
+down somewhere I did not look. "The code is the specification" is a claim about *this* repo, and
+this variable's specification lived in the other one.
+
+### Four mutations, and the one test worth keeping
+
+Its fifth case is the one I would keep: **"reads zero in opposite directions for the two caps, so
+neither can be assumed from the other."** Each cap's own case still passes under a unification —
+a unified rule still produces *some* value at zero — so only asserting that the two **differ**
+catches it. That is a test of a *relationship*, and the same shape as #106's fix (assert the
+round trip and the relationship, not the literal).
+
+It also confirmed the bounds question rather than assuming: `rejectScreenshotUpload` applies the
+byte cap in a **separate `if` before** the count guard, and `purgeExpired` references neither cap.
+So unlimited-per-job removes the count bound and storage stays bounded by byte-cap × window. That
+is the answer I asked for, checked in the code rather than reasoned from the names.
+
+### #109: I measured the scope and it was three variables, not one
+
+I asked the worker to say if the same name is parsed by two services anywhere else. Then I
+checked myself, and it is a **pattern**:
+
+| variable | API | Orchestrator |
+|---|---|---|
+| `SCREENSHOT_MAX_BYTES` | `limitFrom` | `strconv.ParseInt` |
+| `SESSION_MAX_BYTES` | `limitFrom` | `strconv.ParseInt` |
+| `RECORDING_MAX_BYTES` | `limitFrom` | `strconv.ParseInt` |
+| `GRILL_REPLY_TIMEOUT` | duration | Go duration — **mirrored with the syntax written down** |
+
+**Every shared integer cap has the same divergence**, and `GRILL_REPLY_TIMEOUT` is the precedent
+for the fix: when #92 mirrored a value across two services it wrote the accepted *syntax* down on
+both sides and pinned the default rather than letting two parsers agree by luck.
+
+I verified the divergence empirically rather than from the table: `"1e3"` gives the API **1000**
+and the Orchestrator the default; `"50.0"` gives 50 vs the default; and `limitFrom(" 0 ")` is now
+**0** where Go rejects the padding — which is the case the worker honestly disclosed that #107
+*created*.
+
+**Retitled the issue** to name all three, because a fix for one name would be a fourth copy of the
+divergence waiting to be rediscovered — the same reasoning that made #104 delete
+`sessionMaxBytesFrom` rather than keep it as a wrapper.
+
+### Where this leaves the burn-down
+
+**#28 was the hardest issue in the backlog** and it is closed. It needed object storage, a Pi RPC
+contract verified against a binary rather than documentation, a new artifact type through an
+existing retention layer, a non-destructive gesture distinguished from a destructive one, and a
+trust decision about what a pod may talk to. Six waves.
+
+Of the five that remain, **#109 is the only one that is work** — and it is small, decided, and
+measured. The other four need the operator's judgement about a cluster and a chart (#19/#71, #55),
+or an environment that can run an agent job to completion (#38).
