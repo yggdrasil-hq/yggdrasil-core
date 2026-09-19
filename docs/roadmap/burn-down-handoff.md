@@ -7,9 +7,9 @@ git/PR/merge workflow.
 
 ## START HERE — current state
 
-**74 closed, 6 open.** `api` 97 files / **1444 passed** (real DB), `web` 36 / **750**,
-`orchestrator` 11 packages / gofmt-clean, relay harness **13/13**. No residue anywhere:
-no scratch databases, no `rv-*` objects, operator data at 1 project / 1 org / 7 jobs /
+**75 closed, 6 open.** `api` 98 files / **1456 passed** (real DB), `web` 36 / **756**,
+`orchestrator` 22ccae1 / 11 packages gofmt-clean, relay harness **16/16**. No residue: no
+scratch databases, no `rv-*` objects; operator data at 1 project / 1 org / 7 jobs /
 55 events.
 
 ### Needs the OPERATOR — do not dispatch, do not decide unilaterally
@@ -21,17 +21,18 @@ no scratch databases, no `rv-*` objects, operator data at 1 project / 1 org / 7 
 
 ### One thing the OPERATOR can check in 10 seconds, and no agent can
 
-**The live app under relay protocol v2 has not been exercised by a logged-in browser.**
-ADR 033 replaced v1 with v2; the server side is verified end to end (harness 13/13,
-including socket + write through nginx with real auth), but nginx shows **no `/api/ws`
-upgrade** since the API restart. A fresh `playwright-cli` browser redirects to `/login`,
-and the operator's Chrome is **not attachable** (CDP 9222 answers 404, not a DevTools
-endpoint — confirmed independently twice).
+**The live app under relay protocol v2 has still not been exercised by a logged-in
+browser.** ADR 033 replaced v1 with v2. The server side is verified end to end (harness
+16/16, including socket + write through nginx with real auth, and the fan-out check
+writing once and landing on two topics across two replicas), but nginx shows **no
+`/api/ws` upgrade** since the API restart. A fresh `playwright-cli` browser redirects to
+`/login`; the operator's Chrome is **not attachable** (CDP 9222 answers 404, not a
+DevTools endpoint — confirmed independently by four agents now).
 
 **To check:** reload the feature page and confirm the live status reaches `live` and a
 job's progress updates. A tab left open across the upgrade may hold a v2 client against
-the pre-restart v1 server, so reload first. If it does not go live, the page still works
-via polling — that is the point of §4's fallback — but it means a regression in #99.
+the pre-restart v1 server, so reload first. If it does not go live the page still works
+via polling — that is §4's fallback working — but it means a regression in #99.
 
 ### Blocked on the ENVIRONMENT — complete, nothing here can exercise it
 
@@ -39,15 +40,21 @@ via polling — that is the point of §4's fallback — but it means a regressio
 |---|---|
 | **#38** | Implemented across all four layers, hop-verified. Open only because no agent job has completed here. |
 
-### In flight / queued
+### In flight
 
 | Issue | Repos | State |
 |---|---|---|
-| **#100** | `api` + `web` | **In flight.** Feature-driven `test_run` reaches only `feature:`. Decided: one envelope per scope, each scope-tagged. Web half mandatory. |
-| **#28 part 1, API + Web halves** | `api` + `web` | **Queued — blocked on #100**, since it needs the same two repos and there is one writer per repo. The contract below is frozen and verified on the orchestrator side. |
+| **#28 part 1, API + Web halves** | `api` + `web` | ADR 032 items 1 (API side), 2, 3, 4, 5. Built against the orchestrator's **frozen, verified** contract below. |
 
-**#28 part 1's contract — the orchestrator half shipped (`22ccae1`), this is what the
-reader must match:**
+### Small and free
+
+| Issue | Notes |
+|---|---|
+| **#102** | `docker compose run test` **without `--build`** reuses the cached image and reports on the previous build — which makes a mutation look *caught* when the check was never run against it. A **false negative on a guard**, the expensive direction: it leads to a working check being rewritten. Filed with the reproduction and three options. **Until it is fixed, always pass `--build` or use the real-db script.** |
+
+**#28 part 1's contract — the orchestrator half shipped (`22ccae1`), the reader is being
+built now. The orchestrator's `TestPostJobSession_TreatsAMissingRouteAsAnError` pins the
+current 404 as a tripwire and should flip to 201 when the halves meet:**
 
 ```
 POST /internal/jobs/:jobId/session?outcome=<o>[&sessionId=..][&podFilePath=..]
@@ -55,28 +62,22 @@ body = raw JSONL bytes (empty for a failing outcome)
 201 recorded · 202 declined {reason} · 404 route absent (today)
 ```
 
-`outcome ∈ collected | not_collected | unavailable | disabled`; **only `collected`
-permits a fork.** `disabled` is install-level and deliberately not reported, so a
-switched-off deployment posts no per-job noise. **The route does not exist yet**, and the
-orchestrator pins that as `TestPostJobSession_TreatsAMissingRouteAsAnError` so it surfaces
-as an error rather than a silent success.
+`outcome ∈ collected | not_collected | unavailable | disabled`; **only `collected` permits
+a fork.** `disabled` is install-level and deliberately not reported.
 
-**The distinction the API half must not lose** (ADR 032 item 5): `unavailable` means the
-terminal read never completed; `not_collected` means Pi answered and there was no session.
-`rpc.SessionFile.Asked` exists so those cannot collapse — Go's zero value would have made
-them identical. The API must surface them differently, since a caller cannot otherwise
-tell a retrieval failure from a fact about the run.
-
-**Also: `SessionArtifact.ByteSize` was deliberately removed.** It was declared, documented
-as contract, and never sent — the shape this burn-down has found seven times. The bytes
-*are* the body, so the API's own measurement is authoritative. **Do not reintroduce it.**
+**Two things that must not be lost in transit:** `unavailable` (the terminal read never
+completed) and `not_collected` (Pi answered, no session) are **different facts** — paired
+with `rpc.SessionFile.Asked`, which exists because *"Go's zero value would make them
+identical."* And **`SessionArtifact.ByteSize` was deliberately removed** as a
+declared-but-never-sent field, so the API's own measurement is authoritative — **do not
+reintroduce it.**
 
 **Before dispatching anything, read the lessons below.** The recurring ones: a field
-declared, marshalled and discarded (#59, #38, #73, #88, #25, #28 — **seven** times now,
-most recently caught by an agent in its own work); a check whose *label* overstates what
-it proves; `tsc` cannot see an ambiguous SQL column (#61 proves a reviewer cannot either);
-**a mutation test is evidence only if the mutation is in the code**; and **when a check
-passes, verify it can fail before concluding it is broken.**
+declared, marshalled and discarded (**seven** times, most recently caught by an agent in
+its own work); a check whose *label* overstates what it proves; `tsc` cannot see an
+ambiguous SQL column (#61 proves a reviewer cannot either); **a mutation test is evidence
+only if the mutation is in the code**; and **when a check passes, verify it can fail
+before concluding it is broken.**
 
 ## What this burn-down is
 
@@ -1338,3 +1339,80 @@ It stopped mid-sentence after 10 minutes with no error in its log. Resumed with 
 remaining budget and instructed to commit incrementally and keep notes as it went — which
 is why this report exists at all. A silent termination means an end-of-run summary is the
 one artifact that can vanish entirely.
+
+## Wave 16 — a page that answered its own question nowhere, and a trap that defeats the method
+
+Closed **#100**; filed **#102**. **75 closed, 6 open.** Both repos landed it as one change.
+
+### #100 found a real bug in the page it was sent to make live
+
+The task was "the Test entity's run-history page gets no socket signal". The worker checked
+something I asked it to check — *does that page poll at all?* — and the answer was **no**:
+
+> It fetched once on mount and nothing ever refreshed it. A run a schedule dispatched, or
+> one the user started from the button above it, appeared only on a manual reload.
+
+So the page whose entire purpose is *"what has this test been doing?"* could not show a run
+starting, progressing, or finishing. That is a worse bug than the one being fixed, and it
+was adjacent enough that finding it needed only the question rather than a search.
+
+**The generalizable version, which is why it is worth recording:** a live-signal bug
+assumes a working periodic read underneath it. #98's three surfaces all had one. This one
+did not, and that changes what "no live signal" means — the page was not *stale between
+signals*, it was **frozen at mount**. Asking "is the baseline there before improving it?"
+cost one question and found the bigger fault. Worth asking on every "make X live" task.
+
+Also worth noting: the `relay-surfaces` guard #98 built **forced the poll to come with the
+subscription** — a surface importing the relay hook must also schedule a poll — so the fix
+could not have been half-done even if the worker had wanted it.
+
+### The fan-out check is a conjunction, and that is the right shape
+
+"One write reaches both topics" is two claims: *the second delivery was added* and *the
+first was kept*. A check that only asserts the new topic would pass while the old one
+regressed. The harness asserts both, with the two sockets on **different replicas**:
+
+```
+PASS  feature-driven test_run: one write reaches both the feature topic and the test topic
+      — one write -> featureTopic=received testTopic=received
+PASS  feature-only job stays off the test topic — stayed off the test topic
+```
+
+Note also what was fixed as a side effect: **the `test:` topic had no harness coverage at
+all** before this, so #90's scope was only unit-tested. It now has delivery *and* negative
+coverage, 16/16.
+
+### #102 — a harness trap that defeats mutation testing, which is worth a section
+
+The worker caught itself producing a false result: its first falsification of a new guard
+"I reported a full pass — because the web test image `COPY`s the source (only
+`test-results/` is mounted), so `compose run` without `--build` tested the *previous*
+build."
+
+**It filed it**, with the reproduction and a table of which invocations see the edited
+source, and the diagnosis is precise: this is a **false negative on a guard**, and that is
+the expensive direction. A false positive makes you fix working code; a false negative
+makes you **rewrite or delete a check that was working**. It also silently invalidates the
+rule this burn-down now leans on everywhere — *a mutation test is evidence only if the
+mutation is in the code* — because here the mutation **is** in the code and the suite still
+reports on a build that never saw it.
+
+The generalizable version: **when a mutation "passes", suspect the harness before the
+guard.** I inverted this a wave earlier and concluded a guard was broken when my own edit
+had not landed; the worker hit the same conclusion from the other side. Both are the same
+failure — the result was about something other than the check — and both were caught by
+re-running with the artifact made certain.
+
+### Two judgment calls it flagged rather than buried
+
+- **It widened a guard beyond the task.** `relay-surfaces` proved a surface re-reads on
+  connect but not *which scope it points at* — so "this page is live" rested on reading one
+  line. It now reads each hook call's literal `scope: { kind: … }` and treats "no literal
+  kind found" as a **failure**. The justification is the failure mode: a wrong kind is quiet
+  by construction, because the authoriser refuses an id it cannot resolve, the client falls
+  back to polling, and the page works while never being live — precisely #100's bug. It
+  called the widening out explicitly rather than let it pass as part of the change.
+- **The delta path stays single-topic**, considered rather than overlooked: a delta's
+  payload carries one scope (ADR 033 §5) so it must pick one, and the page renders runs and
+  reports rather than progressive text, so a second copy would be published and consumed by
+  nobody. Documented at the call site with the line to revisit.
