@@ -68,6 +68,14 @@ doc your task needs, so you do not have to read the whole `docs/` tree.
    just use `Refs yggdrasil-hq/yggdrasil-core#NN` — which is unambiguous and is what
    every commit in this repo should carry anyway.
 
+   **And it fires on a quotation too.** The commit that *introduced* this warning
+   quoted the offending sentence as an example — and closed the issue a second time.
+   GitHub parses the message as plain text, with no notion of quotation, code spans
+   or intent, so quoting the pattern performs it. When describing this trap in a
+   commit message, break the adjacency (verb in one sentence, reference in another)
+   or describe it without reproducing it. The literal text is safe in a *file* like
+   this one; GitHub only parses commit messages and PR bodies.
+
 6. **Close the issue when it is actually done**, with `gh issue close` and a
    comment saying what changed and where. If you only partly did it, say so in
    the comment and leave the issue open, or open a new issue for the remainder.
