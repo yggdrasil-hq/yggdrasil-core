@@ -7,40 +7,43 @@ git/PR/merge workflow.
 
 ## START HERE — current state
 
-**64 closed, 9 open** (`gh issue list --repo yggdrasil-hq/yggdrasil-core --state open`).
+**65 closed, 11 open** (`gh issue list --repo yggdrasil-hq/yggdrasil-core --state open`).
+All four child repos at verified `main`; no open PRs anywhere.
 
-The nine, sorted by **what actually blocks them** — this is the distinction that
-matters, because dispatching a decision as an implementation task produces a
-plausible change to an unanswered question:
+The eleven, sorted by **what actually blocks them** — the distinction that matters,
+because dispatching a decision as an implementation task produces a plausible change
+to an unanswered question:
 
-**Blocked on a decision, not work** — do not dispatch as implementation:
+**Blocked a decision, not work** — do not dispatch as implementation:
 
 | Issue | The unanswered question |
 |---|---|
-| #19 / #71 | The image **builds** (verified against the real cluster) but a preview cannot **pull** it: containerd is a node daemon, so it uses the node resolver and will not fall back to HTTP. An install needs the registry over TLS with a node-trusted CA, **or** marked insecure in containerd's config, **and** a node-resolvable name. Install-shape decision, recorded in ADR 003 §14. |
-| #55 | Building every linked repository's image needs a chart convention for per-repository image slots. Four sub-questions are enumerated on the issue. |
+| #19 / #71 | The image **builds** (verified against the real cluster) but a preview cannot **pull** it: containerd is a node daemon, so it uses the node resolver and will not fall back to HTTP. An install needs the registry over TLS with a node-trusted CA, **or** marked insecure in containerd's config, **and** a node-resolvable name. Recorded in ADR 003 §14. |
+| #55 | Building every linked repo's image needs a chart convention for per-repository image slots. Four sub-questions on the issue. |
+| #95 | Design sessions cannot stream text deltas, because the delta path is feature-scoped end to end. An API shape decision. |
+| #90 | A feature-less non-design job routes nowhere. Its topic shape should follow #39's pipeline decision, not precede it. |
 
 **Blocked on the environment** — the code is complete; nothing here can exercise it:
 
 | Issue | Why |
 |---|---|
-| #38 | Fully implemented across all four layers (tool, transport, persistence, control) and **hop-verified**. Open only because no agent job has ever completed in this environment, so a model has never actually been induced to choose the structured form. |
-| #28 part 1 | **Decision made — ADR 032.** Now implementable (persist Pi's session JSONL to the object storage #30 built, then `switch_session` + `fork`). Not dispatched: multi-hour, two repos. |
+| #38 | Implemented across all four layers and **hop-verified**. Open only because no agent job has completed here, so a model has never actually been induced to choose the structured form. #73 was the same gap and is now **closed** — its producer, transport and UI all landed — so #38 is the last one blocked this way. |
+| #28 part 1 | **Decided — ADR 032.** Implementable (persist Pi's session JSONL to #30's object storage, then `switch_session` + `fork`). Not dispatched: multi-hour, two repos. |
 
 **Actionable now or in flight:**
 
 | Issue | State |
 |---|---|
-| #25 | Two of three surfaces converted; the **design-session view** is in flight |
-| #92 | API half in flight (grill wait age); needs a cross-repo value decision |
-| #28 part 2 | **Smallest useful piece remaining.** Surface superseded runs — a read over history that already exists, and it also fixes the shipped rewind's write-only discard |
-| #39 | Large: stream progress end to end, spans all four repos. Overlaps #25 and would likely close it |
-| #90 | Needs #39's decision about a topic for a feature-less non-design job |
+| #92 | API half merged, contract posted; **Web half in flight** (in `web/`) |
+| #96 | Small: document `GRILL_REPLY_TIMEOUT`, pin the mirror from the orchestrator side — **in flight** |
+| #28 part 2 | Surface superseded runs — **in flight**, with the instruction to stop and report if it needs API work rather than shipping an inert consumer |
+| #39 | Large: stream progress end to end, spans all four repos. Overlaps and would likely close #25 |
 
-**Before dispatching anything, read the two sections below on how things have gone
-wrong here** — "a verification that asserts the bug certifies the bug" and "a test
-that builds its own app is only testing its own app". Both are cheap to avoid and
-expensive to discover.
+**Before dispatching anything, read the lessons below** — "a verification that asserts
+the bug certifies the bug" (a check whose *name* overstates what it proves), "a test
+that builds its own app is only testing its own app" (#84, and again in `web/`), and
+"a field declared, marshalled and discarded looks finished" (five issues: #59, #38,
+#73, #88, #25). All three are cheap to avoid and expensive to discover.
 
 ## What this burn-down is
 
