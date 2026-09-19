@@ -145,6 +145,23 @@ mechanism is not built).
   (`0cd9a850-e4b2-4ae3-b8ec-699f8d37392d`) that has test runs and a deploy history.
 - **Browser**: `playwright-cli` is attached to a Chrome logged in as the operator.
   Use it **only** against `http://localhost:8080` and the app's own pages.
+- **Agent-image environment variables reach the Orchestrator only through
+  `orchestrator/.env`, and only at container creation.** `deploy/docker-compose.dev.yml`
+  gives the `orchestrator` service `env_file: ../orchestrator/.env` plus an explicit
+  `environment:` block with only `PORT` and `DATABASE_URL`. `deploy/.env` is the
+  **compose-interpolation** file — hosts, ports, credentials, public URLs — and contains
+  no agent-image variables at all (`deploy/.env.example` is the list). So
+  `AGENTIC_REVIEW_IMAGE` / `SCRIPT_TEST_RUN_IMAGE` / `DESIGN_GRILL_IMAGE` set anywhere but
+  `orchestrator/.env` are silently ignored, and an edit to `orchestrator/.env` needs
+  `--force-recreate` because `env_file` is read when the container is **created**, not
+  restarted. Check with:
+  `docker inspect yggdrasil-dev-orchestrator-1 --format '{{range .Config.Env}}{{println .}}{{end}}' | grep -E 'IMAGE'`
+  (Burned real time in wave 13: the operator set `SCRIPT_TEST_RUN_IMAGE`, and the running
+  container had `DESIGN_GRILL_IMAGE` but not it.)
+  **The Orchestrator is the only process that reads these** — it publishes per-kind
+  capabilities to the shared database (`orchestrator/internal/capabilities`) and the API
+  reads them (`api/src/jobs/capabilities.ts`, 15-minute trust window, absence means
+  "capable"). The API needs no image variable of its own.
 - **Postgres had four scratch databases left behind** by verification runs
   (`bugcheck`, `i22check_*`, `i24check_*`, `i30check_*`) because agents could not
   `DROP DATABASE`. All four are now dropped. If you create one, drop it.
