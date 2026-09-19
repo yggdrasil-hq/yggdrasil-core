@@ -55,6 +55,19 @@ doc your task needs, so you do not have to read the whole `docs/` tree.
    (`gh pr merge <n> --squash --delete-branch`). Then bump nothing in the meta
    repo yourself — the coordinator does that.
 
+5b. **Careful with closing keywords in commit messages.** GitHub matches
+   `close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved` followed by an
+   issue reference **anywhere** in a commit message — not just at the start, and not
+   only as a directive. So a sentence of ordinary prose can close an issue:
+
+   > Also folded in: ADR 032 … **resolves #28**
+
+   That closed #28, whose work was not done (it had a decision and no code). It was
+   noticed only by comparing the open count against an inventory. When you mean "this
+   addresses the decision", write it without a closing verb next to the number, or
+   just use `Refs yggdrasil-hq/yggdrasil-core#NN` — which is unambiguous and is what
+   every commit in this repo should carry anyway.
+
 6. **Close the issue when it is actually done**, with `gh issue close` and a
    comment saying what changed and where. If you only partly did it, say so in
    the comment and leave the issue open, or open a new issue for the remainder.
