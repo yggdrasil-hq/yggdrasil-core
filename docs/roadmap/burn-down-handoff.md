@@ -7,9 +7,9 @@ git/PR/merge workflow.
 
 ## START HERE — current state
 
-**71 closed, 8 open.** All four child repos at verified `main`; no open PRs.
-`api` 96 files / **1412 passed** against a real database, `web` 36 / **740**,
-`orchestrator` gofmt-clean / 11 packages, `agent-images` harness green, ledger empty.
+**73 closed, 7 open.** `api` 97 files / **1444 passed** (real DB), `web` 36 / **750**,
+relay harness **13/13**, `orchestrator` 11 packages. No residue: no scratch databases,
+no `rv-*` containers or images, operator data at 1 project / 1 org / 7 jobs / 55 events.
 
 ### Needs the OPERATOR — do not dispatch, do not decide unilaterally
 
@@ -18,30 +18,49 @@ git/PR/merge workflow.
 | **#19 / #71** | The image **builds** (verified against the real cluster) but a preview cannot **pull** it: containerd is a node daemon, so it uses the node resolver and will not fall back to HTTP. An **install-shape** choice: registry over TLS with a node-trusted CA, or marked insecure in containerd's config, **and** a node-resolvable name. ADR 003 §14. |
 | **#55** | Per-repository image slots need a **chart convention**. Four sub-questions on the issue. |
 
+### One thing the OPERATOR can check in 10 seconds, and no agent can
+
+**The live app under the new wire protocol has not been exercised by a logged-in
+browser.** ADR 033 replaced relay protocol v1 with v2, and while the server side is
+verified end to end (harness 13/13, including socket + write through nginx with real
+auth), **no logged-in client has connected to v2 since the API restart** — nginx shows
+no `/api/ws` upgrade at all. A fresh `playwright-cli` browser is redirected to `/login`,
+and the operator's Chrome is not attachable (**CDP 9222 answers 404, not a DevTools
+endpoint** — confirmed independently, matching an earlier agent's report).
+
+**To check:** reload the feature page and confirm the live status reaches `live` and a
+job's progress updates. If it does not, that is #99's regression, and the fallback to
+polling means the page still works — which is the point of §4. A browser tab open across
+the upgrade may be running a v2 client against the pre-restart v1 server, so a reload is
+the honest first step.
+
 ### Blocked on the ENVIRONMENT — complete, nothing here can exercise it
 
 | Issue | Why |
 |---|---|
 | **#38** | Implemented across all four layers, hop-verified. Open only because no agent job has completed here. |
 
-### In flight
-
-| Issue | Repos | State |
-|---|---|---|
-| **#99 + #95** | `api` + `web` | ADR 033 — scope-tagged frames, two `kind`-keyed registries, design deltas as the first new scope |
-| **#28 part 1** | `orchestrator` + `agent-images` | Persist the Pi session JSONL to object storage. **Died silently once**; resumed with ~75 min. Its API/Web halves (fork route, entry ids, "Resume from here", retention) are the next wave and need its report. |
-
 ### Small and free
 
 | Issue | Notes |
 |---|---|
-| **#100** | A feature-driven `test_run` has both ids and feature wins, so the Test-entity page gets no live signal. **Asserted in a test** by #90's work, so it cannot be rediscovered as a surprise. Its shape is "one job, two scopes", which ADR 033 makes expressible — likely a follow-up once #99 lands. |
+| **#100** | A feature-driven `test_run` reaches only the feature topic, so the Test-entity run history gets no live signal. **Now small**: `liveScopeForJob` already decides a job's scope in one place, so it is a second `hub.publish` at the same seam, not a protocol change. |
+| **#101** | `get_session_stats` also returns `sessionFile`, which ADR 032 does not mention — verified against a **real Pi process**, not the docs. Wants a one-line ADR note; no code change. |
+
+### In flight
+
+**#28 part 1** (`orchestrator/`) — the session-file collection has **shipped**
+(`6cbdd91` collect, `798f34a` wire-shape test), and the worker is finishing the ADR item
+5 distinction: *an unanswered terminal read is `unavailable`, not `not_collected`*
+(unpushed at last check). Its report is the input for the API/Web halves — the fork
+route, `get_fork_messages` entry ids, "Resume from here", retention.
 
 **Before dispatching anything, read the lessons below.** The recurring ones: a field
 declared, marshalled and discarded (#59, #38, #73, #88, #25, #28 — six times); a check
-whose *label* overstates what it proves; a test that builds its own app only tests its
-own app; `tsc` cannot see an ambiguous SQL column (#61 proves a reviewer cannot either);
-and **when a check passes, verify it can fail before trusting it.**
+whose *label* overstates what it proves; `tsc` cannot see an ambiguous SQL column (#61
+proves a reviewer cannot either); **a mutation test is evidence only if the mutation is
+in the code** (the coordinator invalidated his own falsification by mutating a comment);
+and **when a check passes, verify it can fail before concluding it is broken.**
 
 ## What this burn-down is
 
@@ -1156,3 +1175,87 @@ The #28 part 1 worker stopped after **10 minutes** mid-sentence with no error, n
 limit, nothing in its log. Resumed with the remaining ~75 minutes and told to commit
 incrementally and keep notes as it goes — a silent termination means an end-of-run report
 is the one artifact that can be lost entirely.
+
+## Wave 14 — ADR 033 landed, and the closed enum is the real design win
+
+Closed **#99** and **#95** (`api` `46e9a0f`, `web` `82d19eb`). Filed **#101**. **7 open.**
+Net on the two repos: ~2,400 lines changed, 848 removed from `api` alone — the protocol
+got *smaller* while gaining a scope.
+
+### What I verified, and the one check that made the design argument concrete
+
+The claim I cared about most was §2's: that a new scope is a **compile error** rather
+than a runtime surprise. I proved it by adding `"fourth_scope"` to the `LiveScopeKind`
+union and adding nothing to either registry. `tsc` rejected it **in both registries**,
+naming the missing property:
+
+```
+src/live/types.ts(137,7):         error TS2741: Property 'fourth_scope' is missing
+                                  in type 'Record<LiveScopeKind, (id: string) => string>'
+src/live/authorization.ts(251,14): error TS2741: Property 'fourth_scope' is missing
+                                  in type 'Record<LiveScopeKind, ScopeAuthorizer>'
+```
+
+That is the answer to #39's refuted claim, in a form a reader cannot argue with: the
+reason a new scope is cheap now is not that someone wrote more helper functions, it is
+that **the type system refuses to compile an incomplete one**. Adding the design scope
+used to be a protocol; forgetting part of it now fails the build.
+
+The registries stay keyed by a closed enum and the three authorisers stay separate
+functions, because §2 forbids the `(projectId, resourceId)` collapse — fusing them could
+only ever produce the loosest gate. The worker added `authorization-routes.test.ts`,
+which **reads the real router's route table** and asserts each scope's `mirrors:` names a
+route that exists, is a GET, and carries auth middleware. That closes something ADR 019
+item 7 had only as a comment, and it is the right kind of check: it fails when the route
+it mirrors is renamed or its auth removed.
+
+### §4's degradation proof — the ADR's condition, satisfied properly
+
+The ADR made this mandatory *and* said why: the mismatched-protocol path is reached only
+during a bad upgrade window, so it is the path that never gets exercised and quietly
+rots. The harness now runs it as one named check with a **control**, and I re-ran it:
+
+```
+PASS  version-1 client: refused as unrecognised, left subscribed to nothing, and still
+      usable under version 2 — ready=v2, v1 frame refused with error ("Unrecognised
+      frame"), nothing delivered while unsubscribed, socket still open, and the same
+      socket subscribed and delivered under version 2
+```
+
+Five assertions in one check, and the load-bearing ones are the negative: *nothing is
+delivered* while the v1 socket sits unsubscribed (so the refusal is inert, not silently
+permissive), and the socket is left **open** rather than closed retryably — a retryable
+close would mean ten reconnect attempts, which is "dead-ish" rather than degraded. The
+same socket then subscribing under v2 is the control that proves the refusal was about
+the frame and not about the connection. 13/13, cleanup clean.
+
+The client half is pinned to **those recorded bytes** rather than to a hand-written
+frame, so the Web test asserts what the server actually sent.
+
+### The honest gap, stated rather than glossed
+
+**No logged-in browser has exercised v2.** The server side is verified end to end —
+including socket + write through nginx with real auth — but nginx shows no `/api/ws`
+upgrade since the API restart, so no real client has connected. A fresh `playwright-cli`
+browser redirects to `/login`, and the operator's Chrome is **not attachable** (CDP 9222
+answers 404, not a DevTools endpoint — I confirmed that independently, which matches what
+an earlier agent reported). This is in START HERE as the one item the operator can settle
+in seconds, with the note that a tab left open across the upgrade may hold a v2 client
+against a v1 server, so a reload is the honest first step.
+
+Worth noting the worker restarted the operator's `yggdrasil-dev-api-1` to be certain the
+running server was v2 and not eight-hour-old v1 — the right call for a breaking wire
+change, and it left the app healthy (`/health` 200).
+
+### #101, from the other worker, is a good catch and a good *non*-change
+
+Its orchestrator worker filed it while implementing #28 part 1: `get_session_stats` also
+returns `sessionFile`, and the Orchestrator has been calling that command at the end of
+every run since ADR 023 — so **the path was already in flight on a turn it already
+opened**, making the change one line rather than a new round trip. It verified this
+against a **live Pi process** (Pi 0.84.4 in the pinned image), not the docs.
+
+It is a second source for one fact, which is this burn-down's recurring shape — but here
+it is benign (one command, one session, no window between them), and the worker said so
+instead of inflating it. The suggestion is a one-line ADR note, no code change. That is
+the correct size of response to the correct size of problem.
