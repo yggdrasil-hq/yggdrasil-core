@@ -1001,3 +1001,68 @@ that would let one through.
 That check exists because a grill transcript is the whole prior conversation, including
 anything a human typed into it — so the failure mode was reading another feature's
 conversation by pasting a uuid.
+
+## Wave 12 — a proposed rule refined against the operator's real data
+
+**#28 part 2 is complete** (API yggdrasil-api#33, Web yggdrasil-web#25). Both trees
+byte-identical to what was tested: `api` 95 files / **1396 passed**, `web` 35 / 725.
+**10 open.**
+
+### The refinement worth recording, because the issue's own suggestion was wrong
+
+I proposed the cheap rule from the issue: *"every `spec_grill` run except the latest"*.
+The worker split it into two questions and got different answers, then **evidence-checked
+both**:
+
+| question | rule |
+|---|---|
+| which runs to **list** | every earlier one — position is the fact, no stored flag (a rewind dispatches a new job, so the newest row *is* current by construction) |
+| which to label **"superseded"** | only a run a later rewind actually pointed into |
+
+The distinction is real and not theoretical: **a run replaced by ADR 012's retry was
+never rewound and nothing was truncated**, so labelling it superseded asserts a discard
+that did not happen. I verified the operator's feature contains both cases:
+
+```
+ec93d045  failed      <- merely older (a retry); no run rewound from it
+ab439db0  completed   <- rewound from: b5e010d3's restarted_from_event_id names its event
+b5e010d3  completed   <- the current run, produced by that rewind
+```
+
+So the list shows `2 earlier runs` with two *different* wordings, which is what the
+operator sees today. Had I not split the question, one of those two labels would have
+been a lie.
+
+**A stored flag would have made this worse, not better** — it would be a second record
+of a fact `restarted_from_event_id` already carries (the whole class of bug this
+burn-down keeps finding: #75, #86, #38, #59, #73, #88). No migration.
+
+### The falsification is the part I would keep
+
+The supersession lookup is one careless edit from #61's `42702` — an unqualified column
+against a joined table. The worker claimed the guard bites, so I reproduced it:
+
+| mutation | result |
+|---|---|
+| `SELECT j.id, …` → `SELECT id, …` | **`tsc --noEmit` reports nothing** |
+| the same, against real Postgres | `column reference "id" is ambiguous` — **6 tests fail**, one named *"is accepted by Postgres, so the join is not ambiguous"* |
+
+That pair is the argument for the real-database tests in one line: **the type checker
+cannot see this class of bug, and #61 already proved the reviewer cannot either.** A
+green `tsc` here would otherwise have read as coverage.
+
+It also verified the security assertion the same way — removing the job-scoped read's
+`featureId` check fails two tests by name, including the `featureId === null` case where
+`null === null` would have let a deploy through.
+
+### Method notes
+
+- **No fixture inserted, and no residue** — the real feature already had three grill
+  runs, two of them earlier than current, so nothing had to be created. That is the
+  cleanest possible demonstration: the feature the work is about supplied its own test
+  data.
+- **The #64 mock-coverage ratchet caught two new unhandled calls** and named both paths.
+  The worker added real handlers rather than ledger entries, on the principle that the
+  ledger is for pre-existing gaps — which is the ratchet working as intended rather than
+  being quietened.
+- One scratch database named precisely and dropped by the coordinator.
