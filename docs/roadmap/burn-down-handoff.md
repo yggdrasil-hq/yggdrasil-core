@@ -709,3 +709,80 @@ inside **expected** `console.error` output from failure-path tests (a deliberate
 exit 0 throughout. **Read the summary line, not a grep of the log** — which is the
 same "measure, do not infer" rule the agents have been held to, and I broke it by
 inferring a verdict from a substring.
+
+## Wave 8 — a coordinator error that contaminated another agent
+
+Closed **#82, #83, #86, #88, #89, #73**, plus **#25's two feature-scoped surfaces**.
+**10 issues open.**
+
+### I mutated files in a repo another agent was working in
+
+I was verifying #88 by reverting each hop in turn — which is the right way to check a
+round-trip test — while an agent was implementing #82 **in the same checkout**. It
+found `curated.go` dirty with `omitempty` removed and reported it as *its own* mutation
+debris.
+
+**It was mine.** The timeline fits (it merged #88 at 08:36 and found the debris after),
+and the mutation it describes is exactly the one I made. The final merged state is
+verified correct — both `omitempty` tags present, all packages green, tree clean,
+nothing lost — but the process was wrong and I got lucky: my `cp` restores could have
+clobbered its in-flight edits instead of merely confusing it.
+
+This is the second time I have done this (a suite run in `api/` earlier reported
+phantom failures for the same reason). The first time I recorded the hazard as advice
+for agents. **Applying it to myself is the actual lesson**, and file *mutation* is
+materially worse than a read-only run:
+
+- check `git branch --show-current` and `git status` in the target repo, **and the
+  agent's activity**, before touching anything;
+- prefer a scratch copy or a worktree for mutation testing;
+- if a repo has an active writer, verify by reading the tests and reasoning about
+  their shape, and let the worker's own mutation evidence stand.
+
+### The pattern this round, in its strongest form yet
+
+Every task closed this wave was **a field or a bound that something silently dropped**:
+
+| issue | dropped by |
+|---|---|
+| #88 | `Translate`'s struct literal, then `jobEventRequest`'s field list, then… nothing |
+| #73 | the same, one issue earlier |
+| #38 | the same, twice |
+| #59 | `create` never declaring the column |
+| #86 | a JS array where jsonb wanted JSON |
+| #25 | `relayEnvelopeFor` returning null for a project-scoped job |
+
+**Five issues in one burn-down with one root cause**, and the fix that generalises is
+now in place: `agent-images/scripts/verify-contract-tools.ts` reconciles every field
+the tools emit against **all four hops** and names which one drops what. That is the
+only mechanism here that *structurally* prevents the next instance rather than
+documenting the last one.
+
+### A ledger that caught its own obsolescence
+
+That harness carries a known-gap ledger, and it has **two** rules: an unlisted drop
+fails the run, and a listed drop that is *no longer* a drop also fails. When #88 landed
+it printed `STALE KNOWN-DROP ENTRIES (the fix landed — delete these)` and failed, so the
+entry could not outlive the fix. With it deleted, `every emitted field is forwarded at
+all four hops` is true rather than contradicting the line beneath it.
+
+That second rule is the difference between a ledger and a list of things nobody dares
+remove, and it is worth copying anywhere this codebase keeps a known-issues list.
+
+### Two "I cannot verify this here" claims, both stated rather than glossed
+
+- **Whether the model actually uses `findings`.** The transport and schema are proven;
+  the tool's inducement is not. No agent job has completed here (#19/#71).
+- **The #82 end-to-end test skips in CI**, because the repo's compose file mounts no
+  kubeconfig. It was run against the supplied k3s cluster instead — which is how the
+  worker produced the bug-reproduction pair: with the fix `PASS (2.24s)`, with the
+  wiring removed `FAIL (32.01s) — driveAgentSession never returned, so an unanswered
+  question still hangs the run`.
+
+### One self-correction worth keeping
+
+A worker wrote a comment claiming `ctx.Err() == nil` was test-guarded, then mutated
+its own work and found **it was not** — the clause closes a same-instant race that no
+test can reach. It kept the code and rewrote the comment to say *reasoned, not
+guarded*. That distinction — "this is covered" versus "this is argued" — is the honest
+one to make, and cheaper than a test that pretends to cover it.
