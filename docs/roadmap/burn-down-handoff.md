@@ -7,7 +7,7 @@ git/PR/merge workflow.
 
 ## START HERE — current state
 
-**73 closed, 7 open.** `api` 97 files / **1444 passed** (real DB), `web` 36 / **750**,
+**74 closed, 6 open.** `api` 97 files / **1444 passed** (real DB), `web` 36 / **750**,
 relay harness **13/13**, `orchestrator` 11 packages. No residue: no scratch databases,
 no `rv-*` containers or images, operator data at 1 project / 1 org / 7 jobs / 55 events.
 
@@ -44,8 +44,7 @@ the honest first step.
 
 | Issue | Notes |
 |---|---|
-| **#100** | A feature-driven `test_run` reaches only the feature topic, so the Test-entity run history gets no live signal. **Now small**: `liveScopeForJob` already decides a job's scope in one place, so it is a second `hub.publish` at the same seam, not a protocol change. |
-| **#101** | `get_session_stats` also returns `sessionFile`, which ADR 032 does not mention — verified against a **real Pi process**, not the docs. Wants a one-line ADR note; no code change. |
+| **#100** | **In flight** (`api` + `web`). A feature-driven `test_run` carries both ids and reaches only `feature:`. **Decided**: one envelope per scope, each scope-tagged — not a two-scope frame — and the Web half is required, since an API-only change would be the seventh instance of this burn-down's "published and never consumed" shape. |
 
 ### In flight
 
