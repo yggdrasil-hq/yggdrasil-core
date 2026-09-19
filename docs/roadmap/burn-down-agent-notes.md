@@ -126,6 +126,24 @@ doc your task needs, so you do not have to read the whole `docs/` tree.
    found it is worth copying — **run the configuration you are not debugging.** Had it run
    only the failing path, the passing path would have shipped.
 
+5d2. **Check that the test you expected actually RAN before believing a surviving
+   mutation.** A filter that matches nothing produces a green suite that says nothing. The
+   coordinator did this in wave 21: `go test -run Fork` after dropping `verifySwitch`'s
+   `MessageCount` guard, and the guard looked untested — but the test is named
+   `TestVerifySwitchRefusesASessionWithNoMessages`, which does not contain "Fork". Run
+   against the package, it failed immediately.
+
+   So three questions before concluding a guard is weak, in order:
+
+   1. **Did the edit land?** `grep` for it; assert the replacement count was 1.
+   2. **Did the test I meant run?** Match filters against the test's **actual name**, or run
+      the whole suite/package. `go test -v` and a test count are cheap checks.
+   3. **Does any input reach the line?** A guard can be tested and still unreachable, if
+      every case fails an earlier condition first.
+
+   All three failures look identical from outside — a green suite after a mutation — and two
+   of the three are your own invocation rather than the code.
+
 5d. **A mutation surviving is evidence about the TEST SET, not about the code.** Three
    distinct things all look identical from outside — a green suite after a mutation:
 

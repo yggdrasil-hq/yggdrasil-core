@@ -8,12 +8,12 @@ git/PR/merge workflow.
 ## START HERE — current state
 
 **79 closed, 7 open.** `api` 103 files / **1540 passed** (real DB), `web` 37 / **769**,
-`orchestrator` `ecea294` / 11 packages gofmt+vet clean, relay harness **16/16**. No residue;
+`orchestrator` `37b1501` / 11 packages gofmt+vet clean, relay harness **16/16**. No residue;
 operator data at 1 project / 1 org / 7 jobs / 55 events.
 
-**`api` CI is GREEN on `main`** (`9688e43` and the two commits after it). It was red for a
-week on #106 — see the wave lesson. **CI runs 0 skips, so it exercises ~77 tests the local
-compose run skips; a green local suite is NOT evidence of CI health.**
+**`api` CI is GREEN on `main`** (`9688e43`+). It was red for a week on #106. **CI runs 0
+skips, so it exercises ~77 tests the local compose run skips — a green local suite is NOT
+evidence of CI health.**
 
 ### Needs the OPERATOR — do not dispatch, do not decide unilaterally
 
@@ -29,7 +29,7 @@ browser.** Server side verified end to end (harness 16/16, including socket + wr
 nginx with real auth, and the fan-out check writing once and landing on two topics across
 two replicas), but nginx shows **no `/api/ws` upgrade** since the API restart. A fresh
 `playwright-cli` browser redirects to `/login`; the operator's Chrome is **not attachable**
-(CDP 9222 answers 404 — seven agents have now confirmed this).
+(CDP 9222 answers 404 — eight agents have now confirmed this).
 
 **To check:** reload the feature page and confirm the live status reaches `live` and a
 job's progress updates. A tab open across the upgrade may hold a v2 client against a
@@ -40,15 +40,13 @@ polling — §4's fallback — but it means a regression in #99.
 
 | Issue | Repos | State |
 |---|---|---|
-| **#103 part 2** | `orchestrator` + `api` + `web` | The fork job — write the session in → `switch_session` → **verify `get_state`** → `fork` → `get_state` again. **Closes #28.** Web half lands with it (the dispatch path now exists, so the UI is no longer a control that does nothing). |
+| **#103 part 2, the dispatch + UI** | `api` + `web` | **Closes #28.** The orchestrator half shipped but is unreachable: `ForkFromJobID` is read in four places and **written nowhere**. Needs the dispatch route (modelled on ADR 024's `restart-from-message`) and the Web control. |
 
 ### Queued
 
-**#107** (`api`) — `SCREENSHOT_MAX_BYTES` / `SCREENSHOT_MAX_PER_JOB` have the same
-unreachable-zero idiom, and **one of them means the opposite thing** (byte cap 0 = refuse
-all, per-job cap 0 = no ceiling). **Decided**: make zero reachable for both, and fix the
-*discoverability* problem — state both readings on both variables, name which direction each
-fails, pin each with a test. Do not invent a third spelling for "unlimited".
+**#107** (`api`) — `SCREENSHOT_MAX_BYTES` / `SCREENSHOT_MAX_PER_JOB`: same unreachable-zero
+idiom, **opposite meanings** (byte cap 0 = refuse all, per-job cap 0 = no ceiling).
+**Decided**: make zero reachable for both and fix the *discoverability* problem.
 
 ### Blocked on the ENVIRONMENT — complete, nothing here can exercise it
 
@@ -57,12 +55,12 @@ fails, pin each with a test. Do not invent a third spelling for "unlimited".
 | **#38** | Implemented across all four layers, hop-verified. Open only because no agent job has completed here. |
 
 **Before dispatching anything, read the lessons below.** Recurring: a field declared,
-marshalled and discarded (**seven** times); **read the check, not its label** (the
-coordinator has made this error twice); **a check that cannot fail where it is run** (#97,
-#102, #106 — three instances, each in a different environment); `tsc` cannot see an
-ambiguous SQL column; **a green suite after a mutation may mean no input reached the mutated
-line**; and **when a check passes for the wrong reason, the assertion is usually about
-absence** (an unselected column reads as "not here").
+marshalled and discarded (**seven** times, and #103's own orchestrator half is currently the
+eighth until the dispatch route lands); **read the check, not its label**; **a check that
+cannot fail where it is run** (#97, #102, #106); **a green suite after a mutation may mean
+the filter matched nothing** — verify the mutation landed *and* that the test you expected
+actually ran; and **when a check passes for the wrong reason, the assertion is usually about
+absence.**
 
 ## What this burn-down is
 
@@ -1772,3 +1770,72 @@ again"[1] — which is exactly the judgment that stops a fix from propagating a 
 specification, and fix the *discoverability* problem — two adjacent `SCREENSHOT_` variables
 reading oppositely at zero is the actual defect. Decision recorded on #107, including
 permission to stop and argue the opposite if implementing it reveals the convention is wrong.
+
+## Wave 21 — the fork's orchestrator half, and a false positive I nearly filed
+
+**#103's fork half shipped** (`orchestrator` `37b1501`, `api` `d53f12a`; migration 056).
+`api` 103 / **1540 passed**, orchestrator 11 packages gofmt+vet clean. **79 closed, 7 open.**
+#28 still cannot close, and the worker said so plainly.
+
+### It could build the fork but not dispatch one — and it named that as the gap
+
+The write path, the RPC sequence and the failure stages all shipped. But **nothing creates a
+fork job**: I verified that `ForkFromJobID` is read in four places in `orchestrator/` and
+**written nowhere**. So the half is currently unreachable — the eighth instance of this
+burn-down's recurring shape — and the worker reported it as the reason #28 stays open rather
+than presenting the work as complete.
+
+**It also found an instance inside its own change**: the guard listing which event types have
+feature-state effects needed `fork_failed` added, or the new event would have been stored and
+acted on by nothing. That is the shape caught at the moment of creation, which is where it is
+cheapest.
+
+### The pod-delivery decision survived, and two checks strengthened it
+
+I had decided the orchestrator writes the session into the pod rather than the pod pulling it.
+It verified rather than assumed: **nothing sets an API URL in the pod's env** (`jobrunner.go`
+builds env from `spec.Env` alone), so a pull really would be a new outbound channel. And it
+checked that **`tee` exists in `node:22-slim`** — which mattered, because the decision's rule
+is argv-slice-never-shell and a redirect would have forced a shell.
+
+**It then found a case the decision had not anticipated and made a call on it:** the write is
+`tee` with **no `mkdir -p`** (a second exec or a shell would both violate the contract), so
+the restore path is `/tmp/yggdrasil-session-<sourceJobId>.jsonl` — `/tmp` is the one location
+needing no setup, and that it is ephemeral is correct for a one-run input. That is the right
+way to extend a decision: name the case it missed, resolve it in the decision's spirit, say so.
+
+### The sequencing choices are both about hazards the ADR documented
+
+- **Every command sent and awaited one at a time**, rather than batched and matched by name
+  the way `fetchSessionStats` does — because ADR 032 item 3 records that **responses are not
+  in send order** once a command touches the session tree. Batching is a hazard needing
+  mitigation; with one command outstanding the hazard cannot arise. It costs three round trips
+  on a path that runs once per fork, which is the right trade.
+- **The verification is three conditions, not one**: `Asked`, the path matching, *and* a
+  non-zero `MessageCount`. Each is satisfiable by the failure another catches — a path match
+  passes for a file that exists but is empty, and a count alone passes for a session that
+  loaded but is not the one named. That triad is item 5's content in practice.
+
+### A false positive I nearly filed against it
+
+Its report admitted a real gap: *"I ran no mutation on the new code."* So I ran one — dropped
+`verifySwitch`'s `MessageCount` guard — and the suite **passed**, which looked like an
+untested critical path, the guard that catches "switch_session loaded nothing".
+
+**It was my error.** I had filtered with `-run Fork`, and the test is named
+`TestVerifySwitchRefusesASessionWithNoMessages` — **which does not contain "Fork"**, so it
+never ran. Re-run against the whole package:
+
+```
+--- FAIL: TestVerifySwitchRefusesASessionWithNoMessages
+    fork_test.go:60: expected an empty session to be refused, got <nil>
+```
+
+**The guard is tested, and the coverage was better than the worker's own self-assessment.**
+
+The lesson was already in the notes and the worker had *reported hitting it itself* — its
+`-run 'ForkPoint'` did not match its new test's name either. **So: a surviving mutation is
+evidence about your invocation before it is evidence about the code.** Check that the edit
+landed, that the test you meant actually ran, and that an input reaches the line — and only
+then conclude anything about the guard. That is three ways now, all of which look identical
+from outside: a green suite.
