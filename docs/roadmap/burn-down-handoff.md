@@ -62,13 +62,57 @@ And the **grill transcript lives at `/grill`**, not `/spec` — `/spec` is the A
 view, and opening `/spec` shows *no* socket because the grill client is not mounted there. That
 cost time too: the absence of `/api/ws` on `/spec` looked like a relay failure and was not.
 
-### One thing only the OPERATOR can settle
+### THE ENVIRONMENT PREMISE WAS WRONG — agents DO run to completion here (2026-09-19)
 
-**No fork has ever run end to end.** No agent job has completed here, so no session has ever
-been collected and no `get_fork_messages` call has been made against a live run. Everything is
-verified at the seam: the parsers against a **real Pi 0.84.4 process**, authorisation, the
-refusal matrix, the state transition, the row written. **"A fork produces a working resumed
-session" is NOT verified**, and neither is the Web control's rendering.
+**Correct this everywhere before dispatching anything.** The burn-down has operated on *"no
+agent job has ever completed in this environment"* and used it to mark issues unverifiable.
+**It is false, and it was false the whole time.** From the database:
+
+```
+spec_grill      | completed | 2      feature_build | completed | 1
+script_test_run | completed | 1
+job_events: 32 agent_text, 7 ask_user, 7 user_message, 2 submit_adr, 1 submit_build_result
+```
+
+The claim likely came from reading `failed` rows without checking `completed` ones. The two
+`script_test_run` failures are real (no `SCRIPT_TEST_RUN_IMAGE`) and sit beside successes.
+
+**A full grill then ran end to end on a fresh run**: `spec_grill` `d55f1334` streamed deltas
+to the browser, asked two questions, took two human replies, and deployed a live preview at
+`luffy-s-portfol-spec-grill-<jobId>.preview.127.0.0.1.nip.io`, with issue #92's wait banner
+counting live ("Waiting for your answer — 29 seconds so far").
+
+**What this changes:**
+
+| was marked | now |
+|---|---|
+| #38 "unverifiable, no run to observe" | **verified: the agent runs and still does not use the structured form** (`question_form` null). Not environment-blocked — a prompt/tool issue, checkable with one query. |
+| ADR 033's relay "no logged-in browser" | **verified** — `ready protocolVersion 2` + `subscribed scope` captured live |
+| #28's fork "cannot be watched" | the *run* is watchable; a fork still needs a real collected session, which the next run produces |
+| "several issues cannot be verified end to end" | mostly wrong; **re-test before accepting it** |
+
+**The blocker was never the environment.** The real one: the project sat in `initializing`
+because its `project_init` grill had failed, and the API refuses feature creation with **409
+"Project initialization must complete before creating features"**. The app's own **Retry
+grill** control is the recovery, and it works.
+
+**And the first retry failed for a reason outside this codebase**: the org's model was set to
+`deepseek-v4-flash`, which the upstream gateway no longer serves —
+
+```
+400: {"error":"no keys found that support model: deepseek-v4-flash","type":"no_key_supports_model"}
+```
+
+The gateway now offers `Anera/aneramodel`, `opencode-go/deepseek-v4.1-flash` and
+`openrouter/deepseek/deepseek-v4-flash-0731`. Repointing the existing model row at the
+OpenRouter id fixed it, with no code change. **A model id in a config row rots upstream, and
+the failure reads like an application error** — worth knowing the next time a grill "fails".
+
+### One thing that genuinely still needs a run
+
+**No fork has run end to end yet** — it needs a *collected session*, and collection shipped
+after the last run. The run above will produce the first one. Everything else is verified at
+the seam or, as of today, in the browser.
 
 **Before dispatching anything, read the lessons below.** Recurring: a field declared, marshalled
 and discarded (**eight** times); **read the check, not its label**; **a check that cannot fail
