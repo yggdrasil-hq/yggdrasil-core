@@ -7,20 +7,22 @@ git/PR/merge workflow.
 
 ## START HERE — current state
 
-**79 closed, 7 open.** `api` 103 files / **1540 passed** (real DB), `web` 37 / **769**,
-`orchestrator` `37b1501` / 11 packages gofmt+vet clean, relay harness **16/16**. No residue;
-operator data at 1 project / 1 org / 7 jobs / 55 events.
+**82 closed, 5 open. #28 IS CLOSED** — the real Pi fork shipped, after being open since the
+beginning of this burn-down. `api` 104 files / **1566 passed** (real DB), `web` 38 / **785**,
+`orchestrator` 11 packages gofmt+vet clean, relay harness **16/16**. No residue; operator data
+at 1 project / 1 org / 7 jobs / 55 events.
 
-**`api` CI is GREEN on `main`** (`9688e43`+). It was red for a week on #106. **CI runs 0
-skips, so it exercises ~77 tests the local compose run skips — a green local suite is NOT
-evidence of CI health.**
+**`api` CI is GREEN on `main`. CI runs 0 skips, so it exercises paths the local compose run
+skips — a green local suite is NOT evidence of CI health** (that is how #106 hid for a week).
 
-### Needs the OPERATOR — do not dispatch, do not decide unilaterally
+### The five that remain — and three of them are yours
 
-| Issue | The question only the operator can answer |
-|---|---|
-| **#19 / #71** | The image **builds** (verified against the real cluster) but a preview cannot **pull** it: containerd is a node daemon, so it uses the node resolver and will not fall back to HTTP. An **install-shape** choice: registry over TLS with a node-trusted CA, or marked insecure in containerd's config, **and** a node-resolvable name. ADR 003 §14. |
-| **#55** | Per-repository image slots need a **chart convention**. Four sub-questions on the issue. |
+| Issue | Kind | What it needs |
+|---|---|---|
+| **#19 / #71** | **OPERATOR** | The image **builds** (verified against the real cluster) but a preview cannot **pull** it: containerd is a node daemon, so it resolves the registry with the node's DNS and will not fall back to HTTP. An **install-shape** choice: registry over TLS with a node-trusted CA, or marked insecure in containerd's config, **and** a node-resolvable name. ADR 003 §14. |
+| **#55** | **OPERATOR** | Per-repository image slots need a **chart convention**. Four sub-questions on the issue. |
+| **#38** | **ENVIRONMENT** | Implemented across all four layers, hop-verified. Open only because **no agent job has ever completed here**, so no model has been induced to use the structured form. |
+| **#107** | **IN FLIGHT** (`api`) | `SCREENSHOT_MAX_BYTES` / `SCREENSHOT_MAX_PER_JOB`: the last two unreachable zeros, and they mean **opposite things** (byte cap 0 = refuse all, per-job cap 0 = no ceiling). Decided: make zero reachable and fix the *discoverability* problem. |
 
 ### One thing the OPERATOR can check in 10 seconds, and no agent can
 
@@ -29,38 +31,27 @@ browser.** Server side verified end to end (harness 16/16, including socket + wr
 nginx with real auth, and the fan-out check writing once and landing on two topics across
 two replicas), but nginx shows **no `/api/ws` upgrade** since the API restart. A fresh
 `playwright-cli` browser redirects to `/login`; the operator's Chrome is **not attachable**
-(CDP 9222 answers 404 — eight agents have now confirmed this).
+(CDP 9222 answers 404 — nine agents have now confirmed this).
 
 **To check:** reload the feature page and confirm the live status reaches `live` and a
 job's progress updates. A tab open across the upgrade may hold a v2 client against a
 pre-restart v1 server, so reload first. If it does not go live, the page still works via
-polling — §4's fallback — but it means a regression in #99.
+polling — ADR 033 §4's fallback — but it means a regression in #99.
 
-### In flight
+### And one thing only a real run can settle
 
-| Issue | Repos | State |
-|---|---|---|
-| **#103 part 2, the dispatch + UI** | `api` + `web` | **Closes #28.** The orchestrator half shipped but is unreachable: `ForkFromJobID` is read in four places and **written nowhere**. Needs the dispatch route (modelled on ADR 024's `restart-from-message`) and the Web control. |
-
-### Queued
-
-**#107** (`api`) — `SCREENSHOT_MAX_BYTES` / `SCREENSHOT_MAX_PER_JOB`: same unreachable-zero
-idiom, **opposite meanings** (byte cap 0 = refuse all, per-job cap 0 = no ceiling).
-**Decided**: make zero reachable for both and fix the *discoverability* problem.
-
-### Blocked on the ENVIRONMENT — complete, nothing here can exercise it
-
-| Issue | Why |
-|---|---|
-| **#38** | Implemented across all four layers, hop-verified. Open only because no agent job has completed here. |
+**No fork has ever run end to end.** No agent job has completed here, so no session has ever
+been collected and no `get_fork_messages` call has been made against a live run. Everything
+is verified at the seam: authorisation, validation, the refusal matrix, the state transition,
+the row written, the parsers against a real Pi process. **"A fork produces a working resumed
+session" is NOT verified**, and neither is the Web control's rendering (a fresh browser has
+no login).
 
 **Before dispatching anything, read the lessons below.** Recurring: a field declared,
-marshalled and discarded (**seven** times, and #103's own orchestrator half is currently the
-eighth until the dispatch route lands); **read the check, not its label**; **a check that
-cannot fail where it is run** (#97, #102, #106); **a green suite after a mutation may mean
-the filter matched nothing** — verify the mutation landed *and* that the test you expected
-actually ran; and **when a check passes for the wrong reason, the assertion is usually about
-absence.**
+marshalled and discarded (**eight** times, most recently caught by an agent in its own
+change); **read the check, not its label**; **a check that cannot fail where it is run**
+(#97, #102, #106); and three ways a green suite lies after a mutation — the edit never
+landed, the filter matched no test, or no input reaches the line.
 
 ## What this burn-down is
 
@@ -1839,3 +1830,94 @@ evidence about your invocation before it is evidence about the code.** Check tha
 landed, that the test you meant actually ran, and that an input reaches the line — and only
 then conclude anything about the guard. That is three ways now, all of which look identical
 from outside: a green suite.
+
+## Wave 22 — #28 closes, and the work found two bugs the ticket never mentioned
+
+**Closed #103 and #28.** Filed #108, then fixed it myself. **82 closed, 5 open.** `api` 104 /
+**1566**, `web` 38 / **785**, CI green on both repos.
+
+### The fork shipped, and the design question was answered by the code's own risk
+
+The dispatch route, the migration, the web control and the failure stages all landed. What I
+want to record is the correctness argument, because it is the kind that is easy to get wrong
+and expensive to miss:
+
+**A successful resume clears `adr_approved`, and that is not tidiness — it is a bug fix.**
+The fork's terminal `submit_adr` overwrites `adr_markdown`, and `setSpecReady` does **not**
+touch the flag. `queueBuild`'s guard is `WHERE status = 'spec_ready' AND adr_approved = TRUE`.
+So a surviving approval would let a build launch **against an ADR nobody approved** — I
+verified all three of those independently. Nothing in the ticket asked for this; it came out
+of asking what the state transition actually implies.
+
+And they shared the transition with ADR 024's rewind **deliberately**, because both gestures
+share the *consequence* (an interview is being redone, so nothing held as settled is settled)
+while differing in what the dispatched job carries — a rewind sends a rendered summary as its
+prompt, a fork sends **two ids and no seed**, since the orchestrator replaces the prompt with
+the fork point's own text and a summary would be built and discarded. One method with a name
+true of both callers, rather than a second copy of the same UPDATE.
+
+### It found a bug in an event that rendered as nothing
+
+`grillBubbleFor` had no `fork_failed` arm, so `default: return null` meant the event **rendered
+as nothing at all** — the run goes `failed`, and neither the agent's sentence nor the failure
+stage reached the reader. Each stage now gets its own diagnosis and its own next step, and the
+`fork` case deliberately does **not** say "try again", because that branch is gone and the
+right action is to pick another point.
+
+**The generalisable shape:** a `switch`/`default: return null` over an event union is a
+silent-drop site, and it is invisible because the missing arm produces *less UI* rather than an
+error. Adding a variant to the union does not add it to the switch. This is the same family as
+the marshalled-and-discarded bugs (eight now), one layer up.
+
+### The mutation that survived, diagnosed correctly this time
+
+Three mutations were caught; a fourth survived all 15 web tests — removing the `state` guard
+in `resumePoints`. **It investigated rather than reporting a hole, and it was right**: for
+every input the API can produce, `state` and `points` agree, because the table's `CHECK` keeps
+`points` null unless `captured`. So the guard was **unreachable, not weak**.
+
+**The fix was to add the input that separates them** — a *contradicting* server sending a list
+under `unavailable`/`unknown`, which is exactly what ADR 032 item 5 forbids. The mutation then
+fails. That is the correct application of the rule and the exact opposite of the two mistakes
+around it: it did not conclude "weak guard", and it did not leave the guard unexercised.
+
+It also confirmed each mutation landed and used **a file filter with verbose output (15 named
+✓ lines)** rather than an unverified `--run` filter — the trap I fell into one wave earlier.
+
+### A test that asserted nothing, found and fixed
+
+Its "404s for a project the caller cannot read" case passed the harness's **own** project id,
+so the request succeeded and it asserted 201. Corrected to a distinct uuid with a comment
+explaining why. A test using the fixture's own identity to prove identity is refused is a test
+that cannot fail — the same family as "a check that cannot fail where it is run".
+
+### #108, which I did myself because `design/` is mine
+
+The Spec wireframe's `.design-note` still said *"'Resume from here' is gone"* — true when
+written, wrong now that ADR 032 item 3 built it with a different meaning. A wireframe
+contradicting the code is the exact failure `design/` exists to prevent (ADR 017), and this one
+had gone wrong **by omission**: nothing in it was false when written, the code simply moved.
+
+So the note keeps what it was recording and says plainly why the third correction no longer
+holds, and the mock gains a `resume-block` above the transcript matching what shipped — a
+**picker of Pi's own reported points**, not a per-turn button, because attaching points to
+bubbles would mean comparing user-message *text*, the weaker second reading ADR 032 item 2
+exists to avoid. The rewind stays per-turn and the two are deliberately **not visually
+symmetric**, since what a reader must tell apart is whether the conversation survives. All four
+`check-design.py` checks pass across 44 pages.
+
+**ADR 032 is now closed out too**: the status table reads shipped for all five items with their
+commits and migrations, and the two Follow-ups that were decisions rather than work record what
+shipped.
+
+### A note on where this burn-down got to
+
+**#28 was the hardest issue in the backlog** — it needed object storage, a Pi RPC contract
+verified against a binary rather than docs, a new artifact type through an existing retention
+layer, a non-destructive gesture distinguished from a destructive one, and a trust decision
+about what a pod is allowed to talk to. It took six waves (15 through 22) and it is done.
+
+**What remains is five issues, and four of them are not work**: three need the operator's
+judgement about a cluster and a chart, and one is blocked because this environment cannot run
+an agent job to completion. That is a materially different position from where the list stood
+at the start of this session.
